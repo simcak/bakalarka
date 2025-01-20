@@ -1,0 +1,31 @@
+\chapter*{Závěr}
+\phantomsection
+\addcontentsline{toc}{chapter}{Závěr}
+
+% !? Jak později v práci správně psát zkratky?
+Tato bakalářská práce se zaměřila na odhad tepové frekvence (\acs{TF}) z fotopletysmografických (\acs{PPG}) signálů.
+Cílem bylo jednak poskytnout stručný přehled existujících metod pro odhad TF z PPG signálů,
+ jednak navrhnout a popsat algoritmy pro spolehlivé stanovení tepové frekvence.
+
+V teoretické části byla popsána fotopletysmografie jako neinvazivní optická metoda monitorování změn objemu
+ krve v tkáních, která se používá zejména pro sledování kardiovaskulárních parametrů.
+Byly představeny základní principy PPG signálů a faktory, které mohou ovlivnit jejich kvalitu a přesnost měření.
+
+Praktická část práce se soustředila na implementaci a testování několika algoritmů pro detekci systolických
+ vrcholů v PPG signálech, včetně Aboyova algoritmu, jeho vylepšené verze Aboy++, Elgendiho algoritmu,
+ Rezonátoru s nulovou frekvencí (ZFR) a nově navrženého Upraveného Aboyova algoritmu.
+Algoritmy byly testovány na dvou databázích: CapnoBase a BUT PPG.
+
+Výsledky ukázaly, že Rezonátor s nulovou frekvencí (ZFR) dosahuje nejlepších výsledků na databázi CapnoBase,
+ přičemž vykazuje vysokou citlivost a pozitivní prediktivní hodnotu.
+Elgendiho algoritmus se prokázal jako nejspolehlivější na databázi BUT PPG, přičemž dosahoval nejnižší průměrné
+ odchylky mezi detekovanou a referenční TF.
+
+Jedním z klíčových cílů této práce byl vývoj a implementace upraveného Aboyova algoritmu.
+Tento algoritmus dosahuje lepších odhadů TF na databázi CapnoBase ve srovnání s původní verzí, a to zejména
+ díky zjednodušení a odstranění některých kroků, které způsobovaly přehlížení skutečných systolických vrcholů.
+Na databázi BUT PPG však vykazoval vyšší odchylky TF, což naznačuje potřebu další optimalizace pro spolehlivější detekci.
+
+Dalším krokem pro zlepšení přesnosti odhadu TF by mohlo být využití pokročilejších technik strojového učení a
+ hlubokých neuronových sítí, které mohou nabídnout lepší adaptaci na různé typy signálů a zlepšit robustnost algoritmů
+ vůči šumu a artefaktům.
