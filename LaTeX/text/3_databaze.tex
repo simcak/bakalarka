@@ -11,8 +11,8 @@ U databáze BUT PPG nebyly referenční hodnoty systolických vrcholů k dispozi
 
 CapnoBase je databáze, která obsahuje signály získané během čtyřiceti dvou různých, klinických, situací.
 V databázi jsou 8 minut dlouhé, elektrokardiografické, respirační a pro naši práci nejdůležitější, fotopletysmofrafické (PPG) signály.
-Signály jsou vzorkovány při frekvenci 300 Hz a obsahují ručně označené referenční systolické vrcholy, což jsme využili pro vypočítání matice záměn [16].
-Tyto vrcholy jsou označené podle záznamů elektrokardiogramů (EKG) [17].
+Signály jsou vzorkovány při frekvenci 300 Hz a obsahují ručně označené referenční systolické vrcholy, což jsme využili pro vypočítání matice záměn \cite{Karlen2013}.
+Tyto vrcholy jsou označené podle záznamů elektrokardiogramů (EKG) \cite{Charlton2022}.
 
 % ----------------------------------------------------------------------- %
 \section{BUT PPG}
@@ -21,19 +21,19 @@ Tyto vrcholy jsou označené podle záznamů elektrokardiogramů (EKG) [17].
 Tato databáze byla vytvořena za účelem hodnocení kvality PPG signálů a odhadu srdeční frekvence (TF).
 Data obsahují 48 desetisekundových záznamů PPG a souvisejících elektrokardiografických (EKG) signálů, které byly použity pro určení referenční TF.
 Data byla shromážděna od 12 subjektů (6 žen a 6 mužů) ve věku od 21 do 61 let.
-Záznamy byly provedeny mezi srpnem 2020 a říjnem 2020 pomocí smartphonu Xiaomi Mi9 se vzorkovací frekvencí 30 Hz [14].
+Záznamy byly provedeny mezi srpnem 2020 a říjnem 2020 pomocí smartphonu Xiaomi Mi9 se vzorkovací frekvencí 30 Hz \cite{Charlton2023}.
 
 Určení kvality PPG signálů bylo stanoveno pěti experty.
 Tito experti určili TF pouze ze signálu PPG a výsledek porovnali s referenční TF vypočítané z EKG signálů.
 Během hodnocení měli přístup k softwaru, který využíval techniky stacionární vlnkové transformace.
-Využití tohoto programu bylo dobrovolné [22].
+Využití tohoto programu bylo dobrovolné \cite{BUT_PPG}.
 
 Jak bylo řečeno, data z BUT PPG byla nasnímána telefonem.
 V této podkapitole tedy popíšeme postup, jak extrahovat PPG signál z videa.
 Pro měření potřebujeme pouze kameru v mobilním telefonu a zapnutý blesk. 
 
 Při sběru dat pro Brněnskou databázi přiložil subjekt ukazováček na fotoaparát tak, aby překrýval objektiv a LED svítilnu.
-Při snímání vyzařuje LED světlo. Rozlišení videa bylo nastaveno na 720 x 1280 px a snímkovací frekvence na 30 Hz [2]. 
+Při snímání vyzařuje LED světlo. Rozlišení videa bylo nastaveno na 720 x 1280 px a snímkovací frekvence na 30 Hz \cite{ENIKÖ}.
 
 Z videa byl extrahován průměr červené složky, který sloužil jako surový PPG signál.
 Jelikož fotoaparát pracuje se světlem odraženým, surový signál byl invertován.
@@ -42,6 +42,6 @@ Postup je zobrazen na obrázku \ref{fig:videoZaznamPPG}.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./obrazky/videoZaznamPPG.png}
-	\caption{Záznam videa na kameru mobilního telefonu (a), jeden vybraný snímek ze záznamu (b), snímek rozložen na tři barevné složky (c), PPG signál vykreslený z červené složky (d), upraveno z [6].}
+	\caption[Získání PPG signálu pro databázi BUT PPG]{Záznam videa na kameru mobilního telefonu (a), jeden vybraný snímek ze záznamu (b), snímek rozložen na tři barevné složky (c), PPG signál vykreslený z červené složky (d), upraveno z \cite{Siddiqui2016}.}
 	\label{fig:videoZaznamPPG}
 \end{figure}
