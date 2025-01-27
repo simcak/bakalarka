@@ -25,3 +25,9 @@ BUT_PPG.mat/
 ├── Quality [48x1 double]
 └── HR [48x1 double]
 ```
+
+## Output csv table
+
+```
+ID - PPG fs - Quality - HR - PPG signal
+```

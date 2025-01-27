@@ -3,11 +3,10 @@ import pandas as pd
 
 def main():
 	# Load the .mat file
-	mat_data = scipy.io.loadmat('./databaze/BUT_PPG.mat')
+	mat_data = scipy.io.loadmat('./BUT_PPG.mat')
 
 	# Access the main key containing the data
-	data_key = 'BUT_PPG'
-	structured_array = mat_data[data_key]
+	structured_array = mat_data['BUT_PPG']
 
 	# Extract individual components
 	ppg_data = structured_array['PPG'][0, 0]		# PPG signals (2D array)
