@@ -9,11 +9,11 @@ def main():
 	structured_array = mat_data['BUT_PPG']
 
 	# Extract individual components
-	ppg_data = structured_array['PPG'][0, 0]		# PPG signals (2D array)
-	ppg_fs   = structured_array['PPG_fs'][0, 0]		# Sampling frequency
-	ids      = structured_array['ID'][0, 0]			# IDs
-	quality  = structured_array['Quality'][0, 0]	# Quality labels
-	hr       = structured_array['HR'][0, 0]			# Heart rates
+	ppg_data	= structured_array['PPG'][0, 0]		# PPG signals (2D array)
+	ppg_fs		= structured_array['PPG_fs'][0, 0]	# Sampling frequency
+	ids			= structured_array['ID'][0, 0]		# IDs
+	quality		= structured_array['Quality'][0, 0]	# Quality labels
+	hr			= structured_array['HR'][0, 0]		# Heart rates
 
 	# Flatten arrays where needed
 	ids_arr = ids.flatten()

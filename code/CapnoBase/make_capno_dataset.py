@@ -2,7 +2,7 @@ import h5py
 import csv
 
 def extract_data(capnobase_file, output_file):
-		# Load the .mat file
+	# Load the .mat file
 	with h5py.File(capnobase_file, 'r') as mat_data:
 		# Access and extract the required datasets
 		param = mat_data['param']
