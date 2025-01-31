@@ -1,5 +1,6 @@
-# Ignore all files with the extension .mat
+# Ignore all data files
 *.mat
+*.csv
 
 # Ignore .pyc files == Python compiled files
 *.pyc
