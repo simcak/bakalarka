@@ -1,6 +1,9 @@
 # Ignore all files with the extension .mat
 *.mat
 
+# Ignore .pyc files == Python compiled files
+*.pyc
+
 # Ignore the LaTeX build files
 *.aux
 *.fls
