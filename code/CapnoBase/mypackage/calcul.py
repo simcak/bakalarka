@@ -14,16 +14,16 @@ def interbeat_intervals(peaks, fs):
 	
 	Returns
 	-------
-	interbeat_intervals : array
+	ibi : array
 		Interbeat intervals.
 	"""
-	interbeat_intervals = np.diff(peaks) / fs
-	return interbeat_intervals
+	ibi = np.diff(peaks) / fs
+	return ibi
 
 def heart_rate(peaks, ppg_signal, fs):
 	"""
 	Compute heart rate from the peaks.
 	"""
-	hr = 60 * len(peaks) / (len(ppg_signal) / fs)
-	hr = round(hr, 2)
+	ibi = interbeat_intervals(peaks, fs)
+	hr = 60 / np.mean(ibi)
 	return hr
