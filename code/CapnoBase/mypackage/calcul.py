@@ -25,4 +25,5 @@ def heart_rate(peaks, ppg_signal, fs):
 	Compute heart rate from the peaks.
 	"""
 	hr = 60 * len(peaks) / (len(ppg_signal) / fs)
+	hr = round(hr, 2)
 	return hr

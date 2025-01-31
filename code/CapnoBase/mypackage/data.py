@@ -25,6 +25,7 @@ def list_of_files():
 def export_file(output_file, capnobase_file, capnobase_fs, ref_peaks, ppg_signal):
 	"""
 	Export data to a CSV file.
+	We use it for checking the data.
 	"""
 	with open(output_file, 'w', newline='') as csvfile:
 		writer = csv.writer(csvfile)
