@@ -82,5 +82,5 @@ def extract(capnobase_file, export=False):
 			output_file = f'./csv/capnobase_{capnobase_file[6:10]}.csv'
 			export_file(output_file, capnobase_file, capnobase_fs, ref_peaks, ppg_signal)
 
-	return capnobase_fs, ref_peaks, ppg_signal, ref_ibi, ref_hr
+	return capnobase_fs, ppg_signal, ref_peaks, ref_ibi, ref_hr
 
