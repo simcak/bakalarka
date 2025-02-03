@@ -30,8 +30,8 @@ def detect_peaks(ppg_signal, capnobase_fs):
 	"""
 	Detect peaks in the PPG signal.
 	"""
-	# 10 seconds window with 50% overlap
-	window_size = int(10 * capnobase_fs)
+	# 5 seconds window with 50% overlap
+	window_size = int(5 * capnobase_fs)
 	overlap_size = window_size // 2
 	peaks_detected = []
 
