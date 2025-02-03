@@ -20,7 +20,7 @@ def interbeat_intervals(peaks, fs):
 	ibi = np.diff(peaks) / fs
 	return ibi
 
-def heart_rate(peaks, ppg_signal, fs):
+def heart_rate(peaks, fs):
 	"""
 	Compute heart rate from the peaks.
 	"""

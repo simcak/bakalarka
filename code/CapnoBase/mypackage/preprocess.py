@@ -1,12 +1,37 @@
 from scipy.signal import butter, filtfilt
 
-def remove_noise(input_signal, fs, lowcut=0.5, highcut=4.0, order=4):
+import numpy as np
+
+def standardize_signal(signal):
+	"""
+	Standardizes a signal to the range [-1, 1].
+
+	Parameters:
+		signal (array-like): The input signal.
+
+	Returns:
+		standardized_signal (array-like): The standardized signal with values between -1 and 1.
+	"""
+	# Center the signal by subtracting the mean
+	centered_signal = signal - np.mean(signal)
+	
+	# Normalize by the maximum absolute value
+	max_abs_value = np.max(np.abs(centered_signal))
+	
+	# Handle edge case where the signal is constant - return centered signal
+	if max_abs_value == 0:
+		return centered_signal
+
+	standardized_signal = centered_signal / max_abs_value
+	return standardized_signal
+
+def remove_noise(input_signal, fs, lowcut=0.7, highcut=4.0, order=4):
 	"""
 	Remove noise from the signal.
 
 	Arguments:
 		input_signal and fs are straightforward
-		lowcut: lowcut frequency for 30 bpm
+		lowcut: lowcut frequency for 42 bpm
 		highcut: highcut frequency for 200 bpm
 		order: higher order means steeper roll-off, but can cause errors
 	"""
@@ -30,9 +55,9 @@ def filter_signal(ppg_signal, capnobase_fs):
 	"""
 	Filter the PPG signal.
 	"""
-	denoised_signal = remove_noise(ppg_signal, capnobase_fs, lowcut=0.5, highcut=4.0)
+	denoised_signal = remove_noise(ppg_signal, capnobase_fs, lowcut=0.7, highcut=4.0)
 	# no_BLD_signal = remove_baseline_drift(denoised_signal, capnobase_fs, highcut=0.5)
-	standardized_signal = (denoised_signal - denoised_signal.mean()) / denoised_signal.std()
+	standardized_signal = standardize_signal(denoised_signal)
 	# remove motion artifacts?
 	output_signal = standardized_signal
 
