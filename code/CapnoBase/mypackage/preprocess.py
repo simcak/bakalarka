@@ -1,5 +1,4 @@
 from scipy.signal import butter, filtfilt
-
 import numpy as np
 
 def standardize_signal(signal):
@@ -15,14 +14,14 @@ def standardize_signal(signal):
 	# Center the signal by subtracting the mean
 	centered_signal = signal - np.mean(signal)
 	
-	# Normalize by the maximum absolute value
-	max_abs_value = np.max(np.abs(centered_signal))
+	# Normalize by the standard deviation
+	standardized_signal = centered_signal / np.std(centered_signal)
 	
-	# Handle edge case where the signal is constant - return centered signal
-	if max_abs_value == 0:
-		return centered_signal
-
-	standardized_signal = centered_signal / max_abs_value
+	# Scale to the range [-1, 1]
+	min_val = np.min(standardized_signal)
+	max_val = np.max(standardized_signal)
+	standardized_signal = 2 * (standardized_signal - min_val) / (max_val - min_val) - 1
+	
 	return standardized_signal
 
 def remove_noise(input_signal, fs, lowcut=0.7, highcut=4.0, order=4):

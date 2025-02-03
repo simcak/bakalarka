@@ -1,4 +1,5 @@
 import numpy as np
+from . import preprocess
 
 def bc_find_peaks(signal, min_height, min_distance):
 	"""
@@ -39,15 +40,11 @@ def detect_peaks(ppg_signal, capnobase_fs):
 		window = ppg_signal[start:end]
 
 		# 1) Rescale/restandardize the window
-		window_mean = np.mean(window)
-		window_std = np.std(window)
-		if (window_std == 0):
-			continue
-		standardized_window = (window - window_mean) / window_std
+		standardized_window = preprocess.standardize_signal(window)
 
 		# 2) Detect peaks
 		min_peak_distance = int(capnobase_fs * 60 / 200)	# 200 BPM
-		min_peak_height = 0.8	# 80% of the signal range = avoiding the diastolic peak
+		min_peak_height = 0.3
 		peaks = bc_find_peaks(standardized_window, min_peak_height, min_peak_distance)
 
 		# Add the detected peaks to the list for the corresponding window
