@@ -1,4 +1,5 @@
 from mypackage import data, preprocess, show
+# from refpackage import aboy, elgendi
 
 def main():
 	capnobase_files = data.list_of_files()
@@ -11,7 +12,8 @@ def main():
 		# interbeat_intervals = compute_interbeat_intervals(ref_peaks, capnobase_fs)
 		# heart_rate = compute_heart_rate(interbeat_intervals)
 
-	show.original_data(ppg_signal, ref_peaks, capnobase_files[0])
+	show.one_signal(ppg_signal, ref_peaks, capnobase_files[-1])
+	show.two_signals(ppg_signal, filtered_ppg_signal, capnobase_files[-1])
 
 if __name__ == "__main__":
 	main()
