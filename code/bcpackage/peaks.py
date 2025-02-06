@@ -43,14 +43,14 @@ def detect_peaks(ppg_signal, capnobase_fs):
 		standardized_window = preprocess.standardize_signal(window)
 
 		# 2) Detect peaks
-		min_peak_distance = int(capnobase_fs * 60 / 200)	# 200 BPM
+		min_peak_distance = int(capnobase_fs * 60 / 200)	# num of samples for 200 BPM
 		min_peak_height = 0.3
 		peaks = bc_find_peaks(standardized_window, min_peak_height, min_peak_distance)
 
-		# Add the detected peaks to the list for the corresponding window
+		# Add ALL the detected peaks to the list for the corresponding window (even doubles)
 		peaks_detected.extend(peaks + start)
 
-	# Remove duplicates and return
+	# Now we remove duplicates and return
 	peaks_detected = np.unique(peaks_detected)
 
 	return peaks_detected

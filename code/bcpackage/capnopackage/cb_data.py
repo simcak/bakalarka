@@ -1,6 +1,6 @@
 import h5py
 import csv
-from . import calcul
+from bcpackage import calcul
 
 def list_of_files():
 	"""
@@ -9,7 +9,7 @@ def list_of_files():
 	Returns:
 		list: A list of file paths to CapnoBase .mat files.
 	"""
-	path = './mat/'	# this path is from the main.py perspective
+	path = './CapnoBase/mat/'	# this path is from the main.py perspective
 	capnobase_files = [
 		f'{path}0329_8min.mat', f'{path}0328_8min.mat', f'{path}0030_8min.mat', f'{path}0031_8min.mat', f'{path}0322_8min.mat', f'{path}0133_8min.mat',
 		f'{path}0018_8min.mat', f'{path}0125_8min.mat', f'{path}0370_8min.mat', f'{path}0128_8min.mat', f'{path}0015_8min.mat', f'{path}0333_8min.mat',
@@ -21,33 +21,6 @@ def list_of_files():
 		]
 
 	return capnobase_files
-
-def export_file(output_file, capnobase_file, capnobase_fs, ref_peaks, ppg_signal):
-	"""
-	Export data to a CSV file.
-	We use it for checking the data.
-	"""
-	with open(output_file, 'w', newline='') as csvfile:
-		writer = csv.writer(csvfile)
-
-		# File name
-		writer.writerow(['File Name'])
-		writer.writerow([capnobase_file[2:]])
-
-		# Write capnobase_fs
-		writer.writerow([])
-		writer.writerow(['PPG_fs'])
-		writer.writerow([capnobase_fs])
-
-		# Write reference peaks
-		writer.writerow([])
-		writer.writerow(['PPG Peaks'])
-		writer.writerow(ref_peaks)
-
-		# Write ppg signals
-		writer.writerow([])
-		writer.writerow(['PPG Signal'])
-		writer.writerow(ppg_signal)
 
 def extract(capnobase_file, export=False):
 	"""
@@ -63,6 +36,33 @@ def extract(capnobase_file, export=False):
 		ppg_signal (numpy.ndarray): Array of pleth signal values.
 		ref_hr (float): Reference heart rate calculated from the peaks and signal length.
 	"""
+	def export_file(output_file, capnobase_file, capnobase_fs, ref_peaks, ppg_signal):
+		"""
+		Export data to a CSV file.
+		We use it for checking the data.
+		"""
+		with open(output_file, 'w', newline='') as csvfile:
+			writer = csv.writer(csvfile)
+
+			# File name
+			writer.writerow(['File Name'])
+			writer.writerow([capnobase_file[2:]])
+
+			# Write capnobase_fs
+			writer.writerow([])
+			writer.writerow(['PPG_fs'])
+			writer.writerow([capnobase_fs])
+
+			# Write reference peaks
+			writer.writerow([])
+			writer.writerow(['PPG Peaks'])
+			writer.writerow(ref_peaks)
+
+			# Write ppg signals
+			writer.writerow([])
+			writer.writerow(['PPG Signal'])
+			writer.writerow(ppg_signal)
+
 	# Load the .mat file
 	with h5py.File(capnobase_file, 'r') as mat_data:
 		# Access the required datasets

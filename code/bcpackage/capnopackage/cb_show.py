@@ -1,6 +1,13 @@
 import os
 import matplotlib.pyplot as plt
 
+def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_file, i):
+	if i == 39:
+		print('\n')
+		# show.one_signal_peaks(filtered_ppg_signal, our_peaks, capnobase_file)
+		two_signals_peaks(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, capnobase_file)
+		# show.two_signals(ppg_signal, filtered_ppg_signal, capnobase_file)
+
 # Plot the PPG signal with its peaks
 def one_signal_peaks(ppg_signal, peaks, capnobase_file):
 	"""
