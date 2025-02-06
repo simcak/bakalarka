@@ -50,12 +50,12 @@ def remove_noise(input_signal, fs, lowcut=0.7, highcut=4.0, order=4):
 	return output_signal
 
 # Filter functions crossroad
-def filter_signal(ppg_signal, capnobase_fs):
+def filter_signal(ppg_signal, fs):
 	"""
 	Filter the PPG signal.
 	"""
-	denoised_signal = remove_noise(ppg_signal, capnobase_fs, lowcut=0.7, highcut=4.0)
-	# no_BLD_signal = remove_baseline_drift(denoised_signal, capnobase_fs, highcut=0.5)
+	denoised_signal = remove_noise(ppg_signal, fs, lowcut=0.7, highcut=4.0)
+	# no_BLD_signal = remove_baseline_drift(denoised_signal, fs, highcut=0.5)
 	standardized_signal = standardize_signal(denoised_signal)
 	# remove motion artifacts?
 	output_signal = standardized_signal

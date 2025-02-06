@@ -1,7 +1,7 @@
 import numpy as np
 from . import preprocess
 
-def bc_find_peaks(signal, min_height, min_distance):
+def bc_find_peaks_iterate(signal, min_height, min_distance):
 	"""
 	Custom function to detect peaks in a signal.
 	
@@ -26,12 +26,12 @@ def bc_find_peaks(signal, min_height, min_distance):
 
 	return np.array(peaks)
 
-def detect_peaks(ppg_signal, capnobase_fs):
+def detect_peaks(ppg_signal, fs):
 	"""
 	Detect peaks in the PPG signal.
 	"""
 	# 5 seconds window with 50% overlap
-	window_size = int(5 * capnobase_fs)
+	window_size = int(5 * fs)
 	overlap_size = window_size // 2
 	peaks_detected = []
 
@@ -43,9 +43,9 @@ def detect_peaks(ppg_signal, capnobase_fs):
 		standardized_window = preprocess.standardize_signal(window)
 
 		# 2) Detect peaks
-		min_peak_distance = int(capnobase_fs * 60 / 200)	# num of samples for 200 BPM
+		min_peak_distance = int(fs * 60 / 200)	# num of samples for 200 BPM
 		min_peak_height = 0.3
-		peaks = bc_find_peaks(standardized_window, min_peak_height, min_peak_distance)
+		peaks = bc_find_peaks_iterate(standardized_window, min_peak_height, min_peak_distance)
 
 		# Add ALL the detected peaks to the list for the corresponding window (even doubles)
 		peaks_detected.extend(peaks + start)

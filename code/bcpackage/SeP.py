@@ -1,5 +1,17 @@
 import numpy as np
 
+def performance_metrics(tp, fp, fn):
+	"""
+	tp: true positive
+	fp: false positive
+	fn: false negative
+
+	Returns: sensitivity, precision
+	"""
+	sensitivity = tp / (tp + fn)
+	precision = tp / (tp + fp)
+	return sensitivity, precision
+
 def confusion_matrix(our_peaks, ref_peaks, tolerance):
 	"""
 	our_peaks: list of detected peaks

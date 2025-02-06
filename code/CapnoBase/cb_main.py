@@ -5,43 +5,61 @@ import numpy as np
 # from refpackage import aboy, elgendi
 
 def capnobase_main():
+	"""
+	Function to run the CapnoBase analysis.
+	1. Load the list of files.
+	FOR LOOP:
+		2. Iterate over the files.
+		3. Extract the CapnoBase data.
+		4. Preprocess the PPG signal = filtering = standardization + noise removal.
+		5. Detect peaks in the preprocessed signal.
+		6. Calculate the heart rate from the detected peaks (using IBI) + calculate the diff with the ref HR.
+		7. Confusion matrix: TP, FP, FN.
+		8. Performance metrics: Sensitivity, Precision.
+		9. Export the data of each signal to a CSV file "./results.csv".
+
+	10. Calculate the global results: Total Sensitivity and Precision + sum of FP, FN, TP + average HR diff.
+
+	Args:
+		None (uses the CapnoBase data)
+
+	Returns:
+		None (exports the results to a CSV file)
+	"""
 	capnobase_files = cb_data.list_of_files()
 	tp_list = []
 	fp_list = []
 	fn_list = []
 
 	for i in range(len(capnobase_files)):
-		print(f'{i})', end=' ')
-		capnobase_fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i], export=False)
-		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, capnobase_fs)
-		our_peaks = peaks.detect_peaks(filtered_ppg_signal, capnobase_fs)
-		our_hr = calcul.heart_rate(our_peaks, capnobase_fs)
-		diff_hr = round(abs(ref_hr - our_hr), 3)
 		id = capnobase_files[i][16:20]
-
-		print(f'File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\
-		| Diff: {diff_hr} bpm')
+		fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i], export=False)
+		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
+		our_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
+		our_hr = calcul.heart_rate(our_peaks, fs)
+		diff_hr = abs(ref_hr - our_hr)
 
 		# Confusion matrix
 		tp, fp, fn = SeP.confusion_matrix(our_peaks, ref_peaks, tolerance=30)
 		tp_list.append(tp)
 		fp_list.append(fp)
 		fn_list.append(fn)
-		print(f'TP: {tp} | FP: {fp} | FN: {fn}')
 
-		# Sensitivity, specificity, and accuracy
-		local_sensitivity = tp/(tp+fn)
-		local_positive_predictivity = tp/(tp+fp)
-		print(f'Sensitivity: {round(local_sensitivity, 3)} | Positive Predictivity: {round(local_positive_predictivity, 3)}')
+		# Performance metrics
+		local_sensitivity, local_precision = SeP.performance_metrics(tp, fp, fn)
+		export.to_csv_local(id, tp, fp, fn,
+					  local_sensitivity, local_precision,
+					  ref_hr, our_hr, diff_hr, i)
 
-		# Export to CSV
-		export.to_csv_local(id, tp, fp, fn, local_sensitivity, local_positive_predictivity, ref_hr, our_hr, round(abs(ref_hr - our_hr), 3), i)
-		# For testing purposes
+		############# For testing purposes #############
 		# cb_show.test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
+		print(f'{i}: File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm \t\t| Diff: {round(diff_hr, 3)} bpm')
+		################################################
 
-	print('\n')
-	print(f'TP: {np.sum(tp_list)} | FP: {np.sum(fp_list)} | FN: {np.sum(fn_list)}')
+	# Global results - outsinde the loop
 	total_sensitivity = np.sum(tp)/(np.sum(tp)+np.sum(fn))
-	total_positive_predictivity = np.sum(tp)/(np.sum(tp)+np.sum(fp))
-	print(f'Sensitivity: {total_sensitivity} | Positive Predictivity: {total_positive_predictivity}')
-	export.to_csv_global('capnobase', np.sum(tp_list), np.sum(fp_list), np.sum(fn_list), total_sensitivity, total_positive_predictivity)
+	total_precision = np.sum(tp)/(np.sum(tp)+np.sum(fp))
+	export.to_csv_global('capnobase',
+					  np.sum(tp_list), np.sum(fp_list), np.sum(fn_list),
+					  total_sensitivity, total_precision,
+					  np.average(diff_hr))
