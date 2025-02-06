@@ -1,14 +1,14 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul
+from bcpackage import preprocess, peaks, calcul, SeP
 import numpy as np
 
 # from refpackage import aboy, elgendi
 
 def capnobase_main():
 	capnobase_files = cb_data.list_of_files()
-	sensitivity = []
-	specificity = []
-	accuracy = []
+	tp_list = []
+	fp_list = []
+	fn_list = []
 
 	for i in range(len(capnobase_files)):
 		print(f'{i})', end=' ')
@@ -20,13 +20,23 @@ def capnobase_main():
 		print(f'File: {capnobase_files[i][6:]} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\
 		| Diff: {round(abs(ref_hr - our_hr), 3)} bpm')
 
-		# For testing purposes
-		cb_show.test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
+		# Confusion matrix
+		tp, fp, fn = SeP.confusion_matrix(our_peaks, ref_peaks, tolerance=30)
+		tp_list.append(tp)
+		fp_list.append(fp)
+		fn_list.append(fn)
+		print(f'TP: {tp} | FP: {fp} | FN: {fn}')
 
 		# Sensitivity, specificity, and accuracy
-		sensitivity.append(len(set(ref_peaks) & set(our_peaks)) / len(ref_peaks))
-		specificity.append(len(set(ref_peaks) & set(our_peaks)) / len(our_peaks))
-		accuracy.append(1 - np.mean(np.abs(ref_hr - our_hr) / ref_hr))
+		local_sensitivity = tp/(tp+fn)
+		local_positive_predictivity = tp/(tp+fp)
+		print(f'Sensitivity: {round(local_sensitivity, 3)} | Positive Predictivity: {round(local_positive_predictivity, 3)}')
+
+		# For testing purposes
+		# cb_show.test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
 
 	print('\n')
-	print(f'Sensitivity: {np.mean(sensitivity)} | Specificity: {np.mean(specificity)} | Accuracy: {np.mean(accuracy)}')
+	print(f'TP: {np.sum(tp_list)} | FP: {np.sum(fp_list)} | FN: {np.sum(fn_list)}')
+	total_sensitivity = np.sum(tp)/(np.sum(tp)+np.sum(fn))
+	total_positive_predictivity = np.sum(tp)/(np.sum(tp)+np.sum(fp))
+	print(f'Sensitivity: {total_sensitivity} | Positive Predictivity: {total_positive_predictivity}')
