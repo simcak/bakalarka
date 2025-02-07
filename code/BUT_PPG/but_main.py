@@ -29,7 +29,8 @@ def but_ppg_main():
 					  quality=quality, type='but_ppg')
 
 		############# For testing purposes #############
-		# but_show.test_hub(ppg_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, id, i)
+		standardize_signal = preprocess.standardize_signal(ppg_signal)
+		but_show.test_hub(standardize_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, id, i)
 		print(f'{i}: ID: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\
 		| Diff: {round(diff_hr, 3)} bpm\t| Quality: {quality}')
 		################################################

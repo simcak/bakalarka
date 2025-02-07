@@ -6,7 +6,6 @@ def test_hub(ppg_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, but_id,
 	Here we choose which function for showing we want to use.
 	"""
 	if i == 39:
-		print('\n')
 		# one_signal_peaks(filtered_ppg_signal, our_peaks, but_id)
 		two_signals_peaks(ppg_signal, filtered_ppg_signal, our_peaks, but_id)
 		# two_signals(ppg_signal, filtered_ppg_signal, but_id)
@@ -34,14 +33,14 @@ def two_signals(signal1, signal2, but_id):
 	plt.ylabel('Signal')
 	plt.show()
 
-def two_signals_peaks(signal1, signal2, peaks1, but_id):
+def two_signals_peaks(signal1, signal2, peaks, but_id):
 	"""
 	Plot two signals with their peaks.
 	"""
 	plt.figure(figsize=(14.4, 6))
 	plt.plot(signal1)
-	plt.scatter(peaks1, signal1[peaks1], c='r')
 	plt.plot(signal2)
+	plt.scatter(peaks, signal2[peaks], c='g')
 	plt.title(f'Two Signals with Peaks (id.: {but_id})')
 	plt.xlabel('Samples')
 	plt.ylabel('Signal')

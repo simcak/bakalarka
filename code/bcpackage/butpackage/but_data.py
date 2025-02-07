@@ -17,10 +17,10 @@ def export_data(id, fs, quality, hr, ppg_signal, i):
 
 	# Save DataFrame to CSV
 	if (i == 0):
-		with open('./but_database.csv', 'w', newline='') as csvfile:
+		with open('./BUT_PPG/but_database.csv', 'w', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=True, index=False)
 	else:
-		with open('./but_database.csv', 'a', newline='') as csvfile:
+		with open('./BUT_PPG/but_database.csv', 'a', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=False, index=False)
 
 def extract(i, export=False):
