@@ -53,7 +53,7 @@ def capnobase_main():
 		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
-					  quality=None, type='capnobase')
+					  None, type='capnobase')
 
 		############# For testing purposes #############
 		# cb_show.test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
