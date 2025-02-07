@@ -10,8 +10,7 @@ def size_of_but_database():
 	return ppg_data
 
 def but_ppg_main():
-	diff_hr_list = []
-	diff_hr_list_quality = []
+	diff_hr_list, diff_hr_list_quality = [], []
 
 	for i in range(size_of_but_database()):
 		id, fs, quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
@@ -30,7 +29,7 @@ def but_ppg_main():
 
 		############# For testing purposes #############
 		standardize_signal = preprocess.standardize_signal(ppg_signal)
-		but_show.test_hub(standardize_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, id, i)
+		# but_show.test_hub(standardize_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, id, i)
 		print(f'{i}: ID: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\
 		| Diff: {round(diff_hr, 3)} bpm\t| Quality: {quality}')
 		################################################

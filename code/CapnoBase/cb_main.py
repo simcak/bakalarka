@@ -27,9 +27,7 @@ def capnobase_main():
 		None (exports the results to a CSV file)
 	"""
 	capnobase_files = cb_data.list_of_files()
-	tp_list = []
-	fp_list = []
-	fn_list = []
+	tp_list, fp_list, fn_list = [], [], []
 	diff_hr_list = []
 
 	for i in range(len(capnobase_files)):
