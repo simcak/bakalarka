@@ -1,10 +1,10 @@
 import numpy as np
 from . import preprocess
 
-def bc_find_peaks_iterate(signal, min_height, min_distance):
+def local_max_detector(signal, min_height, min_distance):
 	"""
-	Custom function to detect peaks in a signal.
-	
+	Custom function to detect peaks in a signal by comparing the values around with some tresholds.
+
 	Args:
 	signal (list or numpy array): The signal to analyze.
 	min_height (float): Minimum height to qualify as a peak.
@@ -30,10 +30,14 @@ def detect_peaks(ppg_signal, fs):
 	"""
 	Detect peaks in the PPG signal.
 	"""
-	# 5 seconds window with 50% overlap
-	window_size = int(5 * fs)
+	# 'time_size' seconds window with 50% overlap
+	time_size = 5
+	window_size = int(time_size * fs)
 	overlap_size = window_size // 2
 	peaks_detected = []
+	# Thresholds
+	min_peak_distance = int(fs * 60 / 200)	# num of samples for 200 BPM
+	min_peak_height = 0.3
 
 	for start in range(0, len(ppg_signal) - window_size + 1, overlap_size):
 		end = start + window_size
@@ -42,10 +46,8 @@ def detect_peaks(ppg_signal, fs):
 		# 1) Rescale/restandardize the window
 		standardized_window = preprocess.standardize_signal(window)
 
-		# 2) Detect peaks
-		min_peak_distance = int(fs * 60 / 200)	# num of samples for 200 BPM
-		min_peak_height = 0.3
-		peaks = bc_find_peaks_iterate(standardized_window, min_peak_height, min_peak_distance)
+		# 2) Detect peaks in the standardized window
+		peaks = local_max_detector(standardized_window, min_peak_height, min_peak_distance)
 
 		# Add ALL the detected peaks to the list for the corresponding window (even doubles)
 		peaks_detected.extend(peaks + start)
