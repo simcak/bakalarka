@@ -57,8 +57,8 @@ def capnobase_main():
 		################################################
 
 	# Global results - outsinde the loop
-	total_sensitivity = np.sum(tp)/(np.sum(tp)+np.sum(fn))
-	total_precision = np.sum(tp)/(np.sum(tp)+np.sum(fp))
+	total_sensitivity = np.sum(tp_list)/(np.sum(tp_list)+np.sum(fn_list))
+	total_precision = np.sum(tp_list)/(np.sum(tp_list)+np.sum(fp_list))
 	export.to_csv_global('capnobase',
 					  np.sum(tp_list), np.sum(fp_list), np.sum(fn_list),
 					  total_sensitivity, total_precision,
