@@ -4,7 +4,7 @@ import scipy.io
 import numpy as np
 
 def size_of_but_database():
-	mat_data = scipy.io.loadmat('./BUT_PPG/BUT_PPG.mat')
+	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
 	ppg_data = len(mat_data['BUT_PPG']['PPG'][0, 0])
 
 	return ppg_data
@@ -13,7 +13,7 @@ def but_ppg_main():
 	diff_hr_list, diff_hr_list_quality = [], []
 
 	for i in range(size_of_but_database()):
-		id, fs, quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
+		id, fs, quality, ref_hr, ppg_signal = but_data.extract(i, export=True)
 		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 		our_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
 		# Calculate the heart rate

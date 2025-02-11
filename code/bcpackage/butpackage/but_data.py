@@ -17,10 +17,10 @@ def export_data(id, fs, quality, hr, ppg_signal, i):
 
 	# Save DataFrame to CSV
 	if (i == 0):
-		with open('./BUT_PPG/but_database.csv', 'w', newline='') as csvfile:
+		with open('./BUT_PPG/databases/but_database.csv', 'w', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=True, index=False)
 	else:
-		with open('./BUT_PPG/but_database.csv', 'a', newline='') as csvfile:
+		with open('./BUT_PPG/databases/but_database.csv', 'a', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=False, index=False)
 
 def extract(i, export=False):
@@ -28,7 +28,7 @@ def extract(i, export=False):
 	
 	"""
 	# Load the .mat file
-	mat_data = scipy.io.loadmat('./BUT_PPG/BUT_PPG.mat')
+	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
 
 	# Access the main key containing the data
 	structured_array = mat_data['BUT_PPG']
