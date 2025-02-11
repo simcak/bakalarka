@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, SeP, export
+from bcpackage import preprocess, peaks, calcul, export
 import numpy as np
 
 # from refpackage import aboy, elgendi
@@ -41,13 +41,13 @@ def capnobase_main():
 		diff_hr_list.append(diff_hr)
 
 		# Confusion matrix
-		tp, fp, fn = SeP.confusion_matrix(our_peaks, ref_peaks, tolerance=30)
+		tp, fp, fn = calcul.confusion_matrix(our_peaks, ref_peaks, tolerance=30)
 		tp_list.append(tp)
 		fp_list.append(fp)
 		fn_list.append(fn)
 
 		# Performance metrics
-		local_sensitivity, local_precision = SeP.performance_metrics(tp, fp, fn)
+		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
