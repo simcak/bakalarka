@@ -76,5 +76,5 @@ def heart_rate(peaks, fs):
 	Compute heart rate from the peaks.
 	"""
 	ibi = interbeat_intervals(peaks, fs)
-	hr = 60 / np.mean(ibi)
+	hr = 60 / np.median(ibi)
 	return hr

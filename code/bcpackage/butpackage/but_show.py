@@ -5,7 +5,7 @@ def test_hub(ppg_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, but_id,
 	"""
 	Here we choose which function for showing we want to use.
 	"""
-	if i == 39:
+	if i == 41:
 		# one_signal_peaks(filtered_ppg_signal, our_peaks, but_id)
 		two_signals_peaks(ppg_signal, filtered_ppg_signal, our_peaks, but_id)
 		# two_signals(ppg_signal, filtered_ppg_signal, but_id)
