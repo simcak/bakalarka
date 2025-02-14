@@ -17,8 +17,7 @@ def but_ppg_main():
 		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 		our_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
 		# Calculate the heart rate
-		our_hr = calcul.heart_rate(our_peaks, fs)
-		diff_hr = abs(ref_hr - our_hr)
+		our_hr, diff_hr = calcul.heart_rate(our_peaks, ref_hr, fs)
 		diff_hr_list.append(diff_hr)
 		if quality:
 			diff_hr_list_quality.append(diff_hr)

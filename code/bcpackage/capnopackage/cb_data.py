@@ -74,7 +74,7 @@ def extract(capnobase_file, export=False):
 		capnobase_fs = param['samplingrate']['pleth'][0][0].astype(int)
 		ref_peaks = labels['pleth']['peak']['x'][:].astype(int).flatten()
 		ppg_signal = signal['pleth']['y'][:].flatten()
-		ref_hr = calcul.heart_rate(ref_peaks, capnobase_fs)
+		ref_hr, _ = calcul.heart_rate(ref_peaks, None, capnobase_fs)
 
 		# Export data to a CSV file
 		if export:

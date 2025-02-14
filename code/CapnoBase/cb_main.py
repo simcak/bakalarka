@@ -32,12 +32,11 @@ def capnobase_main():
 
 	for i in range(len(capnobase_files)):
 		id = capnobase_files[i][16:20]
-		fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i], export=False)
+		fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i])
 		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 		our_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
 		# Calculate the heart rate
-		our_hr = calcul.heart_rate(our_peaks, fs)
-		diff_hr = abs(ref_hr - our_hr)
+		our_hr, diff_hr = calcul.heart_rate(our_peaks, ref_hr, fs)
 		diff_hr_list.append(diff_hr)
 
 		# Confusion matrix

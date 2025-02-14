@@ -55,26 +55,41 @@ def confusion_matrix(our_peaks, ref_peaks, tolerance):
 def interbeat_intervals(peaks, fs):
 	"""
 	Compute interbeat intervals from reference peaks.
-	
-	Parameters
-	----------
-	ref_peaks : array
-		Reference peaks.
-	fs : int
-		Sampling frequency.
-	
-	Returns
-	-------
-	ibi : array
-		Interbeat intervals in seconds.
+
+	Args:
+		peaks: list of peak indices
+		fs: sampling frequency
+
+	Returns:
+		ibi: list of interbeat intervals
 	"""
 	ibi = np.diff(peaks) / fs
 	return ibi
 
-def heart_rate(peaks, fs):
+def heart_rate(peaks, ref_hr, fs, type='median'):
 	"""
 	Compute heart rate from the peaks.
+
+	Args:
+		peaks: list of peak indices
+		ref_hr: reference heart rate
+		fs: sampling frequency
+		type: 'mean' or (default) 'median'
+
+	Returns:
+		our_hr: our heart rate
+		diff_hr: difference between our and reference heart rate
 	"""
-	ibi = interbeat_intervals(peaks, fs)
-	hr = 60 / np.median(ibi)
-	return hr
+	our_ibi = interbeat_intervals(peaks, fs)
+
+	if type == 'mean':
+		our_hr = 60 / np.mean(our_ibi)
+	else:
+		our_hr = 60 / np.median(our_ibi)
+
+	if ref_hr and ref_hr:
+		diff_hr = abs(ref_hr - our_hr)
+	else:
+		diff_hr = None
+
+	return our_hr, diff_hr
