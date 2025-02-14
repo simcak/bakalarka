@@ -2,8 +2,6 @@ from bcpackage.capnopackage import cb_data, cb_show
 from bcpackage import preprocess, peaks, calcul, export
 import numpy as np
 
-# from refpackage import aboy, elgendi
-
 def capnobase_main():
 	"""
 	Function to run the CapnoBase analysis.
@@ -31,8 +29,7 @@ def capnobase_main():
 	diff_hr_list = []
 
 	for i in range(len(capnobase_files)):
-		id = capnobase_files[i][16:20]
-		fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i])
+		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i])
 		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 		our_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
 		# Calculate the heart rate
@@ -47,20 +44,23 @@ def capnobase_main():
 
 		# Performance metrics
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
+
+		# Export the data
 		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
-					  None, type='capnobase')
+					  None, type='capnobase_my')
 
 		############# For testing purposes #############
-		# cb_show.test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
+		standardize_signal = preprocess.standardize_signal(ppg_signal)
+		# cb_show.test_hub(standardize_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_files[i], i)
 		print(f'{i}: File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm \t\t| Diff: {round(diff_hr, 3)} bpm')
 		################################################
 
 	# Global results - outsinde the loop
 	total_sensitivity = np.sum(tp_list)/(np.sum(tp_list)+np.sum(fn_list))
 	total_precision = np.sum(tp_list)/(np.sum(tp_list)+np.sum(fp_list))
-	export.to_csv_global('global capno',
+	export.to_csv_global('CB my',
 					  np.average(diff_hr_list), None,
 					  np.sum(tp_list), np.sum(fp_list), np.sum(fn_list),
 					  total_sensitivity, total_precision)

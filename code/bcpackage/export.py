@@ -1,9 +1,10 @@
 import pandas as pd
 import csv
 
+################################################################################
 def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 				 tp, fp, fn, sensitivity, precision,
-				 quality, type='capnobase'):
+				 quality, type='capnobase_my'):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -11,14 +12,21 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 	"""
 	# Prepare data for CSV
 	rows = []
-	if (type == 'capnobase'):
+	if (type == 'capnobase_my'):
 		rows.append({
 			'ID': id,
 			'TP': tp, 'FP': fp, 'FN': fn,
 			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
 			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr
 		})
-	if (type == 'but_ppg'):
+	elif (type == 'capnobase_elgendi'):
+		rows.append({
+			'ID': id,
+			'TP': tp, 'FP': fp, 'FN': fn,
+			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
+			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr
+		})
+	elif (type == 'but_ppg'):
 		rows.append({
 			'ID': id,
 			'TP': None, 'FP': None, 'FN': None,
@@ -31,17 +39,19 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 	data_row = pd.DataFrame(rows)
 
 	# Append DataFrame to CSV
-	if (i == 0 and type == 'capnobase'):
+	if (i == 0 and type == 'capnobase_my'):
 		with open('./results.csv', 'w', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=True, index=False)
-	if (i == 0 and type == 'but_ppg'):
+	elif (i == 0):
 		with open('./results.csv', 'a', newline='') as csvfile:
 			csv.writer(csvfile).writerow([])
 			data_row.to_csv(csvfile, header=True, index=False)
+	# All data rows AFTER the 1st one
 	else:
 		with open('./results.csv', 'a', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=False, index=False)
 
+################################################################################
 def to_csv_global(id, diff_hr, diff_hr_quality,
 				  tp, fp, fn, sensitivity, precision):
 	"""
