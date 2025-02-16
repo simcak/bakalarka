@@ -1,11 +1,10 @@
 from CapnoBase.cb_main import capnobase_main
-from CapnoBase.cb_elgendi import capnobase_elgendi
 from BUT_PPG.but_main import but_ppg_main
 
 def main():
-	capnobase_main()
+	capnobase_main('my')
 	but_ppg_main()
-	capnobase_elgendi()
+	capnobase_main('elgendi', show=True)
 
 if __name__ == "__main__":
 	main()

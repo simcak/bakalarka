@@ -9,6 +9,7 @@ def size_of_but_database():
 
 	return ppg_data
 
+################################################################################
 def but_ppg_main():
 	diff_hr_list, diff_hr_list_quality = [], []
 
@@ -24,7 +25,7 @@ def but_ppg_main():
 
 		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 					  None, None, None, None, None,
-					  quality=quality, type='but_ppg')
+					  quality=quality, type='but ppg')
 
 		############# For testing purposes #############
 		standardize_signal = preprocess.standardize_signal(ppg_signal)
