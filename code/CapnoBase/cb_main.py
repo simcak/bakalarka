@@ -1,5 +1,6 @@
 from bcpackage.capnopackage import cb_data, cb_show
 from bcpackage import preprocess, peaks, calcul, export
+from bcpackage import constants as C
 
 import neurokit2 as nk
 import numpy as np
@@ -7,6 +8,7 @@ import numpy as np
 def capnobase_main(method: str, show = False):
 	"""
 	Function to run the CapnoBase analysis.
+	0. Initialize the lists for the global results with the empty lists.
 	1. Load the list of files.
 	FOR LOOP:
 		2. Iterate over the files.
@@ -29,9 +31,8 @@ def capnobase_main(method: str, show = False):
 	Returns:
 		None (exports the results to a CSV file)
 	"""
+	C.TP_LIST, C.FP_LIST, C.FN_LIST, C.DIFF_HR_LIST = [], [], [], []
 	capnobase_files = cb_data.list_of_files()
-	tp_list, fp_list, fn_list = [], [], []
-	diff_hr_list = []
 
 	for i in range(len(capnobase_files)):
 		# Extract the data
@@ -54,13 +55,9 @@ def capnobase_main(method: str, show = False):
 
 		# Calculate the heart rate
 		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
-		diff_hr_list.append(diff_hr)
 
 		# Confusion matrix
 		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
-		tp_list.append(tp)
-		fp_list.append(fp)
-		fn_list.append(fn)
 
 		# Performance metrics
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
@@ -75,15 +72,15 @@ def capnobase_main(method: str, show = False):
 		if method == 'my' and show:
 			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, our_hr, capnobase_files[i], i)
 		elif method == 'elgendi' and show:
-			cb_show.elgendi_show(signals, info, i)
+			cb_show.neurokit_show(signals, info, i)
 		print(f'{i}: File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm \t\t| Diff: {round(diff_hr, 3)} bpm')
 		##########################################################################
 
 	# Global results - outside the loop
-	total_sensitivity = np.sum(tp_list) / (np.sum(tp_list) + np.sum(fn_list))
-	total_precision = np.sum(tp_list) / (np.sum(tp_list) + np.sum(fp_list))
+	total_sensitivity = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FN_LIST))
+	total_precision = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FP_LIST))
 	# Export global
 	export.to_csv_global((f'{name} global'),
-					  np.average(diff_hr_list), None,
-					  np.sum(tp_list), np.sum(fp_list), np.sum(fn_list),
+					  np.average(C.DIFF_HR_LIST), None,
+					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
 					  total_sensitivity, total_precision)

@@ -1,12 +1,14 @@
+from bcpackage import constants as C
+
 import os
 import matplotlib.pyplot as plt
 import neurokit2 as nk
 
-# global variables
-SAMPLE_NUMBER = 41
-
-def elgendi_show(signals, info, i):
-	if i == SAMPLE_NUMBER:
+def neurokit_show(signals, info, i):
+	"""
+	fancy plot
+	"""
+	if i == C.SAMPLE_NUMBER_CB:
 		nk.ppg_plot(signals, info)
 		plt.show()
 
@@ -14,7 +16,7 @@ def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_
 	"""
 	Here we choose which function for showing we want to use.
 	"""
-	if i == SAMPLE_NUMBER:
+	if i == C.SAMPLE_NUMBER_CB:
 		# one_signal_peaks(filtered_ppg_signal, our_peaks, capnobase_file)
 		two_signals_peaks(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, capnobase_file)
 		# two_signals(ppg_signal, filtered_ppg_signal, capnobase_file)
