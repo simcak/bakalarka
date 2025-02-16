@@ -1,6 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export
-from bcpackage import constants as C
+from bcpackage import preprocess, peaks, calcul, export, constants as C
 
 import neurokit2 as nk
 import numpy as np
@@ -51,7 +50,7 @@ def capnobase_main(method: str, show = False):
 			name = 'CB elgendi'
 
 		else:
-			raise ValueError('Invalid method provided. Use either "my" or "elgendi".')
+			raise ValueError(C.INVALID_METHOD)
 
 		# Calculate the heart rate
 		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)

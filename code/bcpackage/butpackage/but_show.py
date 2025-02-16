@@ -1,5 +1,15 @@
-import os
+from bcpackage import constants as C
+
 import matplotlib.pyplot as plt
+import neurokit2 as nk
+
+def neurokit_show(signals, info, i):
+	"""
+	fancy plot
+	"""
+	if i == C.SAMPLE_NUMBER_BUT:
+		nk.ppg_plot(signals, info)
+		plt.show()
 
 def test_hub(ppg_signal, filtered_ppg_signal, our_peaks, ref_hr, our_hr, but_id, i):
 	"""
