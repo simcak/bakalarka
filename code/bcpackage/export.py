@@ -2,9 +2,10 @@ import pandas as pd
 import csv
 
 ###################################################################################
-def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
+def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 				 tp, fp, fn, sensitivity, precision,
-				 quality, type='my'):
+				 ref_quality, quality,
+				 type='my', database='CB'):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -13,33 +14,43 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 	# Prepare data for CSV
 	rows = []
 	if (type == 'my'):
-		rows.append({
-			'ID': id,
-			'TP': tp, 'FP': fp, 'FN': fn,
-			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr
-		})
-	elif (type == 'neurokit'):
-		rows.append({
-			'ID': id,
-			'TP': tp, 'FP': fp, 'FN': fn,
-			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr
-		})
-	elif (type == 'but ppg'):
-		rows.append({
-			'ID': id,
-			'TP': None, 'FP': None, 'FN': None,
-			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr,
-			'Quality': quality
-		})
+		if (database == 'CB'):
+			rows.append({
+				'ID': id,
+				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
+				'Diff HR[bpm]': diff_hr,
+				'Our Quality': None,
+				'TP': tp, 'FP': fp, 'FN': fn
+			})
+		elif (database == 'BUT'):
+			rows.append({
+				'ID': id,
+				'Diff HR[bpm]': diff_hr,
+				'Ref. Quality': ref_quality, 'Our Quality': None, 'Diff Quality': None
+			})
+	elif (type == 'NK'):
+		if (database == 'CB'):
+			rows.append({
+				'ID': id,
+				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
+				'Diff HR[bpm]': diff_hr,
+				'Orph. Quality': quality,
+				'TP': tp, 'FP': fp, 'FN': fn
+			})
+		elif (database == 'BUT'):
+			rows.append({
+				'ID': id,
+				'Diff HR[bpm]': diff_hr,
+				'Ref. Quality': ref_quality, 'Orph. Quality': quality, 'Diff Quality': None
+			})
+	else:
+		raise ValueError("Invalid type provided for local export.")
 
 	# Create a DataFrame
 	data_row = pd.DataFrame(rows)
 
 	# Append DataFrame to CSV
-	if (i == 0 and type == 'my'):
+	if (i == 0 and type == 'my' and database == 'CB'):
 		with open('./results.csv', 'w', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=True, index=False)
 	elif (i == 0):
@@ -52,8 +63,9 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 			data_row.to_csv(csvfile, header=False, index=False)
 
 ###################################################################################
-def to_csv_global(id, diff_hr, diff_hr_quality,
-				  tp, fp, fn, sensitivity, precision):
+def to_csv_global(id, diff_hr, diff_Q_hr,
+				  tp, fp, fn, sensitivity, precision,
+				  type='my', database='CB'):
 	"""
 	Framework for exporting chosen data and results of the entire database into
 	a CSV file.
@@ -62,14 +74,34 @@ def to_csv_global(id, diff_hr, diff_hr_quality,
 	precision: Positive Predictivity
 	"""
 	row = []
-	row.append({
-		'ID': id,
-		'TP': tp, 'FP': fp, 'FN': fn,
-		'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-		'Ref HR[bpm]' : None, 'Our HR[bpm]': None,
-		'Average Diff HR[bpm]': diff_hr,
-		'Avg. Diff of Q_HR [bpm]': diff_hr_quality
-	})
+	if (type == 'my'):
+		if (database == 'CB'):
+			row.append({
+				'ID': id,
+				'Total Se': sensitivity, 'Total PPV': precision,
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': None,
+				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
+			})
+		elif (database == 'BUT'):
+			row.append({
+				'ID': id,
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
+			})
+	elif (type == 'NK'):
+		if (database == 'CB'):
+			row.append({
+				'ID': id,
+				'Total Se': sensitivity, 'Total PPV': precision,
+				'AVG Diff HR': diff_hr, 'AVG Diff Quality': None,
+				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
+			})
+		elif (database == 'BUT'):
+			row.append({
+				'ID': id,
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
+			})
+	else:
+		raise ValueError("Invalid type provided for global export.")
 
 	global_data = pd.DataFrame(row)
 
