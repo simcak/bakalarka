@@ -18,16 +18,16 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Diff HR[bpm]': diff_hr,
 				'Our Quality': None,
+				'Diff HR[bpm]': diff_hr,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Diff HR[bpm]': diff_hr,
 				'Orph. Quality': quality,
+				'Diff HR[bpm]': diff_hr,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 	elif (database == 'BUT'):
@@ -81,14 +81,14 @@ def to_csv_global(id, diff_hr, diff_Q_hr,
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Diff HR': diff_hr, 'AVG Quality': None,
+				'AVG Quality': None, 'AVG Diff HR': diff_hr,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Diff HR': diff_hr, 'AVG Diff Quality': None,
+				'AVG Quality': None, 'AVG Diff HR': diff_hr,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
 		else:
