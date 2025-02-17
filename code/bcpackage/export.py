@@ -13,8 +13,8 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 	"""
 	# Prepare data for CSV
 	rows = []
-	if (type == 'my'):
-		if (database == 'CB'):
+	if (database == 'CB'):
+		if (type == 'my'):
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
@@ -22,14 +22,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 				'Our Quality': None,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
-		elif (database == 'BUT'):
-			rows.append({
-				'ID': id,
-				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, 'Our Quality': None, 'Diff Quality': None
-			})
-	elif (type == 'NK'):
-		if (database == 'CB'):
+		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
@@ -37,7 +30,14 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 				'Orph. Quality': quality,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
-		elif (database == 'BUT'):
+	elif (database == 'BUT'):
+		if (type == 'my'):
+			rows.append({
+				'ID': id,
+				'Diff HR[bpm]': diff_hr,
+				'Ref. Quality': ref_quality, 'Our Quality': None, 'Diff Quality': None
+			})
+		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': diff_hr,
@@ -52,10 +52,12 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 	# Append DataFrame to CSV
 	if (i == 0 and type == 'my' and database == 'CB'):
 		with open('./results.csv', 'w', newline='') as csvfile:
+			csv.writer(csvfile).writerow([f'{database} {type}'])
 			data_row.to_csv(csvfile, header=True, index=False)
 	elif (i == 0):
 		with open('./results.csv', 'a', newline='') as csvfile:
 			csv.writer(csvfile).writerow([])
+			csv.writer(csvfile).writerow([f'{database} {type}'])
 			data_row.to_csv(csvfile, header=True, index=False)
 	# All data rows AFTER the 1st one
 	else:
@@ -74,34 +76,38 @@ def to_csv_global(id, diff_hr, diff_Q_hr,
 	precision: Positive Predictivity
 	"""
 	row = []
-	if (type == 'my'):
-		if (database == 'CB'):
+	if (database == 'CB'):
+		if (type == 'my'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': None,
+				'AVG Diff HR': diff_hr, 'AVG Quality': None,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
-		elif (database == 'BUT'):
-			row.append({
-				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
-			})
-	elif (type == 'NK'):
-		if (database == 'CB'):
+		elif (type == 'NK'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
 				'AVG Diff HR': diff_hr, 'AVG Diff Quality': None,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
-		elif (database == 'BUT'):
+		else:
+			raise ValueError("Invalid type provided for global export.")
+	elif (database == 'BUT'):
+		if (type == 'my'):
 			row.append({
 				'ID': id,
 				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
 			})
+		elif (type == 'NK'):
+			row.append({
+				'ID': id,
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
+			})
+		else:
+			raise ValueError("Invalid type provided for global export.")
 	else:
-		raise ValueError("Invalid type provided for global export.")
+		raise ValueError("Invalid databaze provided for global export.")
 
 	global_data = pd.DataFrame(row)
 

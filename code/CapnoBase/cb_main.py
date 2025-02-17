@@ -40,7 +40,7 @@ def capnobase_main(method: str, show = False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			mean_measured_quality = None
+			mean_measured_quality = 0.0
 			name = 'my'
 
 		# Execute the NeuroKit package with:
@@ -55,12 +55,12 @@ def capnobase_main(method: str, show = False):
 		else:
 			raise ValueError(C.INVALID_METHOD)
 
-		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
+		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
 		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 
 		export.to_csv_local(id, i,
-					  ref_hr, our_hr, diff_hr,
+					  ref_hr, calculated_hr, diff_hr,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
 					  None, quality=mean_measured_quality,
@@ -68,10 +68,16 @@ def capnobase_main(method: str, show = False):
 
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
-			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, our_hr, capnobase_files[i], i)
+			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, capnobase_files[i], i)
 		elif method == 'neurokit' and show:
 			cb_show.neurokit_show(nk_signals, nk_info, i)
-		print(f'{i}: File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm \t\t| Diff: {round(diff_hr, 3)} bpm')
+
+		if method == 'my':
+			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
+		elif method == 'neurokit':
+			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
+		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(mean_measured_quality, 3)}\t|')
+		print('---------------------------------------------------------------------------------')
 		##########################################################################
 
 	# Global results - outside the loop
@@ -83,3 +89,4 @@ def capnobase_main(method: str, show = False):
 					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
 					  total_sensitivity, total_precision,
 					  type=name, database='CB')
+	print('---------------------------------------------------------------------------------')

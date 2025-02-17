@@ -25,7 +25,7 @@ def but_ppg_main(method: str, show = False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			mean_measured_quality = None
+			mean_measured_quality = 0.0
 			name = 'my'
 		
 		# Execute NeuroKit library with:
@@ -41,26 +41,28 @@ def but_ppg_main(method: str, show = False):
 			raise ValueError(C.INVALID_METHOD)
 
 		# Calculate the heart rate
-		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
+		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
 		diff_hr_list.append(diff_hr)
 		if ref_quality:
 			diff_hr_list_quality.append(diff_hr)
 
-		export.to_csv_local(id, i, ref_hr, our_hr, diff_hr,
+		export.to_csv_local(id, i, ref_hr, calculated_hr, diff_hr,
 					  None, None, None, None, None,
 					  ref_quality=ref_quality, quality=mean_measured_quality,
 					  type=name, database='BUT')
 
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
-			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, ref_hr, our_hr, id, i)
+			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, ref_hr, calculated_hr, id, i)
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
 
-		print('|    i\t|    ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Orphanidou Quality\t|')
-		if mean_measured_quality is not None:
-			print(f'|    {i}\t|    {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(our_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|   {round(mean_measured_quality, 3)}\t\t|')
-		print('-----------------------------------------------------------------------------------------------------------------')
+		if method == 'my':
+			print('|  i\t|   ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Our Quality\t|')
+		elif method == 'neurokit':
+			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
+		print(f'|  {i}\t|   {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(calculated_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|     {round(mean_measured_quality, 3)}\t|')
+		print('---------------------------------------------------------------------------------------------------------')
 		##########################################################################
 
 	# Global results - outsinde the loop
@@ -68,3 +70,4 @@ def but_ppg_main(method: str, show = False):
 					  np.average(diff_hr_list), np.average(diff_hr_list_quality),
 					  None, None, None, None, None,
 					  type=name, database='BUT')
+	print('---------------------------------------------------------------------------------------------------------')
