@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, constants as C
+from bcpackage import preprocess, peaks, calcul, export, constants as C, quality
 
 import neurokit2 as nk
 import numpy as np
@@ -14,7 +14,7 @@ def capnobase_main(method: str, show = False):
 		3. Extract the CapnoBase data.
 		4. Preprocess the PPG signal = filtering = standardization + noise removal.
 			- My method
-			- Elgendi method
+			- NeuroKit method
 		5. Detect peaks in the preprocessed signal.
 		6. Calculate the heart rate from the detected peaks (using IBI) + calculate the diff with the ref HR.
 		7. Confusion matrix: TP, FP, FN.
@@ -24,7 +24,7 @@ def capnobase_main(method: str, show = False):
 	10. Calculate the global results: Total Sensitivity and Precision + sum of FP, FN, TP + average HR diff.
 
 	Args:
-		method (str): The method to execute. Use either "my" or "elgendi".
+		method (str): The method to execute. Use either "my" or "NeuroKit".
 		show (bool): Flag to show debugging or testing info.
 
 	Returns:
@@ -41,13 +41,16 @@ def capnobase_main(method: str, show = False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			name = 'CB my'
+			name = 'my'
 
-		# Execute the Elgendi method
-		elif method == 'elgendi':
-			signals, info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
-			detected_peaks = np.where(signals['PPG_Peaks'] == 1)[0]
-			name = 'CB elgendi'
+		# Execute the NeuroKit package with:
+		#	Elgendi method for peak detection and
+		#	Orphanidou method for quality estimation == templatematch
+		elif method == 'neurokit':
+			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
+			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
+			orphanidou_quality = nk_signals['PPG_Quality']
+			name = 'neurokit'
 
 		else:
 			raise ValueError(C.INVALID_METHOD)
@@ -70,8 +73,8 @@ def capnobase_main(method: str, show = False):
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
 			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, our_hr, capnobase_files[i], i)
-		elif method == 'elgendi' and show:
-			cb_show.neurokit_show(signals, info, i)
+		elif method == 'neurokit' and show:
+			cb_show.neurokit_show(nk_signals, nk_info, i)
 		print(f'{i}: File: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm \t\t| Diff: {round(diff_hr, 3)} bpm')
 		##########################################################################
 
@@ -79,7 +82,7 @@ def capnobase_main(method: str, show = False):
 	total_sensitivity = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FN_LIST))
 	total_precision = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FP_LIST))
 	# Export global
-	export.to_csv_global((f'{name} global'),
+	export.to_csv_global((f'CB {name} global'),
 					  np.average(C.DIFF_HR_LIST), None,
 					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
 					  total_sensitivity, total_precision)

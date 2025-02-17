@@ -4,7 +4,7 @@ import csv
 ###################################################################################
 def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 				 tp, fp, fn, sensitivity, precision,
-				 quality, type='CB my'):
+				 quality, type='my'):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -12,14 +12,14 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 	"""
 	# Prepare data for CSV
 	rows = []
-	if (type == 'CB my'):
+	if (type == 'my'):
 		rows.append({
 			'ID': id,
 			'TP': tp, 'FP': fp, 'FN': fn,
 			'Sensitivity': sensitivity, 'Precision (PPV)': precision,
 			'Ref HR[bpm]' : ref_hr, 'Our HR[bpm]': our_hr, 'Diff HR[bpm]': diff_hr
 		})
-	elif (type == 'CB elgendi'):
+	elif (type == 'neurokit'):
 		rows.append({
 			'ID': id,
 			'TP': tp, 'FP': fp, 'FN': fn,
@@ -39,7 +39,7 @@ def to_csv_local(id, ref_hr, our_hr, diff_hr, i,
 	data_row = pd.DataFrame(rows)
 
 	# Append DataFrame to CSV
-	if (i == 0 and type == 'CB my'):
+	if (i == 0 and type == 'my'):
 		with open('./results.csv', 'w', newline='') as csvfile:
 			data_row.to_csv(csvfile, header=True, index=False)
 	elif (i == 0):

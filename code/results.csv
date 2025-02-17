@@ -143,7 +143,7 @@ ID,TP,FP,FN,Sensitivity,Precision (PPV),Ref HR[bpm],Our HR[bpm],Diff HR[bpm]
 0023,817,0,0,1.0,1.0,103.44827586206897,102.27272727272727,1.1755485893417017
 
 ID,TP,FP,FN,Sensitivity,Precision (PPV),Ref HR[bpm],Our HR[bpm],Average Diff HR[bpm],Avg. Diff of Q_HR [bpm]
-CB elgendi global,27935,34,57,0.9979637039154045,0.9987843684078802,,,0.3283613539833266,
+CB neurokit global,27935,34,57,0.9979637039154045,0.9987843684078802,,,0.3283613539833266,
 
 ID,TP,FP,FN,Sensitivity,Precision (PPV),Ref HR[bpm],Our HR[bpm],Diff HR[bpm],Quality
 100001,,,,,,83,72.0,11.0,1
@@ -196,4 +196,4 @@ ID,TP,FP,FN,Sensitivity,Precision (PPV),Ref HR[bpm],Our HR[bpm],Diff HR[bpm],Qua
 111004,,,,,,102,73.46938775510205,28.530612244897952,0
 
 ID,TP,FP,FN,Sensitivity,Precision (PPV),Ref HR[bpm],Our HR[bpm],Average Diff HR[bpm],Avg. Diff of Q_HR [bpm]
-BUT elgendi global,,,,,,,,10.51444475402822,5.0575788867126645
+BUT neurokit global,,,,,,,,10.51444475402822,5.0575788867126645

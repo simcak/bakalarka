@@ -25,13 +25,14 @@ def but_ppg_main(method: str, show = False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			name = 'BUT my'
+			name = 'my'
 		
-		# Execute the Elgendi method
-		elif method == 'elgendi':
+		# Execute NeuroKit library with:
+		# 	Elgendi method for peak detection
+		elif method == 'neurokit':
 			signals, info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi")
 			detected_peaks = np.where(signals['PPG_Peaks'] == 1)[0]
-			name = 'BUT elgendi'
+			name = 'neurokit'
 		
 		else:
 			raise ValueError(C.INVALID_METHOD)
@@ -49,12 +50,12 @@ def but_ppg_main(method: str, show = False):
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
 			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, ref_hr, our_hr, id, i)
-		elif method == 'elgendi' and show:
+		elif method == 'neurokit' and show:
 			but_show.neurokit_show(signals, info, i)
 		print(f'{i}: ID: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\t\t| Diff: {round(diff_hr, 3)} bpm\t| Quality: {quality}')
 		##########################################################################
 
 	# Global results - outsinde the loop
-	export.to_csv_global(f'{name} global',
+	export.to_csv_global(f'BUT {name} global',
 					  np.average(diff_hr_list), np.average(diff_hr_list_quality),
 					  None, None, None, None, None)
