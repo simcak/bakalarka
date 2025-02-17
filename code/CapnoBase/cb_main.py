@@ -34,13 +34,13 @@ def capnobase_main(method: str, show = False):
 	capnobase_files = cb_data.list_of_files()
 
 	for i in range(len(capnobase_files)):
-		# Extract the data
 		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i])
 
 		# Execute my method
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
+			mean_measured_quality = None
 			name = 'my'
 
 		# Execute the NeuroKit package with:
@@ -49,26 +49,22 @@ def capnobase_main(method: str, show = False):
 		elif method == 'neurokit':
 			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			orphanidou_quality = nk_signals['PPG_Quality']
-			name = 'neurokit'
+			mean_measured_quality = np.mean(nk_signals['PPG_Quality'])
+			name = 'NK'
 
 		else:
 			raise ValueError(C.INVALID_METHOD)
 
-		# Calculate the heart rate
 		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
-
-		# Confusion matrix
 		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
-
-		# Performance metrics
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 
-		# Export the data
-		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
+		export.to_csv_local(id, i,
+					  ref_hr, our_hr, diff_hr,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
-					  None, type=name)
+					  None, quality=mean_measured_quality,
+					  type=name, database='CB')
 
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
@@ -81,8 +77,9 @@ def capnobase_main(method: str, show = False):
 	# Global results - outside the loop
 	total_sensitivity = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FN_LIST))
 	total_precision = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FP_LIST))
-	# Export global
+
 	export.to_csv_global((f'CB {name} global'),
 					  np.average(C.DIFF_HR_LIST), None,
 					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
-					  total_sensitivity, total_precision)
+					  total_sensitivity, total_precision,
+					  type=name, database='CB')

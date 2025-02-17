@@ -19,20 +19,23 @@ def but_ppg_main(method: str, show = False):
 	diff_hr_list, diff_hr_list_quality = [], []
 
 	for i in range(size_of_but_database()):
-		id, fs, quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
+		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
 
 		# Execute my method
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
+			mean_measured_quality = None
 			name = 'my'
 		
 		# Execute NeuroKit library with:
 		# 	Elgendi method for peak detection
+		# 	Orphanidou method for quality estimation == templatematch
 		elif method == 'neurokit':
-			signals, info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi")
-			detected_peaks = np.where(signals['PPG_Peaks'] == 1)[0]
-			name = 'neurokit'
+			nk_signals, info = nk.ppg_process(preprocess.standardize_signal(ppg_signal), sampling_rate=fs, method="elgendi")
+			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
+			mean_measured_quality = np.mean(nk_signals['PPG_Quality'])
+			name = 'NK'
 		
 		else:
 			raise ValueError(C.INVALID_METHOD)
@@ -40,22 +43,28 @@ def but_ppg_main(method: str, show = False):
 		# Calculate the heart rate
 		our_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
 		diff_hr_list.append(diff_hr)
-		if quality:
+		if ref_quality:
 			diff_hr_list_quality.append(diff_hr)
 
-		export.to_csv_local(id, ref_hr, our_hr, diff_hr, i,
+		export.to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 					  None, None, None, None, None,
-					  quality=quality, type='but ppg')
+					  ref_quality=ref_quality, quality=mean_measured_quality,
+					  type=name, database='BUT')
 
 		########################## For testing purposes ##########################
 		if method == 'my' and show:
 			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, ref_hr, our_hr, id, i)
 		elif method == 'neurokit' and show:
-			but_show.neurokit_show(signals, info, i)
-		print(f'{i}: ID: {id} | Ref HR: {round(ref_hr, 3)} bpm | Our HR: {round(our_hr, 3)} bpm\t\t| Diff: {round(diff_hr, 3)} bpm\t| Quality: {quality}')
+			but_show.neurokit_show(nk_signals, info, i)
+
+		print('|    i\t|    ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Orphanidou Quality\t|')
+		if mean_measured_quality is not None:
+			print(f'|    {i}\t|    {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(our_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|   {round(mean_measured_quality, 3)}\t\t|')
+		print('-----------------------------------------------------------------------------------------------------------------')
 		##########################################################################
 
 	# Global results - outsinde the loop
 	export.to_csv_global(f'BUT {name} global',
 					  np.average(diff_hr_list), np.average(diff_hr_list_quality),
-					  None, None, None, None, None)
+					  None, None, None, None, None,
+					  type=name, database='BUT')
