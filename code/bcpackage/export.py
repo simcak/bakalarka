@@ -1,11 +1,14 @@
+from . import constants as C
+
 import pandas as pd
+import numpy as np
 import csv
 
 ###################################################################################
 def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 				 tp, fp, fn, sensitivity, precision,
-				 ref_quality, quality,
-				 type='my', database='CB'):
+				 ref_quality, quality, diff_quality,
+				 type='My', database='CB'):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -14,11 +17,11 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 	# Prepare data for CSV
 	rows = []
 	if (database == 'CB'):
-		if (type == 'my'):
+		if (type == 'My'):
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Our Quality': None,
+				'Our Quality': quality,
 				'Diff HR[bpm]': diff_hr,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
@@ -26,22 +29,22 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Orph. Quality': quality,
+				f'Orph. Q. (>={C.CORRELATION_THRESHOLD} = 1)': quality,
 				'Diff HR[bpm]': diff_hr,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 	elif (database == 'BUT'):
-		if (type == 'my'):
+		if (type == 'My'):
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, 'Our Quality': None, 'Diff Quality': None
+				'Ref. Quality': ref_quality, 'Our Quality': quality, 'Diff Quality': diff_quality
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, 'Orph. Quality': quality, 'Diff Quality': None
+				'Ref. Quality': ref_quality, f'Orph. Q. (>={C.CORRELATION_THRESHOLD} = 1)': quality, 'Diff Quality': diff_quality
 			})
 	else:
 		raise ValueError("Invalid type provided for local export.")
@@ -50,7 +53,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 	data_row = pd.DataFrame(rows)
 
 	# Append DataFrame to CSV
-	if (i == 0 and type == 'my' and database == 'CB'):
+	if (i == 0 and type == 'My' and database == 'CB'):
 		with open('./results.csv', 'w', newline='') as csvfile:
 			csv.writer(csvfile).writerow([f'{database} {type}'])
 			data_row.to_csv(csvfile, header=True, index=False)
@@ -65,9 +68,9 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			data_row.to_csv(csvfile, header=False, index=False)
 
 ###################################################################################
-def to_csv_global(id, diff_hr, diff_Q_hr,
+def to_csv_global(id, diff_hr, diff_Q_hr, diff_Q, avg_Q,
 				  tp, fp, fn, sensitivity, precision,
-				  type='my', database='CB'):
+				  type='My', database='CB'):
 	"""
 	Framework for exporting chosen data and results of the entire database into
 	a CSV file.
@@ -77,32 +80,32 @@ def to_csv_global(id, diff_hr, diff_Q_hr,
 	"""
 	row = []
 	if (database == 'CB'):
-		if (type == 'my'):
+		if (type == 'My'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': None, 'AVG Diff HR': diff_hr,
+				'AVG Quality': avg_Q, 'AVG Diff HR': diff_hr,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': None, 'AVG Diff HR': diff_hr,
+				'AVG Quality': avg_Q, 'AVG Diff HR': diff_hr,
 				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
 	elif (database == 'BUT'):
-		if (type == 'my'):
+		if (type == 'My'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/42 * 100, 3)})%'
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'AVG Diff Quality': None
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/48 * 100, 3)})%'
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")

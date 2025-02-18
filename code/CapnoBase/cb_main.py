@@ -4,7 +4,7 @@ from bcpackage import preprocess, peaks, calcul, export, constants as C, quality
 import neurokit2 as nk
 import numpy as np
 
-def capnobase_main(method: str, show = False):
+def capnobase_main(method: str, show=False):
 	"""
 	Function to run the CapnoBase analysis.
 	0. Initialize the lists for the global results with the empty lists.
@@ -30,7 +30,7 @@ def capnobase_main(method: str, show = False):
 	Returns:
 		None (exports the results to a CSV file)
 	"""
-	C.TP_LIST, C.FP_LIST, C.FN_LIST, C.DIFF_HR_LIST = [], [], [], []
+	C.TP_LIST, C.FP_LIST, C.FN_LIST, C.DIFF_HR_LIST, C.QUALITY_LIST = [], [], [], [], []
 	capnobase_files = cb_data.list_of_files()
 
 	for i in range(len(capnobase_files)):
@@ -40,8 +40,9 @@ def capnobase_main(method: str, show = False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			mean_measured_quality = 0.0
-			name = 'my'
+			measured_quality = 0.0
+			C.QUALITY_LIST.append(measured_quality)
+			name = 'My'
 
 		# Execute the NeuroKit package with:
 		#	Elgendi method for peak detection and
@@ -49,7 +50,8 @@ def capnobase_main(method: str, show = False):
 		elif method == 'neurokit':
 			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			mean_measured_quality = np.mean(nk_signals['PPG_Quality'])
+			measured_quality = np.mean(nk_signals['PPG_Quality'])
+			C.QUALITY_LIST.append(measured_quality)
 			name = 'NK'
 
 		else:
@@ -63,10 +65,10 @@ def capnobase_main(method: str, show = False):
 					  ref_hr, calculated_hr, diff_hr,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
-					  None, quality=mean_measured_quality,
+					  None, measured_quality, None,
 					  type=name, database='CB')
 
-		########################## For testing purposes ##########################
+		################################### For testing purposes ##################################
 		if method == 'my' and show:
 			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, capnobase_files[i], i)
 		elif method == 'neurokit' and show:
@@ -76,16 +78,16 @@ def capnobase_main(method: str, show = False):
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
-		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(mean_measured_quality, 3)}\t|')
+		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(measured_quality, 3)}\t|')
 		print('---------------------------------------------------------------------------------')
-		##########################################################################
+		############################################################################################
 
 	# Global results - outside the loop
 	total_sensitivity = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FN_LIST))
 	total_precision = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FP_LIST))
 
 	export.to_csv_global((f'CB {name} global'),
-					  np.average(C.DIFF_HR_LIST), None,
+					  np.average(C.DIFF_HR_LIST), None, None, np.average(C.QUALITY_LIST),
 					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
 					  total_sensitivity, total_precision,
 					  type=name, database='CB')
