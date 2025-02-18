@@ -2,7 +2,7 @@ import h5py
 import csv
 from bcpackage import calcul
 
-def list_of_files():
+def info():
 	"""
 	Generate a list of CapnoBase .mat files.
 
@@ -19,8 +19,10 @@ def list_of_files():
 		f'{path}0103_8min.mat', f'{path}0035_8min.mat', f'{path}0313_8min.mat', f'{path}0312_8min.mat', f'{path}0016_8min.mat', f'{path}0330_8min.mat',
 		f'{path}0331_8min.mat', f'{path}0121_8min.mat', f'{path}0029_8min.mat', f'{path}0028_8min.mat', f'{path}0115_8min.mat', f'{path}0023_8min.mat'
 		]
+	
+	cb_files_len = len(capnobase_files)
 
-	return capnobase_files
+	return capnobase_files, cb_files_len
 
 def extract(capnobase_file, export=False):
 	"""

@@ -9,6 +9,11 @@ CORRELATION_THRESHOLD = 0.7
 INVALID_METHOD = 'Invalid method provided. Use either "my" or "neurokit".'
 INVALID_QUALITY_METHOD = 'Invalid method provided. Use either "my" or "orphanidou".'
 
+# File info
+CB_FILES = []
+CB_FILES_LEN = 0
+BUT_DATA_LEN = 0
+
 # Lists for storing TP, FP, FN
 TP_LIST, FP_LIST, FN_LIST = [], [], []
 

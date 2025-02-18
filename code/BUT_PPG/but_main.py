@@ -1,17 +1,8 @@
 from bcpackage.butpackage import but_data, but_show
 from bcpackage import preprocess, peaks, calcul, export, constants as C, quality
-
 import neurokit2 as nk
-import scipy.io
 import numpy as np
 
-def size_of_but_database():
-	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
-	ppg_data = len(mat_data['BUT_PPG']['PPG'][0, 0])
-
-	return ppg_data
-
-################################################################################
 def but_ppg_main(method: str, show=False):
 	"""
 	Function to run the BUT PPG analysis.
@@ -19,7 +10,7 @@ def but_ppg_main(method: str, show=False):
 	# Init before the loop
 	diff_hr_list, diff_hr_list_quality, C.DIFF_QUALITY_SUM = [], [], 0
 
-	for i in range(size_of_but_database()):
+	for i in range(C.BUT_DATA_LEN):
 		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
 
 		# Execute my method

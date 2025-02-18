@@ -146,7 +146,7 @@ ID,Diff HR[bpm],Ref. Quality,Our Quality,Diff Quality
 111004,20.181818181818173,0,0.0,0
 
 ID,AVG Diff HR,AVG Diff Q-HR,Diff Quality
-BUT My global,12.29401824811314,3.507653761088551,35 (83.333)%
+BUT My global,12.29401824811314,3.507653761088551,35 (72.917)%
 
 BUT NK
 ID,Diff HR[bpm],Ref. Quality,Orph. Q. (>=0.7 = 1),Diff Quality

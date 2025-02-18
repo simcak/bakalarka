@@ -1,5 +1,12 @@
 import scipy.io
 import pandas as pd
+import scipy.io
+
+def info():
+	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
+	ppg_data_len = len(mat_data['BUT_PPG']['PPG'][0, 0])
+
+	return ppg_data_len
 
 def export_data(id, fs, quality, hr, ppg_signal, i):
 	# Prepare data for CSV

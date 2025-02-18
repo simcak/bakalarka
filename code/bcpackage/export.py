@@ -100,12 +100,12 @@ def to_csv_global(id, diff_hr, diff_Q_hr, diff_Q, avg_Q,
 		if (type == 'My'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/42 * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/C.BUT_DATA_LEN * 100, 3)})%'
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/48 * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/C.BUT_DATA_LEN * 100, 3)})%'
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")

@@ -31,10 +31,9 @@ def capnobase_main(method: str, show=False):
 		None (exports the results to a CSV file)
 	"""
 	C.TP_LIST, C.FP_LIST, C.FN_LIST, C.DIFF_HR_LIST, C.QUALITY_LIST = [], [], [], [], []
-	capnobase_files = cb_data.list_of_files()
 
-	for i in range(len(capnobase_files)):
-		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(capnobase_files[i])
+	for i in range(C.CB_FILES_LEN):
+		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(C.CB_FILES[i])
 
 		# Execute my method
 		if method == 'my':
@@ -70,7 +69,7 @@ def capnobase_main(method: str, show=False):
 
 		################################### For testing purposes ##################################
 		if method == 'my' and show:
-			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, capnobase_files[i], i)
+			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, C.CB_FILES[i], i)
 		elif method == 'neurokit' and show:
 			cb_show.neurokit_show(nk_signals, nk_info, i)
 
