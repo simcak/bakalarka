@@ -1,5 +1,5 @@
 from bcpackage.butpackage import but_data, but_show
-from bcpackage import preprocess, peaks, calcul, export, quality, quality2, globals as G
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
 import neurokit2 as nk
 import numpy as np
 
@@ -17,9 +17,9 @@ def but_ppg_main(method: str, show=False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			measured_quality, diff_quality = quality.evaluate([0.0, 0.0, 0.0], ref_quality,
-													 method=method, database='BUT')
-			quality2.estimate(filtered_ppg_signal, detected_peaks, fs)
+			measured_quality, diff_quality = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
+													 None, ref_quality,
+													 method='my_morpho', database='BUT')
 			name = 'My'
 		
 		# Execute NeuroKit library with:
@@ -28,7 +28,8 @@ def but_ppg_main(method: str, show=False):
 		elif method == 'neurokit':
 			nk_signals, info = nk.ppg_process(preprocess.standardize_signal(ppg_signal), sampling_rate=fs, method="elgendi")
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			measured_quality, diff_quality = quality.evaluate(nk_signals['PPG_Quality'], ref_quality,
+			measured_quality, diff_quality = quality.evaluate(None, detected_peaks, fs,
+													 nk_signals['PPG_Quality'], ref_quality,
 													 method='orphanidou', database='BUT')
 			name = 'NK'
 		
@@ -62,7 +63,7 @@ def but_ppg_main(method: str, show=False):
 
 	# Global results - outsinde the loop
 	export.to_csv_global(f'BUT {name} global',
-					  np.average(diff_hr_list), np.average(diff_hr_list_quality), G.DIFF_QUALITY_SUM, None,
+					  np.average(diff_hr_list), np.average(diff_hr_list_quality), None,
 					  None, None, None, None, None,
 					  type=name, database='BUT')
 	print('#########################################################################################################')

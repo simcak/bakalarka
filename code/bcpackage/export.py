@@ -38,7 +38,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, 'Our Quality': quality, 'Diff Quality': diff_quality
+				'Ref. Quality': ref_quality, f'Our Q. (>={G.MORPHO_THRESHOLD})': quality, 'Diff Quality': diff_quality
 			})
 		elif (type == 'NK'):
 			rows.append({
@@ -68,7 +68,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			data_row.to_csv(csvfile, header=False, index=False)
 
 ###################################################################################
-def to_csv_global(id, diff_hr, diff_Q_hr, diff_Q, avg_Q,
+def to_csv_global(id, diff_hr, diff_Q_hr, avg_Q,
 				  tp, fp, fn, sensitivity, precision,
 				  type='My', database='CB'):
 	"""
@@ -100,12 +100,12 @@ def to_csv_global(id, diff_hr, diff_Q_hr, diff_Q, avg_Q,
 		if (type == 'My'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/G.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)})%'
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/G.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)})%'
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
