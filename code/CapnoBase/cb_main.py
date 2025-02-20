@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, constants as C, quality
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
 
 import neurokit2 as nk
 import numpy as np
@@ -30,17 +30,17 @@ def capnobase_main(method: str, show=False):
 	Returns:
 		None (exports the results to a CSV file)
 	"""
-	C.TP_LIST, C.FP_LIST, C.FN_LIST, C.DIFF_HR_LIST, C.QUALITY_LIST = [], [], [], [], []
+	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
 
-	for i in range(C.CB_FILES_LEN):
-		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(C.CB_FILES[i])
+	for i in range(G.CB_FILES_LEN):
+		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(G.CB_FILES[i])
 
 		# Execute my method
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
 			measured_quality = 0.0
-			C.QUALITY_LIST.append(measured_quality)
+			G.QUALITY_LIST.append(measured_quality)
 			name = 'My'
 
 		# Execute the NeuroKit package with:
@@ -50,11 +50,11 @@ def capnobase_main(method: str, show=False):
 			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
 			measured_quality = np.mean(nk_signals['PPG_Quality'])
-			C.QUALITY_LIST.append(measured_quality)
+			G.QUALITY_LIST.append(measured_quality)
 			name = 'NK'
 
 		else:
-			raise ValueError(C.INVALID_METHOD)
+			raise ValueError(G.INVALID_METHOD)
 
 		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
 		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
@@ -69,7 +69,7 @@ def capnobase_main(method: str, show=False):
 
 		################################### For testing purposes ##################################
 		if method == 'my' and show:
-			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, C.CB_FILES[i], i)
+			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, G.CB_FILES[i], i)
 		elif method == 'neurokit' and show:
 			cb_show.neurokit_show(nk_signals, nk_info, i)
 
@@ -82,12 +82,12 @@ def capnobase_main(method: str, show=False):
 		############################################################################################
 
 	# Global results - outside the loop
-	total_sensitivity = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FN_LIST))
-	total_precision = np.sum(C.TP_LIST) / (np.sum(C.TP_LIST) + np.sum(C.FP_LIST))
+	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
+	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
 	export.to_csv_global((f'CB {name} global'),
-					  np.average(C.DIFF_HR_LIST), None, None, np.average(C.QUALITY_LIST),
-					  np.sum(C.TP_LIST), np.sum(C.FP_LIST), np.sum(C.FN_LIST),
+					  np.average(G.DIFF_HR_LIST), None, None, np.average(G.QUALITY_LIST),
+					  np.sum(G.TP_LIST), np.sum(G.FP_LIST), np.sum(G.FN_LIST),
 					  total_sensitivity, total_precision,
 					  type=name, database='CB')
-	print('---------------------------------------------------------------------------------')
+	print('#################################################################################')

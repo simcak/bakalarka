@@ -1,4 +1,4 @@
-from bcpackage import constants as C
+from bcpackage import globals as G
 
 import os
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ def neurokit_show(signals, info, i):
 	"""
 	fancy plot
 	"""
-	if i == C.SAMPLE_NUMBER_CB:
+	if i == G.SAMPLE_NUMBER_CB:
 		nk.ppg_plot(signals, info)
 		plt.show()
 
@@ -16,7 +16,7 @@ def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_
 	"""
 	Here we choose which function for showing we want to use.
 	"""
-	if i == C.SAMPLE_NUMBER_CB:
+	if i == G.SAMPLE_NUMBER_CB:
 		# one_signal_peaks(filtered_ppg_signal, our_peaks, capnobase_file)
 		two_signals_peaks(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, capnobase_file)
 		# two_signals(ppg_signal, filtered_ppg_signal, capnobase_file)

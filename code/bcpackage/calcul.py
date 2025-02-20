@@ -1,4 +1,4 @@
-from bcpackage import constants as C
+from . import globals as G
 import numpy as np
 
 def performance_metrics(tp, fp, fn):
@@ -57,9 +57,9 @@ def confusion_matrix(our_peaks, ref_peaks, tolerance, add_to_list=True):
 				fp += len(matches) - 1
 
 	if add_to_list:
-		C.TP_LIST.append(tp)
-		C.FP_LIST.append(fp)
-		C.FN_LIST.append(fn)
+		G.TP_LIST.append(tp)
+		G.FP_LIST.append(fp)
+		G.FN_LIST.append(fn)
 
 	return tp, fp, fn
 
@@ -102,7 +102,7 @@ def heart_rate(peaks, hr_in, fs, type='median'):
 
 	if hr_in:
 		diff_hr = abs(hr_in - hr_out)
-		C.DIFF_HR_LIST.append(diff_hr)
+		G.DIFF_HR_LIST.append(diff_hr)
 	else:
 		diff_hr = None
 

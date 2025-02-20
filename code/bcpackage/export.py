@@ -1,4 +1,4 @@
-from . import constants as C
+from . import globals as G
 
 import pandas as pd
 import numpy as np
@@ -29,7 +29,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				f'Orph. Q. (>={C.CORRELATION_THRESHOLD} = 1)': quality,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality,
 				'Diff HR[bpm]': diff_hr,
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
@@ -44,7 +44,7 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, f'Orph. Q. (>={C.CORRELATION_THRESHOLD} = 1)': quality, 'Diff Quality': diff_quality
+				'Ref. Quality': ref_quality, f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality, 'Diff Quality': diff_quality
 			})
 	else:
 		raise ValueError("Invalid type provided for local export.")
@@ -100,12 +100,12 @@ def to_csv_global(id, diff_hr, diff_Q_hr, diff_Q, avg_Q,
 		if (type == 'My'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/C.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/G.BUT_DATA_LEN * 100, 3)})%'
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/C.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{diff_Q} ({np.round(diff_Q/G.BUT_DATA_LEN * 100, 3)})%'
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
