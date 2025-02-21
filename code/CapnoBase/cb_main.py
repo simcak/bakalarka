@@ -39,8 +39,9 @@ def capnobase_main(method: str, show=False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			measured_quality = 0.0
-			G.QUALITY_LIST.append(measured_quality)
+			quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
+								   None, None,
+								   method='my_morpho', database='CB')
 			name = 'My'
 
 		# Execute the NeuroKit package with:
@@ -49,8 +50,9 @@ def capnobase_main(method: str, show=False):
 		elif method == 'neurokit':
 			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			measured_quality = np.mean(nk_signals['PPG_Quality'])
-			G.QUALITY_LIST.append(measured_quality)
+			quality_info = quality.evaluate(None, detected_peaks, fs,
+								   nk_signals['PPG_Quality'], None,
+								   method='orphanidou', database='CB')
 			name = 'NK'
 
 		else:
@@ -64,7 +66,7 @@ def capnobase_main(method: str, show=False):
 					  ref_hr, calculated_hr, diff_hr,
 					  tp, fp, fn,
 					  local_sensitivity, local_precision,
-					  None, measured_quality, None,
+					  None, quality_info['Average Quality'], None,
 					  type=name, database='CB')
 
 		################################### For testing purposes ##################################
@@ -77,7 +79,7 @@ def capnobase_main(method: str, show=False):
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
-		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(measured_quality, 3)}\t|')
+		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(quality_info["Average Quality"], 3)}\t|')
 		print('---------------------------------------------------------------------------------')
 		############################################################################################
 

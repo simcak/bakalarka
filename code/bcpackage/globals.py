@@ -1,6 +1,6 @@
 #################### GLOBAL CONSTANTS ####################
 # what sample i do we want to show?
-SAMPLE_NUMBER_CB = 26
+SAMPLE_NUMBER_CB = 0
 SAMPLE_NUMBER_BUT = 45
 
 # Quality threshold
@@ -8,8 +8,8 @@ CORRELATION_THRESHOLD = 0.7
 MORPHO_THRESHOLD = 0.6
 
 # Quality: Morphological thresholds
-AMPLITUDE_MIN = 0.1
-AMPLITUDE_MAX = 1.5
+AMPLITUDE_MIN = 0.5
+AMPLITUDE_MAX = 2.0
 RISE_TIME_MIN = 0.05
 RISE_TIME_MAX = 0.4
 

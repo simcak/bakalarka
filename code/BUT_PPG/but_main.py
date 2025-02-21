@@ -17,9 +17,9 @@ def but_ppg_main(method: str, show=False):
 		if method == 'my':
 			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			measured_quality, diff_quality = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
-													 None, ref_quality,
-													 method='my_morpho', database='BUT')
+			quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
+								   None, ref_quality,
+								   method='my_morpho', database='BUT')
 			name = 'My'
 		
 		# Execute NeuroKit library with:
@@ -28,9 +28,9 @@ def but_ppg_main(method: str, show=False):
 		elif method == 'neurokit':
 			nk_signals, info = nk.ppg_process(preprocess.standardize_signal(ppg_signal), sampling_rate=fs, method="elgendi")
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			measured_quality, diff_quality = quality.evaluate(None, detected_peaks, fs,
-													 nk_signals['PPG_Quality'], ref_quality,
-													 method='orphanidou', database='BUT')
+			quality_info = quality.evaluate(None, detected_peaks, fs,
+								   nk_signals['PPG_Quality'], ref_quality,
+								   method='orphanidou', database='BUT')
 			name = 'NK'
 		
 		else:
@@ -44,7 +44,7 @@ def but_ppg_main(method: str, show=False):
 
 		export.to_csv_local(id, i, ref_hr, calculated_hr, diff_hr,
 					  None, None, None, None, None,
-					  ref_quality, measured_quality, diff_quality,
+					  ref_quality, quality_info['Average Quality'], quality_info['Difference Quality'],
 					  type=name, database='BUT')
 
 		############################################### For testing purposes ##############################################
@@ -57,7 +57,7 @@ def but_ppg_main(method: str, show=False):
 			print('|  i\t|   ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
-		print(f'|  {i}\t|   {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(calculated_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|     {round(measured_quality, 3)}\t|')
+		print(f'|  {i}\t|   {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(calculated_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|     {round(quality_info["Average Quality"], 3)}\t|')
 		print('---------------------------------------------------------------------------------------------------------')
 		###################################################################################################################
 

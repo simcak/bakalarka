@@ -4,8 +4,8 @@ from scipy.interpolate import interp1d
 
 
 def compute_beat_features(ppg_signal, peak_index,
-						  window_left=0.2,
-						  window_right=0.4,
+						  border_left=0.2,
+						  border_right=0.4,
 						  fs=100):
 	"""
 	Extract morphological features for a range around the single beat centered on 'peak_index'.
@@ -16,9 +16,9 @@ def compute_beat_features(ppg_signal, peak_index,
 		1D array containing the cleaned PPG signal.
 	peak_index : int
 		The index in 'ppg_signal' that corresponds to the peak of interest.
-	window_left : float
+	border_left : float
 		Time (seconds) to extend to the left of the peak for analysis (e.g., to find the foot of the wave).
-	window_right : float
+	border_right : float
 		Time (seconds) to extend to the right of the peak for analysis (e.g., to see the downslope).
 	fs : int
 		Sampling frequency of the signal.
@@ -29,13 +29,13 @@ def compute_beat_features(ppg_signal, peak_index,
 		A python dictionary containing morphological metrics (amplitude, rise_time, ...) for one provided beat.
 	"""
 	########################## PREPROCESSING ##########################
-	# Convert windows (in time) to samples. Robust to different fs.
-	left_buff_samples = int(window_left * fs)
-	right_buff_samples = int(window_right * fs)
+	# Convert borders (in time) to samples. Robust for different fs.
+	left_border_samples = int(border_left * fs)
+	right_border_samples = int(border_right * fs)
 
 	# Define boundaries + we don't go out of the signal range.
-	start_idx = max(0, peak_index - left_buff_samples)
-	end_idx = min(len(ppg_signal), peak_index + right_buff_samples)
+	start_idx = max(0, peak_index - left_border_samples)
+	end_idx = min(len(ppg_signal), peak_index + right_border_samples)
 
 	# EXTRACT THE SEGMENT AROUND THE PEAK
 	segment = ppg_signal[start_idx:end_idx]
@@ -164,7 +164,7 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 		diff_quality: The difference between the average quality and the reference quality (if provided).
 	"""
 	if method == 'my_morpho':
-		quality_arr, _ = ppg_quality_morphological(filtered_ppg_signal, peaks,
+		quality_arr, morphod_ata = ppg_quality_morphological(filtered_ppg_signal, peaks,
 												fs=sampling_rate,
 												amplitude_min=G.AMPLITUDE_MIN,
 												amplitude_max=G.AMPLITUDE_MAX,
@@ -172,8 +172,12 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 												rise_time_max=G.RISE_TIME_MAX)
 		# print('Quality array:', quality_arr)
 		avg_quality = np.mean(quality_arr)
+		G.QUALITY_LIST.append(avg_quality)
+
 	elif method == 'orphanidou':
 		avg_quality = np.mean(quality_arr)
+		G.QUALITY_LIST.append(avg_quality)
+
 	else:
 		raise ValueError(G.INVALID_QUALITY_METHOD)
 
@@ -183,11 +187,17 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 			rounded_q = 1 if avg_quality >= G.MORPHO_THRESHOLD else 0
 		elif method == 'orphanidou':
 			rounded_q = 1 if avg_quality >= G.CORRELATION_THRESHOLD else 0
-
 		# How much is aplied quality alg different from the reference quality?
 		diff_quality = abs(rounded_q - ref_quality)
 		G.DIFF_QUALITY_SUM += diff_quality
 
-		return avg_quality, diff_quality
+	elif database == 'CB':
+		diff_quality = None
 
-	return avg_quality, None
+	quality_info = {
+		'Quality array': quality_arr,
+		'Average Quality': avg_quality,
+		'Difference Quality': diff_quality
+	}
+
+	return quality_info
