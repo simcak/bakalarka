@@ -77,13 +77,13 @@ def interbeat_intervals(peaks, fs):
 	ibi = np.diff(peaks) / fs
 	return ibi
 
-def heart_rate(peaks, hr_in, fs, type='median'):
+def heart_rate(peaks, hr_in_ref, fs, type='median'):
 	"""
 	Compute heart rate from the peaks.
 
 	Args:
 		peaks: list of peak indices
-		hr_in: reference heart rate
+		hr_in_ref: reference heart rate
 		fs: sampling frequency
 		type: 'mean' or (default) 'median'
 
@@ -100,11 +100,10 @@ def heart_rate(peaks, hr_in, fs, type='median'):
 	else:
 		raise ValueError('Invalid type provided. Use either "mean" or "median".')
 
-	if hr_in:
-		diff_hr = abs(hr_in - hr_out)
+	if hr_in_ref is not None:
+		diff_hr = abs(hr_in_ref - hr_out)
 		G.DIFF_HR_LIST.append(diff_hr)
 	else:
 		diff_hr = None
-
 
 	return hr_out, diff_hr

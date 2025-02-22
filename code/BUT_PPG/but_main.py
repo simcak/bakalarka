@@ -8,7 +8,7 @@ def but_ppg_main(method: str, show=False):
 	Function to run the BUT PPG analysis.
 	"""
 	# Init before the loop
-	diff_hr_list, diff_hr_list_quality, G.DIFF_QUALITY_SUM = [], [], 0
+	G.DIFF_HR_LIST, G.DIFF_HR_LIST_QUALITY, G.DIFF_QUALITY_SUM = [], [], 0
 
 	for i in range(G.BUT_DATA_LEN):
 		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
@@ -38,9 +38,8 @@ def but_ppg_main(method: str, show=False):
 
 		# Calculate the heart rate
 		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
-		diff_hr_list.append(diff_hr)
 		if ref_quality == 1:
-			diff_hr_list_quality.append(diff_hr)
+			G.DIFF_HR_LIST_QUALITY.append(diff_hr)
 
 		export.to_csv_local(id, i, ref_hr, calculated_hr, diff_hr,
 					  None, None, None, None, None,
@@ -63,7 +62,6 @@ def but_ppg_main(method: str, show=False):
 
 	# Global results - outsinde the loop
 	export.to_csv_global(f'BUT {name} global',
-					  np.average(diff_hr_list), np.average(diff_hr_list_quality), None,
-					  None, None, None, None, None,
+					  None, None,
 					  type=name, database='BUT')
 	print('#########################################################################################################')

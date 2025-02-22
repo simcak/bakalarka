@@ -88,8 +88,6 @@ def capnobase_main(method: str, show=False):
 	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
 	export.to_csv_global((f'CB {name} global'),
-					  np.average(G.DIFF_HR_LIST), None, np.average(G.QUALITY_LIST),
-					  np.sum(G.TP_LIST), np.sum(G.FP_LIST), np.sum(G.FN_LIST),
 					  total_sensitivity, total_precision,
 					  type=name, database='CB')
 	print('#################################################################################')

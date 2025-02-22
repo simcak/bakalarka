@@ -68,8 +68,8 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			data_row.to_csv(csvfile, header=False, index=False)
 
 ###################################################################################
-def to_csv_global(id, diff_hr, diff_Q_hr, avg_Q,
-				  tp, fp, fn, sensitivity, precision,
+def to_csv_global(id,
+				  sensitivity, precision,
 				  type='My', database='CB'):
 	"""
 	Framework for exporting chosen data and results of the entire database into
@@ -84,15 +84,15 @@ def to_csv_global(id, diff_hr, diff_Q_hr, avg_Q,
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': avg_Q, 'AVG Diff HR': diff_hr,
-				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
+				'AVG Quality': np.average(G.QUALITY_LIST), 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
 				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': avg_Q, 'AVG Diff HR': diff_hr,
-				'TP sum': tp, 'FP sum': fp, 'FN sum': fn
+				'AVG Quality': np.average(G.QUALITY_LIST), 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
@@ -100,12 +100,12 @@ def to_csv_global(id, diff_hr, diff_Q_hr, avg_Q,
 		if (type == 'My'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST), 'AVG Diff Q-HR': np.average(G.DIFF_HR_LIST_QUALITY), 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)}%)'
 			})
 		elif (type == 'NK'):
 			row.append({
 				'ID': id,
-				'AVG Diff HR': diff_hr, 'AVG Diff Q-HR': diff_Q_hr, 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)})%'
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST), 'AVG Diff Q-HR': np.average(G.DIFF_HR_LIST_QUALITY), 'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)}%)'
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
