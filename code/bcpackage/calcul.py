@@ -77,15 +77,15 @@ def interbeat_intervals(peaks, fs):
 	ibi = np.diff(peaks) / fs
 	return ibi
 
-def heart_rate(peaks, hr_in_ref, fs, type='median'):
+def heart_rate(peaks, ref_hr, fs, init=False, math_method='median'):
 	"""
 	Compute heart rate from the peaks.
 
 	Args:
 		peaks: list of peak indices
-		hr_in_ref: reference heart rate
+		ref_hr: reference heart rate
 		fs: sampling frequency
-		type: 'mean' or (default) 'median'
+		math_method: 'mean' or (default) 'median'
 
 	Returns:
 		hr_out: our heart rate
@@ -93,17 +93,27 @@ def heart_rate(peaks, hr_in_ref, fs, type='median'):
 	"""
 	our_ibi = interbeat_intervals(peaks, fs)
 
-	if type == 'mean':
+	if math_method == 'mean':
 		hr_out = 60 / np.mean(our_ibi)
-	elif type == 'median':
+	elif math_method == 'median':
 		hr_out = 60 / np.median(our_ibi)
 	else:
-		raise ValueError('Invalid type provided. Use either "mean" or "median".')
+		raise ValueError('Invalid math_method provided. Use either "mean" or "median".')
 
-	if hr_in_ref is not None:
-		diff_hr = abs(hr_in_ref - hr_out)
+	# Comparing our detected peaks with ref_hr (BUT) or ref_peaks hr (CB)
+	if init == False:
+		diff_hr = abs(ref_hr - hr_out)
 		G.DIFF_HR_LIST.append(diff_hr)
-	else:
+	# For detecting HR from referential peaks (CB)
+	elif init == True:
+		ref_hr = hr_out
+		hr_out = None
 		diff_hr = None
 
-	return hr_out, diff_hr
+	hr_info = {
+		'Calculated HR': hr_out,
+		'Ref HR': ref_hr,
+		'Diff HR': diff_hr
+	}
+
+	return hr_info

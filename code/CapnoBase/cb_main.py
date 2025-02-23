@@ -33,7 +33,7 @@ def capnobase_main(method: str, show=False):
 	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
 
 	for i in range(G.CB_FILES_LEN):
-		id, fs, ppg_signal, ref_peaks, ref_hr = cb_data.extract(G.CB_FILES[i])
+		id, fs, ppg_signal, ref_peaks, hr_info = cb_data.extract(G.CB_FILES[i])
 
 		# Execute my method
 		if method == 'my':
@@ -58,20 +58,17 @@ def capnobase_main(method: str, show=False):
 		else:
 			raise ValueError(G.INVALID_METHOD)
 
-		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
+		hr_info = calcul.heart_rate(detected_peaks, hr_info['Ref HR'], fs)
 		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 
-		export.to_csv_local(id, i,
-					  ref_hr, calculated_hr, diff_hr,
-					  tp, fp, fn,
-					  local_sensitivity, local_precision,
-					  None, quality_info['Average Quality'], None,
+		export.to_csv_local(id, i, hr_info, quality_info,
+					  tp, fp, fn, local_sensitivity, local_precision,
 					  type=name, database='CB')
 
 		################################### For testing purposes ##################################
 		if method == 'my' and show:
-			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, ref_hr, calculated_hr, G.CB_FILES[i], i)
+			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, hr_info, G.CB_FILES[i], i)
 		elif method == 'neurokit' and show:
 			cb_show.neurokit_show(nk_signals, nk_info, i)
 
@@ -79,7 +76,7 @@ def capnobase_main(method: str, show=False):
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
-		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(diff_hr, 3)} bpm\t|     {round(quality_info["Average Quality"], 3)}\t|')
+		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(hr_info["Diff HR"], 3)} bpm\t|     {round(quality_info["AVG Q."], 3)}\t|')
 		print('---------------------------------------------------------------------------------')
 		############################################################################################
 

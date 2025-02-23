@@ -195,9 +195,10 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 		diff_quality = None
 
 	quality_info = {
-		'Quality array': quality_arr,
-		'Average Quality': avg_quality,
-		'Difference Quality': diff_quality
+		'Q. array': quality_arr,
+		'AVG Q.': avg_quality,
+		'Diff Q.': diff_quality,
+		'Ref Q.': None
 	}
 
 	return quality_info

@@ -20,6 +20,7 @@ def but_ppg_main(method: str, show=False):
 			quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
 								   None, ref_quality,
 								   method='my_morpho', database='BUT')
+			quality_info['Ref Q.'] = ref_quality
 			name = 'My'
 		
 		# Execute NeuroKit library with:
@@ -31,24 +32,24 @@ def but_ppg_main(method: str, show=False):
 			quality_info = quality.evaluate(None, detected_peaks, fs,
 								   nk_signals['PPG_Quality'], ref_quality,
 								   method='orphanidou', database='BUT')
+			quality_info['Ref Q.'] = ref_quality
 			name = 'NK'
 		
 		else:
 			raise ValueError(G.INVALID_METHOD)
 
 		# Calculate the heart rate
-		calculated_hr, diff_hr = calcul.heart_rate(detected_peaks, ref_hr, fs)
-		if ref_quality == 1:
-			G.DIFF_HR_LIST_QUALITY.append(diff_hr)
+		hr_info = calcul.heart_rate(detected_peaks, ref_hr, fs)
+		if quality_info['Ref Q.'] == 1:
+			G.DIFF_HR_LIST_QUALITY.append(hr_info['Diff HR'])
 
-		export.to_csv_local(id, i, ref_hr, calculated_hr, diff_hr,
+		export.to_csv_local(id, i, hr_info, quality_info,
 					  None, None, None, None, None,
-					  ref_quality, quality_info['Average Quality'], quality_info['Difference Quality'],
 					  type=name, database='BUT')
 
 		############################################### For testing purposes ##############################################
 		if method == 'my' and show:
-			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, ref_hr, calculated_hr, id, i)
+			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, hr_info, id, i)
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
 
@@ -56,7 +57,7 @@ def but_ppg_main(method: str, show=False):
 			print('|  i\t|   ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
-		print(f'|  {i}\t|   {id}\t|    {round(ref_hr, 3)} bpm\t|   {round(calculated_hr, 3)} bpm\t|   {round(diff_hr, 3)} bpm\t|    {ref_quality}\t\t|     {round(quality_info["Average Quality"], 3)}\t|')
+		print(f'|  {i}\t|   {id}\t|    {round(hr_info["Ref HR"], 3)} bpm\t|   {round(hr_info["Calculated HR"], 3)} bpm\t|   {round(hr_info["Diff HR"], 3)} bpm\t|    {quality_info["Ref Q."]}\t\t|     {round(quality_info["AVG Q."], 3)}\t|')
 		print('---------------------------------------------------------------------------------------------------------')
 		###################################################################################################################
 

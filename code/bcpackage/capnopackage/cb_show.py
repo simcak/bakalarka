@@ -12,7 +12,7 @@ def neurokit_show(signals, info, i):
 		nk.ppg_plot(signals, info)
 		plt.show()
 
-def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, ref_hr, our_hr, capnobase_file, i):
+def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, hr_info, capnobase_file, i):
 	"""
 	Here we choose which function for showing we want to use.
 	"""

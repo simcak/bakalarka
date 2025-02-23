@@ -5,9 +5,8 @@ import numpy as np
 import csv
 
 ###################################################################################
-def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
+def to_csv_local(id, i, hr_info, quality_info,
 				 tp, fp, fn, sensitivity, precision,
-				 ref_quality, quality, diff_quality,
 				 type='My', database='CB'):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
@@ -21,30 +20,34 @@ def to_csv_local(id, i, ref_hr, our_hr, diff_hr,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Our Quality': quality,
-				'Diff HR[bpm]': diff_hr,
+				'Our Quality': quality_info['AVG Q.'],
+				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality,
-				'Diff HR[bpm]': diff_hr,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['AVG Q.'],
+				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 	elif (database == 'BUT'):
 		if (type == 'My'):
 			rows.append({
 				'ID': id,
-				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, f'Our Q. (>={G.MORPHO_THRESHOLD})': quality, 'Diff Quality': diff_quality
+				'Diff HR[bpm]': hr_info['Diff HR'],
+				'Ref. Quality': quality_info['Ref Q.'],
+				f'Our AVG Q. (>={G.MORPHO_THRESHOLD})': quality_info['AVG Q.'],
+				'Diff Quality': quality_info['Diff Q.']
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
-				'Diff HR[bpm]': diff_hr,
-				'Ref. Quality': ref_quality, f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality, 'Diff Quality': diff_quality
+				'Diff HR[bpm]': hr_info['Diff HR'],
+				'Ref. Quality': quality_info['Ref Q.'],
+				f'Orph. AVG Q. (>={G.CORRELATION_THRESHOLD})': quality_info['AVG Q.'],
+				'Diff Quality': quality_info['Diff Q.']
 			})
 	else:
 		raise ValueError("Invalid type provided for local export.")
