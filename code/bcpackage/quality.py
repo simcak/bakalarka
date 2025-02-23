@@ -171,12 +171,12 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 												rise_time_min=G.RISE_TIME_MIN,
 												rise_time_max=G.RISE_TIME_MAX)
 		# print('Quality array:', quality_arr)
-		avg_quality = np.mean(quality_arr)
-		G.QUALITY_LIST.append(avg_quality)
+		quality_out = np.mean(quality_arr)
+		G.QUALITY_LIST.append(quality_out)
 
 	elif method == 'orphanidou':
-		avg_quality = np.mean(quality_arr)
-		G.QUALITY_LIST.append(avg_quality)
+		quality_out = np.mean(quality_arr)
+		G.QUALITY_LIST.append(quality_out)
 
 	else:
 		raise ValueError(G.INVALID_QUALITY_METHOD)
@@ -184,9 +184,9 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 	# Round the quality to 0 or 1
 	if database == 'BUT':
 		if method == 'my_morpho':
-			rounded_q = 1 if avg_quality >= G.MORPHO_THRESHOLD else 0
+			rounded_q = 1 if quality_out >= G.MORPHO_THRESHOLD else 0
 		elif method == 'orphanidou':
-			rounded_q = 1 if avg_quality >= G.CORRELATION_THRESHOLD else 0
+			rounded_q = 1 if quality_out >= G.CORRELATION_THRESHOLD else 0
 		# How much is aplied quality alg different from the reference quality?
 		diff_quality = abs(rounded_q - ref_quality)
 		G.DIFF_QUALITY_SUM += diff_quality
@@ -196,7 +196,7 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 
 	quality_info = {
 		'Q. array': quality_arr,
-		'AVG Q.': avg_quality,
+		'Calc Q.': quality_out,
 		'Diff Q.': diff_quality,
 		'Ref Q.': None
 	}

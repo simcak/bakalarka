@@ -20,7 +20,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Our Quality': quality_info['AVG Q.'],
+				'Our Quality': quality_info['Calc Q.'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
@@ -28,7 +28,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 			rows.append({
 				'ID': id,
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['AVG Q.'],
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['Calc Q.'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
@@ -38,7 +38,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'Ref. Quality': quality_info['Ref Q.'],
-				f'Our AVG Q. (>={G.MORPHO_THRESHOLD})': quality_info['AVG Q.'],
+				f'Our Q. (>={G.MORPHO_THRESHOLD})': quality_info['Calc Q.'],
 				'Diff Quality': quality_info['Diff Q.']
 			})
 		elif (type == 'NK'):
@@ -46,7 +46,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'Ref. Quality': quality_info['Ref Q.'],
-				f'Orph. AVG Q. (>={G.CORRELATION_THRESHOLD})': quality_info['AVG Q.'],
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD})': quality_info['Calc Q.'],
 				'Diff Quality': quality_info['Diff Q.']
 			})
 	else:

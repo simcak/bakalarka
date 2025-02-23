@@ -57,7 +57,7 @@ def but_ppg_main(method: str, show=False):
 			print('|  i\t|   ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
-		print(f'|  {i}\t|   {id}\t|    {round(hr_info["Ref HR"], 3)} bpm\t|   {round(hr_info["Calculated HR"], 3)} bpm\t|   {round(hr_info["Diff HR"], 3)} bpm\t|    {quality_info["Ref Q."]}\t\t|     {round(quality_info["AVG Q."], 3)}\t|')
+		print(f'|  {i}\t|   {id}\t|    {round(hr_info["Ref HR"], 3)} bpm\t|   {round(hr_info["Calculated HR"], 3)} bpm\t|   {round(hr_info["Diff HR"], 3)} bpm\t|    {quality_info["Ref Q."]}\t\t|     {round(quality_info["Calc Q."], 3)}\t|')
 		print('---------------------------------------------------------------------------------------------------------')
 		###################################################################################################################
 

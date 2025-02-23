@@ -76,7 +76,7 @@ def capnobase_main(method: str, show=False):
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
 		elif method == 'neurokit':
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
-		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(hr_info["Diff HR"], 3)} bpm\t|     {round(quality_info["AVG Q."], 3)}\t|')
+		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(hr_info["Diff HR"], 3)} bpm\t|     {round(quality_info["Calc Q."], 3)}\t|')
 		print('---------------------------------------------------------------------------------')
 		############################################################################################
 
