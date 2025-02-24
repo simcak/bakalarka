@@ -3,6 +3,9 @@
 SAMPLE_NUMBER_CB = 0
 SAMPLE_NUMBER_BUT = 45
 
+# Tolerance for peak detection (in samples) - for confusion matrix
+TOLERANCE = 30
+
 # Quality threshold
 CORRELATION_THRESHOLD = 0.7
 MORPHO_THRESHOLD = 0.6

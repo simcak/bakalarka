@@ -17,7 +17,7 @@ def performance_metrics(tp, fp, fn):
 
 	return sensitivity, precision
 
-def confusion_matrix(our_peaks, ref_peaks, tolerance, add_to_list=True):
+def confusion_matrix(our_peaks, ref_peaks, tolerance):
 	"""
 	Compute confusion matrix for the detected peaks.
 
@@ -25,7 +25,6 @@ def confusion_matrix(our_peaks, ref_peaks, tolerance, add_to_list=True):
 		our_peaks: list of detected peaks
 		ref_peaks: list of reference peaks
 		tolerance: num of samples that a peak can be off by && still be considered a match
-		add_to_list: whether to add the results to the global lists
 
 	Returns:
 		TP, FP, FN
@@ -56,10 +55,9 @@ def confusion_matrix(our_peaks, ref_peaks, tolerance, add_to_list=True):
 			if len(matches) >= 2:
 				fp += len(matches) - 1
 
-	if add_to_list:
-		G.TP_LIST.append(tp)
-		G.FP_LIST.append(fp)
-		G.FN_LIST.append(fn)
+	G.TP_LIST.append(tp)
+	G.FP_LIST.append(fp)
+	G.FN_LIST.append(fn)
 
 	return tp, fp, fn
 
@@ -88,15 +86,14 @@ def heart_rate(peaks, ref_hr, fs, init=False, math_method='median'):
 		math_method: 'mean' or (default) 'median'
 
 	Returns:
-		hr_out: our heart rate
-		diff_hr: difference between our and reference heart rate
+		hr_info: dictionary containing calculated HR, reference HR, and difference HR
 	"""
 	our_ibi = interbeat_intervals(peaks, fs)
 
 	if math_method == 'mean':
 		hr_out = 60 / np.mean(our_ibi)
 	elif math_method == 'median':
-		hr_out = 60 / np.median(our_ibi)
+		hr_out = 60 / np.median(our_ibi)	# median is more robust
 	else:
 		raise ValueError('Invalid math_method provided. Use either "mean" or "median".')
 

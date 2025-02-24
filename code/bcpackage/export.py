@@ -5,9 +5,9 @@ import numpy as np
 import csv
 
 ###################################################################################
-def to_csv_local(id, i, hr_info, quality_info,
+def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 				 tp, fp, fn, sensitivity, precision,
-				 type='My', database='CB'):
+				 type='My', database='CB', first=False):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -18,7 +18,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 	if (database == 'CB'):
 		if (type == 'My'):
 			rows.append({
-				'ID': id,
+				'ID': f'{id}_{chunk_idx}min',
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
 				'Our Quality': quality_info['Calc Q.'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
@@ -26,7 +26,7 @@ def to_csv_local(id, i, hr_info, quality_info,
 			})
 		elif (type == 'NK'):
 			rows.append({
-				'ID': id,
+				'ID': f'{id}_{chunk_idx}min',
 				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
 				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['Calc Q.'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
@@ -56,11 +56,11 @@ def to_csv_local(id, i, hr_info, quality_info,
 	data_row = pd.DataFrame(rows)
 
 	# Append DataFrame to CSV
-	if (i == 0 and type == 'My' and database == 'CB'):
+	if (i == 0 and chunk_idx == 0 and first == True):
 		with open('./results.csv', 'w', newline='') as csvfile:
 			csv.writer(csvfile).writerow([f'{database} {type}'])
 			data_row.to_csv(csvfile, header=True, index=False)
-	elif (i == 0):
+	elif (i == 0 and first == False):
 		with open('./results.csv', 'a', newline='') as csvfile:
 			csv.writer(csvfile).writerow([])
 			csv.writer(csvfile).writerow([f'{database} {type}'])

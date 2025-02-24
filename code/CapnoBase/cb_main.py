@@ -4,7 +4,19 @@ from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
 import neurokit2 as nk
 import numpy as np
 
-def capnobase_main(method: str, show=False):
+def _compute_global_results(name: str):
+	"""
+	Function to calculate the global results.
+	"""
+	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
+	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
+
+	export.to_csv_global(f'CB {name} global',
+						 total_sensitivity, total_precision,
+						 type=name, database='CB')
+
+
+def capnobase_main(method: str, show=False, first=False):
 	"""
 	Function to run the CapnoBase analysis.
 	0. Initialize the lists for the global results with the empty lists.
@@ -59,12 +71,12 @@ def capnobase_main(method: str, show=False):
 			raise ValueError(G.INVALID_METHOD)
 
 		hr_info = calcul.heart_rate(detected_peaks, hr_info['Ref HR'], fs)
-		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=30)
+		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
 		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 
-		export.to_csv_local(id, i, hr_info, quality_info,
+		export.to_csv_local(id, 8, i, hr_info, quality_info,
 					  tp, fp, fn, local_sensitivity, local_precision,
-					  type=name, database='CB')
+					  type=name, database='CB', first=first)
 
 		################################### For testing purposes ##################################
 		if method == 'my' and show:
@@ -77,14 +89,8 @@ def capnobase_main(method: str, show=False):
 		elif method == 'neurokit':
 			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
 		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(hr_info["Diff HR"], 3)} bpm\t|     {round(quality_info["Calc Q."], 3)}\t|')
-		print('---------------------------------------------------------------------------------')
+		print('--------------------------------------------------------------------------------')
 		############################################################################################
 
-	# Global results - outside the loop
-	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
-	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
-
-	export.to_csv_global((f'CB {name} global'),
-					  total_sensitivity, total_precision,
-					  type=name, database='CB')
-	print('#################################################################################')
+	_compute_global_results(name)
+	print('################################################################################')

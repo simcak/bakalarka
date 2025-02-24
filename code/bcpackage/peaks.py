@@ -18,11 +18,9 @@ def local_max_detector(signal, min_height, min_distance):
 
 	for i in range(1, len(signal) - 1):
 		# Check if the current point is a peak
-		if signal[i - 1] < signal[i] > signal[i + 1] and signal[i] > min_height:
-			# Ensure the peak is at least `min_distance` away from the last detected peak
-			if i - last_peak_index >= min_distance:
-				peaks.append(i)
-				last_peak_index = i
+		if signal[i - 1] < signal[i] > signal[i + 1] and signal[i] > min_height and i - last_peak_index >= min_distance:
+			peaks.append(i)
+			last_peak_index = i
 
 	return np.array(peaks)
 
@@ -33,7 +31,7 @@ def detect_peaks(ppg_signal, fs):
 	# 'time_size' seconds window with 50% overlap
 	time_size = 5
 	window_size = int(time_size * fs)
-	overlap_size = window_size // 2
+	overlap_size = window_size // 2 # floor division
 	peaks_detected = []
 	# Thresholds
 	min_peak_distance = int(fs * 60 / 200)	# num of samples for 200 BPM

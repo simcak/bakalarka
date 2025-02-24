@@ -3,7 +3,7 @@ from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
 import neurokit2 as nk
 import numpy as np
 
-def but_ppg_main(method: str, show=False):
+def but_ppg_main(method: str, show=False, first=False):
 	"""
 	Function to run the BUT PPG analysis.
 	"""
@@ -43,9 +43,9 @@ def but_ppg_main(method: str, show=False):
 		if quality_info['Ref Q.'] == 1:
 			G.DIFF_HR_LIST_QUALITY.append(hr_info['Diff HR'])
 
-		export.to_csv_local(id, i, hr_info, quality_info,
+		export.to_csv_local(id, 8, i, hr_info, quality_info,
 					  None, None, None, None, None,
-					  type=name, database='BUT')
+					  type=name, database='BUT', first=first)
 
 		############################################### For testing purposes ##############################################
 		if method == 'my' and show:
@@ -58,11 +58,11 @@ def but_ppg_main(method: str, show=False):
 		elif method == 'neurokit':
 			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
 		print(f'|  {i}\t|   {id}\t|    {round(hr_info["Ref HR"], 3)} bpm\t|   {round(hr_info["Calculated HR"], 3)} bpm\t|   {round(hr_info["Diff HR"], 3)} bpm\t|    {quality_info["Ref Q."]}\t\t|     {round(quality_info["Calc Q."], 3)}\t|')
-		print('---------------------------------------------------------------------------------------------------------')
+		print('--------------------------------------------------------------------------------------------------------')
 		###################################################################################################################
 
 	# Global results - outsinde the loop
 	export.to_csv_global(f'BUT {name} global',
 					  None, None,
 					  type=name, database='BUT')
-	print('#########################################################################################################')
+	print('########################################################################################################')

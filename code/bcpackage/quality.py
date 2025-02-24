@@ -160,11 +160,10 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 		method: 'my_morpho' or 'orphanidou'
 
 	Returns:
-		avg_quality: The average quality of the signal.
-		diff_quality: The difference between the average quality and the reference quality (if provided).
+		quality_info: A dictionary containing quality information.
 	"""
 	if method == 'my_morpho':
-		quality_arr, morphod_ata = ppg_quality_morphological(filtered_ppg_signal, peaks,
+		quality_arr, morpho_data = ppg_quality_morphological(filtered_ppg_signal, peaks,
 												fs=sampling_rate,
 												amplitude_min=G.AMPLITUDE_MIN,
 												amplitude_max=G.AMPLITUDE_MAX,
@@ -192,11 +191,13 @@ def evaluate(filtered_ppg_signal, peaks, sampling_rate,
 		G.DIFF_QUALITY_SUM += diff_quality
 
 	elif database == 'CB':
+		rounded_q = None
 		diff_quality = None
 
 	quality_info = {
 		'Q. array': quality_arr,
 		'Calc Q.': quality_out,
+		'Rounded Q.': rounded_q,
 		'Diff Q.': diff_quality,
 		'Ref Q.': None
 	}
