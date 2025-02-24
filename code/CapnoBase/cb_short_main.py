@@ -50,6 +50,7 @@ def capnobase_main_short(method: str, show=False, first=False):
 
 		for chunk_idx in range(8):
 			############################################## Chunking ##############################################
+			# todo: ovelapping chunks
 			chunk_len = fs * 60
 			start_idx = chunk_idx * chunk_len
 			end_idx = (chunk_idx + 1) * chunk_len
