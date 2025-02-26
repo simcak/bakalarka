@@ -1,4 +1,4 @@
-from bcpackage import globals as G
+from bcpackage import globals as G, show
 from bcpackage.capnopackage import cb_data
 from bcpackage.butpackage import but_data
 
@@ -11,9 +11,12 @@ def main():
 	G.BUT_DATA_LEN = but_data.info()
 
 	capnobase_main_short('my', first=True)
+	capnobase_main('my')
 	capnobase_main('neurokit')
 	but_ppg_main('my')
 	but_ppg_main('neurokit')
+
+	show.full_results()
 
 if __name__ == "__main__":
 	main()

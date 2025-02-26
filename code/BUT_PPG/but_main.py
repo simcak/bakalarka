@@ -62,7 +62,7 @@ def but_ppg_main(method: str, show=False, first=False):
 		###################################################################################################################
 
 	# Global results - outsinde the loop
-	export.to_csv_global(f'BUT {name} global',
+	export.to_csv_global('all',
 					  None, None,
 					  type=name, database='BUT')
 	print('########################################################################################################')
