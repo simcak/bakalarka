@@ -17,7 +17,7 @@ def _compute_global_results(name: str):
 						 type=name, database='CB')
 
 
-def capnobase_main_short(method: str, show=False, first=False):
+def capnobase_main_short(method: str, show=True, first=False):
 	"""
 	Function to run the CapnoBase analysis.
 	0. Initialize the lists for the global results with the empty lists.
@@ -50,10 +50,13 @@ def capnobase_main_short(method: str, show=False, first=False):
 
 		for chunk_idx in range(8):
 			############################################## Chunking ##############################################
-			# todo: ovelapping chunks
 			chunk_len = fs * 60
+			right_buffer = 0.1 * chunk_len
+
+			right_border_samples = int(chunk_len + right_buffer)
+
 			start_idx = chunk_idx * chunk_len
-			end_idx = (chunk_idx + 1) * chunk_len
+			end_idx = min(len(ppg_signal), chunk_idx * chunk_len + right_border_samples)
 
 			ppg_chunk = ppg_signal[start_idx:end_idx]
 
