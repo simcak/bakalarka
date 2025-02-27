@@ -17,7 +17,7 @@ def _compute_global_results(name: str):
 						 type=name, database='CB')
 
 
-def capnobase_main_short(method: str, show=True, first=False):
+def capnobase_main_short(method: str, show=False, first=False):
 	"""
 	Function to run the CapnoBase analysis.
 	0. Initialize the lists for the global results with the empty lists.

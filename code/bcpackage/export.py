@@ -19,16 +19,16 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 		if (type == 'My'):
 			rows.append({
 				'ID': f'{id}_{chunk_idx}min',
-				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				'Our Quality': quality_info['Calc Q.'],
+				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
+				'Our Quality': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': f'{id}_{chunk_idx}min',
-				'Sensitivity': sensitivity, 'Precision (PPV)': precision,
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['Calc Q.'],
+				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
@@ -37,16 +37,16 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
-				'Ref. Quality': quality_info['Ref Q.'],
-				f'Our Q. (>={G.MORPHO_THRESHOLD})': quality_info['Calc Q.'],
+				'Ref. Quality': quality_info['Ref Q.'] * 100,
+				f'Our Q. (>={G.MORPHO_THRESHOLD})': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
-				'Ref. Quality': quality_info['Ref Q.'],
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD})': quality_info['Calc Q.'],
+				'Ref. Quality': quality_info['Ref Q.'] * 100,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD})': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
 	else:
@@ -91,14 +91,14 @@ def to_csv_global(id,
 	if (database == 'CB'):
 		if (type == 'My'):
 			row.append({
-				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': np.average(G.QUALITY_LIST), 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
+				'AVG Quality': np.average(G.QUALITY_LIST) * 100, 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
-				'Total Se': sensitivity, 'Total PPV': precision,
-				'AVG Quality': np.average(G.QUALITY_LIST), 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
+				'AVG Quality': np.average(G.QUALITY_LIST) * 100, 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		else:
