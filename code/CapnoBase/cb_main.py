@@ -16,7 +16,80 @@ def _compute_global_results(name: str):
 						 type=name, database='CB')
 
 
-def capnobase_main(method: str, show=False, first=False):
+def _chunking_signal(file_info, chunk_idx):
+	"""
+	Chunk the signal.
+	"""
+	chunk_len = file_info['fs'] * 60
+	right_buffer = chunk_len # * 0.1 # for 10% overlap
+
+	right_border_samples = int(chunk_len + right_buffer)
+
+	start_idx = chunk_idx * chunk_len
+	end_idx = min(len(file_info['Raw Signal']), chunk_idx * chunk_len + right_border_samples)
+
+	ppg_chunk = file_info['Raw Signal'][start_idx:end_idx]
+
+	chunk_ref_peaks = np.array(file_info['Ref Peaks'])
+	mask = (chunk_ref_peaks >= start_idx) & (chunk_ref_peaks < end_idx)
+	chunk_ref_peaks = chunk_ref_peaks[mask] - start_idx
+
+	return ppg_chunk, chunk_ref_peaks
+
+
+def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
+	"""
+	Process the signal according to the method.
+	"""
+	# init
+	nk_signals, nk_info, filtered_ppg_signal = None, None, None
+
+	if chunk:
+		ppg_signal, ref_peaks = _chunking_signal(file_info, chunk_idx)
+	else:
+		ppg_signal = file_info['Raw Signal']
+		ref_peaks = file_info['Ref Peaks']
+
+	# Execute my method
+	if method == 'my':
+		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, file_info['fs'])
+		detected_peaks = peaks.detect_peaks(filtered_ppg_signal, file_info['fs'])
+		quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks,
+								file_info['fs'], None, None,
+								method='my_morpho', database='CB')
+		name = 'My'
+
+	# Execute the NeuroKit package with:
+	#	Elgendi method for peak detection and
+	#	Orphanidou method for quality estimation == templatematch
+	elif method == 'neurokit':
+		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=file_info['fs'], method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
+		detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
+		quality_info = quality.evaluate(None, detected_peaks,
+								file_info['fs'], nk_signals['PPG_Quality'], None,
+								method='orphanidou', database='CB')
+		name = 'NK'
+
+	else:
+		raise ValueError(G.INVALID_METHOD)
+
+	local_hr_info = calcul.heart_rate(detected_peaks, file_info['Ref HR'], file_info['fs'])
+	tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
+	local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
+
+	################################### For testing purposes ##################################
+	if method == 'my' and show:
+		cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
+	elif method == 'neurokit' and show:
+		cb_show.neurokit_show(nk_signals, nk_info, i)
+	############################################################################################
+
+	return (name,
+		 quality_info, local_hr_info,
+		 tp, fp, fn, local_sensitivity, local_precision)
+
+
+def capnobase_main(method: str, chunk=False, show=False, first=False):
 	"""
 	Function to run the CapnoBase analysis.
 	0. Initialize the lists for the global results with the empty lists.
@@ -45,52 +118,27 @@ def capnobase_main(method: str, show=False, first=False):
 	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
 
 	for i in range(G.CB_FILES_LEN):
-		id, fs, ppg_signal, ref_peaks, hr_info = cb_data.extract(G.CB_FILES[i])
+		file_info = cb_data.extract(G.CB_FILES[i])
 
-		# Execute my method
-		if method == 'my':
-			filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
-			detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-			quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
-								   None, None,
-								   method='my_morpho', database='CB')
-			name = 'My'
+		if chunk:
+			for chunk_idx in range(8):
+				(
+					name, quality_info, local_hr_info,
+					tp, fp, fn, local_sensitivity, local_precision
+				) = _process_signal(file_info, method, i, show,
+						chunk=chunk, chunk_idx=chunk_idx)
 
-		# Execute the NeuroKit package with:
-		#	Elgendi method for peak detection and
-		#	Orphanidou method for quality estimation == templatematch
-		elif method == 'neurokit':
-			nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
-			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-			quality_info = quality.evaluate(None, detected_peaks, fs,
-								   nk_signals['PPG_Quality'], None,
-								   method='orphanidou', database='CB')
-			name = 'NK'
-
+				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, quality_info,
+							  tp, fp, fn, local_sensitivity, local_precision,
+							  type=name, database='CB', first=first)
 		else:
-			raise ValueError(G.INVALID_METHOD)
+			(
+				name, quality_info, local_hr_info,
+				tp, fp, fn, local_sensitivity, local_precision
+			) = _process_signal(file_info, method, i, show)
 
-		hr_info = calcul.heart_rate(detected_peaks, hr_info['Ref HR'], fs)
-		tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
-		local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
-
-		export.to_csv_local(id, 8, i, hr_info, quality_info,
-					  tp, fp, fn, local_sensitivity, local_precision,
-					  type=name, database='CB', first=first)
-
-		################################### For testing purposes ##################################
-		if method == 'my' and show:
-			cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, hr_info, G.CB_FILES[i], i)
-		elif method == 'neurokit' and show:
-			cb_show.neurokit_show(nk_signals, nk_info, i)
-
-		if method == 'my':
-			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t|  Our Quality\t|')
-		elif method == 'neurokit':
-			print('|  i\t|  ID\t|    Sen\t|    Precision\t|    Diff HR\t| Orph. Quality\t|')
-		print(f'|  {i}\t|  {id}\t|    {round(local_sensitivity, 3)}\t|    {round(local_precision, 3)}\t|   {round(hr_info["Diff HR"], 3)} bpm\t|     {round(quality_info["Calc Q."], 3)}\t|')
-		print('--------------------------------------------------------------------------------')
-		############################################################################################
+			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, quality_info,
+						  tp, fp, fn, local_sensitivity, local_precision,
+						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)
-	print('################################################################################')
