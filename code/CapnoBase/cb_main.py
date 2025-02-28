@@ -7,18 +7,24 @@ import numpy as np
 def _compute_global_results(name: str):
 	"""
 	Function to calculate the global results.
+
+	Args:
+		name (str): The name of the method.
 	"""
 	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
 	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
-	export.to_csv_global('all',
-						 total_sensitivity, total_precision,
+	export.to_csv_global('all', total_sensitivity, total_precision,
 						 type=name, database='CB')
 
 
 def _chunking_signal(file_info, chunk_idx):
 	"""
 	Chunk the signal.
+
+	Args:
+		file_info (dict): The file info.
+		chunk_idx (int): The index of the chunk.
 	"""
 	chunk_len = file_info['fs'] * 60
 	right_buffer = chunk_len # * 0.1 # for 10% overlap
@@ -40,42 +46,55 @@ def _chunking_signal(file_info, chunk_idx):
 def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	"""
 	Process the signal according to the method.
+
+	Args:
+		file_info (dict): The info comming from the file.
+		method (str): The method to execute.
+		i (int): The index of the file.
+		show (bool): Flag to show signals - for testing purposes.
+		chunk (bool): Flag to chunk the signal.
+		chunk_idx (int): The index of the chunk.
 	"""
-	# init
+	# init & assign
 	nk_signals, nk_info, filtered_ppg_signal = None, None, None
+	fs = file_info['fs']
 
 	if chunk:
 		ppg_signal, ref_peaks = _chunking_signal(file_info, chunk_idx)
 	else:
-		ppg_signal = file_info['Raw Signal']
-		ref_peaks = file_info['Ref Peaks']
+		ppg_signal, ref_peaks = file_info['Raw Signal'], file_info['Ref Peaks']
 
 	# Execute my method
 	if method == 'my':
-		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, file_info['fs'])
-		detected_peaks = peaks.detect_peaks(filtered_ppg_signal, file_info['fs'])
-		quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks,
-								file_info['fs'], None, None,
-								method='my_morpho', database='CB')
+		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
+		detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
+		quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
+								  None, None,
+								  method='my_morpho', database='CB')
 		name = 'My'
 
 	# Execute the NeuroKit package with:
 	#	Elgendi method for peak detection and
 	#	Orphanidou method for quality estimation == templatematch
 	elif method == 'neurokit':
-		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=file_info['fs'], method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
+		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 		detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-		quality_info = quality.evaluate(None, detected_peaks,
-								file_info['fs'], nk_signals['PPG_Quality'], None,
-								method='orphanidou', database='CB')
+		quality_info = quality.evaluate(None, detected_peaks, fs,
+								  nk_signals['PPG_Quality'], None,
+								  method='orphanidou', database='CB')
 		name = 'NK'
 
 	else:
 		raise ValueError(G.INVALID_METHOD)
 
-	local_hr_info = calcul.heart_rate(detected_peaks, file_info['Ref HR'], file_info['fs'])
+	local_hr_info = calcul.heart_rate(detected_peaks, file_info['Ref HR'], fs)
 	tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
 	local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
+
+	statistical_info = {
+		'TP': tp, 'FP': fp, 'FN': fn,
+		'Se': local_sensitivity, 'PPV': local_precision
+	}
 
 	################################### For testing purposes ##################################
 	if method == 'my' and show:
@@ -84,33 +103,18 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 		cb_show.neurokit_show(nk_signals, nk_info, i)
 	############################################################################################
 
-	return (name,
-		 quality_info, local_hr_info,
-		 tp, fp, fn, local_sensitivity, local_precision)
+	return name, quality_info, local_hr_info, statistical_info
 
 
 def capnobase_main(method: str, chunk=False, show=False, first=False):
 	"""
 	Function to run the CapnoBase analysis.
-	0. Initialize the lists for the global results with the empty lists.
-	1. Load the list of files.
-	FOR LOOP:
-		2. Iterate over the files.
-		3. Extract the CapnoBase data.
-		4. Preprocess the PPG signal = filtering = standardization + noise removal.
-			- My method
-			- NeuroKit method
-		5. Detect peaks in the preprocessed signal.
-		6. Calculate the heart rate from the detected peaks (using IBI) + calculate the diff with the ref HR.
-		7. Confusion matrix: TP, FP, FN.
-		8. Performance metrics: Sensitivity, Precision.
-		9. Export the data of each signal to a CSV file "./results.csv".
-
-	10. Calculate the global results: Total Sensitivity and Precision + sum of FP, FN, TP + average HR diff.
 
 	Args:
 		method (str): The method to execute. Use either "my" or "NeuroKit".
+		chunk (bool): Flag to chunk the signal.
 		show (bool): Flag to show debugging or testing info.
+		first (bool): Flag to indicate the first run for the CSV file.
 
 	Returns:
 		None (exports the results to a CSV file)
@@ -122,23 +126,15 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 
 		if chunk:
 			for chunk_idx in range(8):
-				(
-					name, quality_info, local_hr_info,
-					tp, fp, fn, local_sensitivity, local_precision
-				) = _process_signal(file_info, method, i, show,
-						chunk=chunk, chunk_idx=chunk_idx)
+				(name, quality_info, local_hr_info, statistical_info) = _process_signal(file_info, method, i, show,
+																			chunk=chunk, chunk_idx=chunk_idx)
 
-				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, quality_info,
-							  tp, fp, fn, local_sensitivity, local_precision,
+				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, quality_info, statistical_info,
 							  type=name, database='CB', first=first)
 		else:
-			(
-				name, quality_info, local_hr_info,
-				tp, fp, fn, local_sensitivity, local_precision
-			) = _process_signal(file_info, method, i, show)
+			(name, quality_info, local_hr_info, statistical_info) = _process_signal(file_info, method, i, show)
 
-			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, quality_info,
-						  tp, fp, fn, local_sensitivity, local_precision,
+			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, quality_info, statistical_info,
 						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)

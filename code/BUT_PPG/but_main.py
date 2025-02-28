@@ -43,8 +43,7 @@ def but_ppg_main(method: str, show=False, first=False):
 		if quality_info['Ref Q.'] == 1:
 			G.DIFF_HR_LIST_QUALITY.append(hr_info['Diff HR'])
 
-		export.to_csv_local(id, 8, i, hr_info, quality_info,
-					  None, None, None, None, None,
+		export.to_csv_local(id, 8, i, hr_info, quality_info, None,
 					  type=name, database='BUT', first=first)
 
 		############################################### For testing purposes ##############################################
@@ -52,17 +51,9 @@ def but_ppg_main(method: str, show=False, first=False):
 			but_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, detected_peaks, hr_info, id, i)
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
-
-		if method == 'my':
-			print('|  i\t|   ID\t\t|    Ref HR\t|    Our HR\t|    Diff HR\t|    Ref. Q\t|   Our Quality\t|')
-		elif method == 'neurokit':
-			print('|  i\t|   ID\t\t|    Ref HR\t|    NK HR\t|    Diff HR\t|    Ref. Q\t| Orph. Quality\t|')
-		print(f'|  {i}\t|   {id}\t|    {round(hr_info["Ref HR"], 3)} bpm\t|   {round(hr_info["Calculated HR"], 3)} bpm\t|   {round(hr_info["Diff HR"], 3)} bpm\t|    {quality_info["Ref Q."]}\t\t|     {round(quality_info["Calc Q."], 3)}\t|')
-		print('--------------------------------------------------------------------------------------------------------')
 		###################################################################################################################
 
 	# Global results - outsinde the loop
 	export.to_csv_global('all',
 					  None, None,
 					  type=name, database='BUT')
-	print('########################################################################################################')

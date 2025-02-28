@@ -5,8 +5,7 @@ import numpy as np
 import csv
 
 ###################################################################################
-def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
-				 tp, fp, fn, sensitivity, precision,
+def to_csv_local(id, chunk_idx, i, hr_info, quality_info, statistical_info,
 				 type='My', database='CB', first=False):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
@@ -16,6 +15,10 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 	# Prepare data for CSV
 	rows = []
 	if (database == 'CB'):
+		# assign
+		tp, fp, fn = statistical_info['TP'], statistical_info['FP'], statistical_info['FN']
+		sensitivity, precision = statistical_info['Se'], statistical_info['PPV']
+
 		if (type == 'My'):
 			rows.append({
 				'ID': f'{id}_{chunk_idx}min',
@@ -37,7 +40,7 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
-				'Ref. Quality': quality_info['Ref Q.'] * 100,
+				'Ref. Quality': quality_info['Ref Q.'],
 				f'Our Q. (>={G.MORPHO_THRESHOLD})': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
@@ -45,7 +48,7 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info,
 			rows.append({
 				'ID': id,
 				'Diff HR[bpm]': hr_info['Diff HR'],
-				'Ref. Quality': quality_info['Ref Q.'] * 100,
+				'Ref. Quality': quality_info['Ref Q.'],
 				f'Orph. Q. (>={G.CORRELATION_THRESHOLD})': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
