@@ -32,7 +32,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 		# Show only the number before the '_' in the ID on the x-axis
 		ax1.set_xticks(range(len(table1['df']['ID'])))
 		ax1.set_xticklabels([label.split('_')[0] for label in table1['df']['ID']])
-	ax1.margins(x=0.01, y=0.1)
+	ax1.margins(x=0, y=0.1)
 	ax1.legend()
 	ax1.tick_params(axis='x', rotation=90)
 
@@ -63,7 +63,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 		# Show only the number before the '_' in the ID on the x-axis
 		ax2.set_xticks(range(len(table1['df']['ID'])))
 		ax2.set_xticklabels([label.split('_')[0] for label in table1['df']['ID']])
-	ax2.margins(x=0.01, y=0.1)
+	ax2.margins(x=0, y=0.1)
 	ax2.legend()
 	ax2.tick_params(axis='x', rotation=90)
 
@@ -71,7 +71,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 	plt.show()
 
 
-def full_results():
+def full_results(print_head=True):
 	"""
 	Reads a file containing multiple CSV-style tables with repeated headers,
 	splitting them into separate DataFrames.
@@ -142,9 +142,10 @@ def full_results():
 		tables.append(table_data)
 
 	# Inspect each sub-table = we can easily check and fix any problems
-	for table in tables:
-		print(f" Title: {table['title']}")
-		print(table['df'].head())
-		print("\n============================")
+	if print_head:
+		for table in tables:
+			print(f" Title: {table['title']}")
+			print(table['df'].head())
+			print("\n============================")
 
 	return tables

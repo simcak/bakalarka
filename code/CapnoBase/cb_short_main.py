@@ -3,7 +3,6 @@ from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
 
 import neurokit2 as nk
 import numpy as np
-import math
 
 def _compute_global_results(name: str):
 	"""
@@ -20,25 +19,11 @@ def _compute_global_results(name: str):
 def capnobase_main_short(method: str, show=False, first=False):
 	"""
 	Function to run the CapnoBase analysis.
-	0. Initialize the lists for the global results with the empty lists.
-	1. Load the list of files.
-	FOR LOOP:
-		2. Iterate over the files.
-		3. Extract the CapnoBase data.
-		4. Preprocess the PPG signal = filtering = standardization + noise removal.
-			- My method
-			- NeuroKit method
-		5. Detect peaks in the preprocessed signal.
-		6. Calculate the heart rate from the detected peaks (using IBI) + calculate the diff with the ref HR.
-		7. Confusion matrix: TP, FP, FN.
-		8. Performance metrics: Sensitivity, Precision.
-		9. Export the data of each signal to a CSV file "./results.csv".
-
-	10. Calculate the global results: Total Sensitivity and Precision + sum of FP, FN, TP + average HR diff.
 
 	Args:
 		method (str): The method to execute. Use either "my" or "NeuroKit".
 		show (bool): Flag to show debugging or testing info.
+		first (bool): Flag to tell the exporter if 'a' or 'w' the output.csv
 
 	Returns:
 		None (exports the results to a CSV file)
