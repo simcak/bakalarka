@@ -10,13 +10,15 @@ def main():
 	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
 	G.BUT_DATA_LEN = but_data.info()
 
-	capnobase_main_short('my', first=True)
-	capnobase_main('my')
-	capnobase_main('neurokit')
-	but_ppg_main('my')
-	but_ppg_main('neurokit')
+	# capnobase_main_short('my', first=True)
+	# capnobase_main_short('neurokit')
+	# capnobase_main('my')
+	# capnobase_main('neurokit')
+	# but_ppg_main('my')
+	# but_ppg_main('neurokit')
 
-	show.full_results()
+	tables = show.full_results()
+	show.plotting_SePPV(tables[0], tables[2], chunked=True)
 
 if __name__ == "__main__":
 	main()

@@ -51,7 +51,7 @@ def capnobase_main_short(method: str, show=False, first=False):
 		for chunk_idx in range(8):
 			############################################## Chunking ##############################################
 			chunk_len = fs * 60
-			right_buffer = 0.1 * chunk_len
+			right_buffer = chunk_len # * 0.1 # for 10% overlap
 
 			right_border_samples = int(chunk_len + right_buffer)
 

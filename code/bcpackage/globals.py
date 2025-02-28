@@ -1,6 +1,6 @@
 #################### GLOBAL CONSTANTS ####################
 # what sample i do we want to show?
-SAMPLE_NUMBER_CB = 0
+SAMPLE_NUMBER_CB = 3
 SAMPLE_NUMBER_BUT = 45
 
 # Tolerance for peak detection (in samples) - for confusion matrix
