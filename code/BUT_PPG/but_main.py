@@ -11,8 +11,13 @@ def but_ppg_main(method: str, show=False, first=False):
 	G.DIFF_HR_LIST, G.DIFF_HR_LIST_QUALITY, G.DIFF_QUALITY_SUM = [], [], 0
 	start_time = time.terminal_time()
 
+	for j in range(3888):
+		but_data.extract_big(j, export=True)
+
+	exit()
+
 	for i in range(G.BUT_DATA_LEN):
-		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
+		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i)
 
 		# Execute my method
 		if method == 'my':
