@@ -1,6 +1,8 @@
 # Ignore all data files
 *.mat
 *.csv
+
+# Ignore all data from specific folders
 code/BUT_PPG/databases/big/**
 
 # except for the following
