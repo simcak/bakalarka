@@ -40,7 +40,10 @@ def _chunking_signal(file_info, chunk_idx):
 	mask = (chunk_ref_peaks >= start_idx) & (chunk_ref_peaks < end_idx)
 	chunk_ref_peaks = chunk_ref_peaks[mask] - start_idx
 
-	return ppg_chunk, chunk_ref_peaks
+	hr_info = calcul.heart_rate(chunk_ref_peaks, None, file_info['fs'], init=True)
+	chunk_ref_hr = hr_info['Ref HR']
+
+	return ppg_chunk, chunk_ref_peaks, chunk_ref_hr
 
 
 def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
@@ -60,9 +63,9 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	fs = file_info['fs']
 
 	if chunk:
-		ppg_signal, ref_peaks = _chunking_signal(file_info, chunk_idx)
+		ppg_signal, ref_peaks, ref_hr = _chunking_signal(file_info, chunk_idx)
 	else:
-		ppg_signal, ref_peaks = file_info['Raw Signal'], file_info['Ref Peaks']
+		ppg_signal, ref_peaks, ref_hr = file_info['Raw Signal'], file_info['Ref Peaks'], file_info['Ref HR']
 
 	# Execute my method
 	if method == 'my':
@@ -76,8 +79,9 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	# Execute the NeuroKit package with:
 	#	Elgendi method for peak detection and
 	#	Orphanidou method for quality estimation == templatematch
+	#	nk_signal returns: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 	elif method == 'neurokit':
-		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")	# Return: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
+		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")
 		detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
 		quality_info = quality.evaluate(None, detected_peaks, fs,
 								  nk_signals['PPG_Quality'], None,
@@ -87,7 +91,7 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	else:
 		raise ValueError(G.INVALID_METHOD)
 
-	local_hr_info = calcul.heart_rate(detected_peaks, file_info['Ref HR'], fs)
+	local_hr_info = calcul.heart_rate(detected_peaks, ref_hr, fs)
 	tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
 	local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
 

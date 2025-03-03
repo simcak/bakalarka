@@ -1,3 +1,4 @@
+from . import globals as G
 import pandas as pd
 from io import StringIO
 
@@ -11,14 +12,14 @@ def plotting_SePPV(table1, table2, chunked=False):
 
 	################ Plot Sensitivity ################
 	ax1.set_title(f"Sensitivity (Se)")
-	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'My', color='#02CCFF')
-	ax1.plot(table2['df']['ID'], table2['df']['Sensitivity'], label=f'Elgendi', color='#E23F44')
+	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'My', color=G.CESA_BLUE)
+	ax1.plot(table2['df']['ID'], table2['df']['Sensitivity'], label=f'Elgendi', color=G.BUT_RED)
 	
 	# Calculate and plot the average sensitivity
 	avg_sensitivity_table1 = table1['df']['Sensitivity'].mean()
 	avg_sensitivity_table2 = table2['df']['Sensitivity'].mean()
-	ax1.axhline(avg_sensitivity_table1, color='#02CCFF', linestyle='--', label=f'Avg My: {avg_sensitivity_table1:.2f}')
-	ax1.axhline(avg_sensitivity_table2, color='#E23F44', linestyle='--', label=f'Avg Elgendi: {avg_sensitivity_table2:.2f}')
+	ax1.axhline(avg_sensitivity_table1, color=G.CESA_BLUE, linestyle='--', label=f'Avg My: {avg_sensitivity_table1:.2f}')
+	ax1.axhline(avg_sensitivity_table2, color=G.BUT_RED, linestyle='--', label=f'Avg Elgendi: {avg_sensitivity_table2:.2f}')
 	
 	ax1.set_ylabel('Se [%]')
 	if chunked:
@@ -38,14 +39,14 @@ def plotting_SePPV(table1, table2, chunked=False):
 
 	################ Plot Positive Predictive Value (PPV) ################
 	ax2.set_title(f"Positive Predictive Value (PPV)")
-	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'My', color='#02CCFF')
-	ax2.plot(table2['df']['ID'], table2['df']['Precision (PPV)'], label=f'Elgendi', color='#E23F44')
+	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'My', color=G.CESA_BLUE)
+	ax2.plot(table2['df']['ID'], table2['df']['Precision (PPV)'], label=f'Elgendi', color=G.BUT_RED)
 
 	# Calculate and plot the average precision
 	avg_precision_table1 = table1['df']['Precision (PPV)'].mean()
 	avg_precision_table2 = table2['df']['Precision (PPV)'].mean()
-	ax2.axhline(avg_precision_table1, color='#02CCFF', linestyle='--', label=f'Avg My: {avg_precision_table1:.2f}')
-	ax2.axhline(avg_precision_table2, color='#E23F44', linestyle='--', label=f'Avg Elgendi: {avg_precision_table2:.2f}')
+	ax2.axhline(avg_precision_table1, color=G.CESA_BLUE, linestyle='--', label=f'Avg My: {avg_precision_table1:.2f}')
+	ax2.axhline(avg_precision_table2, color=G.BUT_RED, linestyle='--', label=f'Avg Elgendi: {avg_precision_table2:.2f}')
 
 	if chunked:
 		ax2.set_xlabel('ID (shown just for the 1st minute)')

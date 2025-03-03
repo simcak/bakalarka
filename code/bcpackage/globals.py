@@ -1,6 +1,6 @@
 #################### GLOBAL CONSTANTS ####################
 # what sample i do we want to show?
-SAMPLE_NUMBER_CB = 3
+SAMPLE_NUMBER_CB = 0
 SAMPLE_NUMBER_BUT = 45
 
 # Tolerance for peak detection (in samples) - for confusion matrix
@@ -19,6 +19,10 @@ RISE_TIME_MAX = 0.4
 ##################### GLOBAL ERRORS ######################
 INVALID_METHOD = 'Invalid method provided. Use either "my" or "neurokit".'
 INVALID_QUALITY_METHOD = 'Invalid method provided. Use either "my" or "orphanidou".'
+
+##################### GLOBAL COLORS ######################
+BUT_RED = '#E23F44'
+CESA_BLUE = '#02CCFF'
 
 #################### GLOBAL VARIABLES ####################
 # File info
