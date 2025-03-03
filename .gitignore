@@ -1,6 +1,8 @@
 # Ignore all data files
 *.mat
 *.csv
+code/BUT_PPG/databases/big/**
+
 # except for the following
 !results.csv
 
