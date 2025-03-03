@@ -1,0 +1,32 @@
+import time
+import sys
+import threading
+
+def terminal_time():
+	"""
+	Print the time elapsed since the last call of this function.
+	"""
+	start_time = time.time()
+
+	# Loading icon
+	def print_loading_icon():
+		icons = ['|', '/', '-', '\\']
+		while True:
+			for icon in icons:
+				sys.stdout.write(f'\rProcessing {icon}')
+				sys.stdout.flush()
+				time.sleep(0.1)
+
+	loading_thread = threading.Thread(target=print_loading_icon)
+	loading_thread.daemon = True
+	loading_thread.start()
+
+	return start_time
+
+def stop_terminal_time(start_time):
+	"""
+	Stop the loading icon and print the elapsed time.
+	"""
+	end_time = time.time()
+	elapsed_time = end_time - start_time
+	print(f"\nTime spent in this function: {elapsed_time:.2f} seconds")

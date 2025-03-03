@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time
 
 import neurokit2 as nk
 import numpy as np
@@ -124,21 +124,23 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 		None (exports the results to a CSV file)
 	"""
 	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
+	start_time = time.terminal_time()
 
 	for i in range(G.CB_FILES_LEN):
 		file_info = cb_data.extract(G.CB_FILES[i])
 
 		if chunk:
 			for chunk_idx in range(8):
-				(name, quality_info, local_hr_info, statistical_info) = _process_signal(file_info, method, i, show,
+				name, quality_info, local_hr_info, statistical_info = _process_signal(file_info, method, i, show,
 																			chunk=chunk, chunk_idx=chunk_idx)
 
 				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, quality_info, statistical_info,
 							  type=name, database='CB', first=first)
 		else:
-			(name, quality_info, local_hr_info, statistical_info) = _process_signal(file_info, method, i, show)
+			name, quality_info, local_hr_info, statistical_info = _process_signal(file_info, method, i, show)
 
 			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, quality_info, statistical_info,
 						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)
+	time.stop_terminal_time(start_time)

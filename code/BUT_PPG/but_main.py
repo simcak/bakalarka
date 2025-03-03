@@ -1,5 +1,5 @@
 from bcpackage.butpackage import but_data, but_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time
 import neurokit2 as nk
 import numpy as np
 
@@ -9,6 +9,7 @@ def but_ppg_main(method: str, show=False, first=False):
 	"""
 	# Init before the loop
 	G.DIFF_HR_LIST, G.DIFF_HR_LIST_QUALITY, G.DIFF_QUALITY_SUM = [], [], 0
+	start_time = time.terminal_time()
 
 	for i in range(G.BUT_DATA_LEN):
 		id, fs, ref_quality, ref_hr, ppg_signal = but_data.extract(i, export=False)
@@ -57,3 +58,4 @@ def but_ppg_main(method: str, show=False, first=False):
 	export.to_csv_global('all',
 					  None, None,
 					  type=name, database='BUT')
+	time.stop_terminal_time(start_time)
