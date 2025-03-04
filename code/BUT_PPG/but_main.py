@@ -12,7 +12,7 @@ def but_ppg_main(method: str, show=False, first=False):
 	start_time = time.terminal_time()
 
 	for j in range(3888):
-		but_signal_info = but_data.extract_big(j, export=True)
+		but_signal_info = but_data.extract_big(j, export=False)
 		# filtered_ppg_signal = preprocess.filter_signal(but_signal_info['PPG_Signal'], but_signal_info['PPG_fs'])
 		# but_signal_info['PPG_Peaks'] = peaks.detect_peaks(filtered_ppg_signal, but_signal_info['PPG_fs'])
 

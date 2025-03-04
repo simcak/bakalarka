@@ -5,10 +5,14 @@ import scipy.io
 import wfdb
 
 def info():
-	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
-	ppg_data_len = len(mat_data['BUT_PPG']['PPG'][0, 0])
+	"""
+	Get the information about the BUT PPG database.
+	"""
+	with open('./BUT_PPG/databases/big/subject-info.csv', 'r', encoding='utf-8-sig') as csvfile:
+		reader = csv.DictReader(csvfile)
+		data = list(reader)
 
-	return ppg_data_len
+		return len(data)
 
 
 def extract(i, export=False):
@@ -97,10 +101,11 @@ def extract_big(i, export=False):
 	# Extract specially ID for accurate file approaching
 	id = row_subject_info['ID']
 
-	# Read the PPG signal (data + header)
+	# Read the PPG signal (data + header) - fs for export - we dont want to export signals to CSV (too big)
 	record = wfdb.rdrecord('./BUT_PPG/databases/big/' + id + '/' + id + '_PPG')
-	ppg_signal = record.p_signal
 	ppg_fs = record.fs
+	signal_data = record.p_signal
+	signal_shape = signal_data.shape
 
 	# Load the annotation - QRS - file. Extract the qrs and under-sample it from 1000 to 30 fs
 	qrs_annot = wfdb.rdann('./BUT_PPG/databases/big/' + id + '/' + id, 'qrs')
@@ -119,11 +124,23 @@ def extract_big(i, export=False):
 		'Motion':		row_subject_info['Motion'],
 		'Quality':		row_quality_hr['Quality'],
 		'HR':			row_quality_hr['HR'],
-		'QRS':			resampled_qrs_positions,
-		# 'PPG_Signal':	ppg_signal.flatten()
+		'QRS':			resampled_qrs_positions
 	}
 
 	if export:
 		_export_data_big(but_signal_info, i)
+
+	# For the first, original, 48 signals, the signal is in the shape (1, 300)
+	if signal_shape == (1, 300):
+		but_signal_info['PPG_Red']		= None
+		but_signal_info['PPG_Green']	= None
+		but_signal_info['PPG_Blue']		= None
+		but_signal_info['PPG_Signal']	= list(signal_data.flatten())
+	# For the rest of the signals, the signal is in the shape (300, 3) = has RGB channels and we use only the Red one
+	elif signal_shape == (300, 3):
+		but_signal_info['PPG_Red']		= list(signal_data[:, 0])
+		but_signal_info['PPG_Green']	= list(signal_data[:, 1])
+		but_signal_info['PPG_Blue']		= list(signal_data[:, 2])
+		but_signal_info['PPG_Signal']	= list(but_signal_info['PPG_Red'])
 
 	return but_signal_info
