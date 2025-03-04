@@ -12,8 +12,17 @@ def but_ppg_main(method: str, show=False, first=False):
 	start_time = time.terminal_time()
 
 	for j in range(3888):
-		but_data.extract_big(j, export=True)
+		but_signal_info = but_data.extract_big(j, export=True)
+		# filtered_ppg_signal = preprocess.filter_signal(but_signal_info['PPG_Signal'], but_signal_info['PPG_fs'])
+		# but_signal_info['PPG_Peaks'] = peaks.detect_peaks(filtered_ppg_signal, but_signal_info['PPG_fs'])
 
+		# import matplotlib.pyplot as plt
+		# plt.plot(but_signal_info['PPG_Signal'])
+		# plt.scatter(but_signal_info['PPG_Peaks'], but_signal_info['PPG_Signal'][but_signal_info['PPG_Peaks']], color='red')
+		# plt.scatter(but_signal_info['QRS'], but_signal_info['PPG_Signal'][but_signal_info['QRS']], color='green')
+		# plt.show()
+
+	time.stop_terminal_time(start_time)
 	exit()
 
 	for i in range(G.BUT_DATA_LEN):
@@ -60,7 +69,5 @@ def but_ppg_main(method: str, show=False, first=False):
 		###################################################################################################################
 
 	# Global results - outsinde the loop
-	export.to_csv_global('all',
-					  None, None,
-					  type=name, database='BUT')
+	export.to_csv_global('all', None, None, type=name, database='BUT')
 	time.stop_terminal_time(start_time)

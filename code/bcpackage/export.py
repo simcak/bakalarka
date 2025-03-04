@@ -80,9 +80,7 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info, statistical_info,
 			data_row.to_csv(csvfile, header=False, index=False)
 
 ###################################################################################
-def to_csv_global(id,
-				  sensitivity, precision,
-				  type='My', database='CB'):
+def to_csv_global(id, sensitivity, precision, type='My', database='CB'):
 	"""
 	Framework for exporting chosen data and results of the entire database into
 	a CSV file.

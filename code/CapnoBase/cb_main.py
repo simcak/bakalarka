@@ -14,8 +14,7 @@ def _compute_global_results(name: str):
 	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
 	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
-	export.to_csv_global('all', total_sensitivity, total_precision,
-						 type=name, database='CB')
+	export.to_csv_global('all', total_sensitivity, total_precision, type=name, database='CB')
 
 
 def _chunking_signal(file_info, chunk_idx):

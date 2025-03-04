@@ -2,6 +2,7 @@ import scipy.io
 import pandas as pd
 import csv
 import scipy.io
+import wfdb
 
 def info():
 	mat_data = scipy.io.loadmat('./BUT_PPG/databases/BUT_PPG.mat')
@@ -59,23 +60,22 @@ def extract_big(i, export=False):
 	"""
 	Extact the data from the new=big BUT PPG database.
 	"""
-	def export_data_big(id, gender, age, height, weight, ear_finger, motion, i):
+	def _reader_general(file):
+		"""
+		Read the csv file.
+		"""
+		with open(f'./BUT_PPG/databases/big/{file}', 'r', encoding='utf-8-sig') as csvfile:
+			reader = csv.DictReader(csvfile)
+			data = list(reader)
+		return data
+
+	def _export_data_big(but_signal_info, i):
 		"""
 		Export the data into a CSV file.
 		"""
-		# Prepare data for CSV
+		# Prepare data for CSV = Create a DataFrame
 		row = []
-		row.append({
-			'ID':			id,
-			'Gender':		gender,
-			'Age':			age,
-			'Height':		height,
-			'Weight':		weight,
-			'Ear/Finger':	ear_finger,
-			'Motion':		motion
-		})
-
-		# Create a DataFrame
+		row.append(but_signal_info)
 		data_row = pd.DataFrame(row)
 
 		# Save DataFrame to CSV
@@ -88,22 +88,42 @@ def extract_big(i, export=False):
 
 
 	# Load the CSV file
-	with open('./BUT_PPG/databases/big/subject-info.csv', 'r') as csvfile:
-		reader = csv.DictReader(csvfile)
-		rows = list(reader)
+	subject_info = _reader_general('subject-info.csv')
+	quality_hr = _reader_general('quality-hr-ann.csv')
 
 	# Extract individual components
-	row				= rows[i]
-	id				= row['ID']
-	gender			= row['Gender']
-	age				= row['Age [years]']
-	height			= row['Height [cm]']
-	weight			= row['Weight [kg]']
-	ear_finger		= row['Ear/finger']
-	motion			= row['Motion']
+	row_subject_info = subject_info[i]
+	row_quality_hr	 = quality_hr[i]
+	# Extract specially ID for accurate file approaching
+	id = row_subject_info['ID']
+
+	# Read the PPG signal (data + header)
+	record = wfdb.rdrecord('./BUT_PPG/databases/big/' + id + '/' + id + '_PPG')
+	ppg_signal = record.p_signal
+	ppg_fs = record.fs
+
+	# Load the annotation - QRS - file. Extract the qrs and under-sample it from 1000 to 30 fs
+	qrs_annot = wfdb.rdann('./BUT_PPG/databases/big/' + id + '/' + id, 'qrs')
+	qrs_positions = qrs_annot.sample
+	resampled_qrs_positions = [int(i * ppg_fs / 1000) for i in qrs_positions]
+
+	but_signal_info = {
+		'ID':			id,
+		'ID-record':	f'{id[:3]}-{id[3:]}',
+		'PPG_fs':		ppg_fs,
+		'Gender':		row_subject_info['Gender'],
+		'Age':			row_subject_info['Age [years]'],
+		'Height':		row_subject_info['Height [cm]'],
+		'Weight':		row_subject_info['Weight [kg]'],
+		'Finger/Ear':	row_subject_info['Ear/finger'],
+		'Motion':		row_subject_info['Motion'],
+		'Quality':		row_quality_hr['Quality'],
+		'HR':			row_quality_hr['HR'],
+		'QRS':			resampled_qrs_positions,
+		# 'PPG_Signal':	ppg_signal.flatten()
+	}
 
 	if export:
-		export_data_big(id, gender, age, height, weight, ear_finger, motion, i)
-		pass
+		_export_data_big(but_signal_info, i)
 
-	return id, gender, age, height, weight, ear_finger, motion
+	return but_signal_info
