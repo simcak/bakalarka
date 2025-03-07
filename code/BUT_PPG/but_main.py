@@ -9,12 +9,12 @@ def but_ppg_main(method: str, show=False, first=False):
 	"""
 	# Init before the loop
 	G.DIFF_HR_LIST, G.DIFF_HR_LIST_QUALITY, G.DIFF_QUALITY_SUM = [], [], 0
-	start_time, stop_event = time_count.terminal_time()
+	# start_time, stop_event = time_count.terminal_time()
 
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
-		if but_error.police(but_signal_info):
-			print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
+		print(f'File {i} extracted. ID: {but_signal_info["ID"]}')
+		if but_error.police(but_signal_info, i):
 			continue
 
 		# Execute my method
@@ -53,11 +53,10 @@ def but_ppg_main(method: str, show=False, first=False):
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
 		# print(f'File {i}: \nsignal:{but_signal_info["PPG_Signal"]}\nRef HR: {but_signal_info["Ref_HR"]}\nDetected peaks: {detected_peaks}\nHR info: {hr_info}')
-		 
-		print(f'File {i} done. ID: {but_signal_info["ID"]}')
+		print(f'File {i} done. ID: {but_signal_info["ID"]}, Ref Quality: {quality_info["Ref Q."]}')
 		# print(f'HR info: {hr_info}')
 		###################################################################################################################
 
 	# Global results - outsinde the loop
 	export.to_csv_global(None, None, type=name, database='BUT')
-	time_count.stop_terminal_time(start_time, stop_event)
+	# time_count.stop_terminal_time(start_time, stop_event)
