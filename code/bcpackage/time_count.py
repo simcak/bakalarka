@@ -11,22 +11,24 @@ def terminal_time():
 	# Loading icon
 	def print_loading_icon():
 		icons = ['|', '/', '-', '\\']
-		while True:
+		while not stop_event.is_set():
 			for icon in icons:
 				sys.stdout.write(f'\rProcessing {icon}')
 				sys.stdout.flush()
 				time.sleep(0.1)
 
+	stop_event = threading.Event()
 	loading_thread = threading.Thread(target=print_loading_icon)
 	loading_thread.daemon = True
 	loading_thread.start()
 
-	return start_time
+	return start_time, stop_event
 
-def stop_terminal_time(start_time):
+def stop_terminal_time(start_time, stop_event):
 	"""
 	Stop the loading icon and print the elapsed time.
 	"""
 	end_time = time.time()
 	elapsed_time = end_time - start_time
 	print(f"\nTime spent in this function: {elapsed_time:.2f} seconds")
+	stop_event.set()

@@ -54,11 +54,11 @@ def extract(i, export=False):
 	row_subject_info = subject_info[i]
 	row_quality_hr	 = quality_hr[i]
 	# Extract specially ID for accurate file approaching
-	id_ = row_subject_info['ID']
+	id_ = str(row_subject_info['ID'])
 
 	# Read the PPG signal (data + header) - fs for export - we dont want to export signals to CSV (too big)
 	record = wfdb.rdrecord('./BUT_PPG/databases/big/' + id_ + '/' + id_ + '_PPG')
-	ppg_fs = record.fs
+	ppg_fs = int(record.fs)
 	signal_data = record.p_signal
 	signal_shape = signal_data.shape
 
@@ -97,5 +97,8 @@ def extract(i, export=False):
 		but_signal_info['PPG_Green']	= list(signal_data[:, 1])
 		but_signal_info['PPG_Blue']		= list(signal_data[:, 2])
 		but_signal_info['PPG_Signal']	= list(but_signal_info['PPG_Red'])
+	
+	# print(f'File {i} extracted.')
+	# print(but_signal_info)
 
 	return but_signal_info

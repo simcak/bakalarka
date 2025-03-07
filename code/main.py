@@ -13,12 +13,12 @@ def main():
 	# capnobase_main('neurokit', chunk=True)
 	# capnobase_main('my')
 	# capnobase_main('neurokit')
-	but_ppg_main('my')
-	but_ppg_main('neurokit')
+	but_ppg_main('my', show=True)
+	but_ppg_main('neurokit', show=True)
 
-	# tables = show.full_results()
-	# show.plotting_SePPV(tables[0], tables[2], chunked=True)
-	# show.plotting_SePPV(tables[4], tables[6])
+	tables = show.full_results()
+	show.plotting_SePPV(tables[0], tables[2], chunked=True)
+	show.plotting_SePPV(tables[4], tables[6])
 
 if __name__ == "__main__":
 	main()

@@ -1,5 +1,5 @@
-from bcpackage.butpackage import but_data, but_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time
+from bcpackage.butpackage import but_data, but_error, but_show
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time_count
 import neurokit2 as nk
 import numpy as np
 
@@ -9,10 +9,13 @@ def but_ppg_main(method: str, show=False, first=False):
 	"""
 	# Init before the loop
 	G.DIFF_HR_LIST, G.DIFF_HR_LIST_QUALITY, G.DIFF_QUALITY_SUM = [], [], 0
-	start_time = time.terminal_time()
+	start_time, stop_event = time_count.terminal_time()
 
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
+		if but_error.police(but_signal_info):
+			print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
+			continue
 
 		# Execute my method
 		if method == 'my':
@@ -35,9 +38,6 @@ def but_ppg_main(method: str, show=False, first=False):
 								   method='orphanidou', database='BUT')
 			quality_info['Ref Q.'] = but_signal_info['Ref_Quality']
 			name = 'NK'
-		
-		else:
-			raise ValueError(G.INVALID_METHOD)
 
 		# Calculate the heart rate
 		hr_info = calcul.heart_rate(detected_peaks, but_signal_info['Ref_HR'], but_signal_info['PPG_fs'])
@@ -52,8 +52,12 @@ def but_ppg_main(method: str, show=False, first=False):
 			but_show.test_hub(preprocess.standardize_signal(but_signal_info['PPG_Signal']), filtered_ppg_signal, detected_peaks, hr_info, but_signal_info['ID'], i)
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
+		# print(f'File {i}: \nsignal:{but_signal_info["PPG_Signal"]}\nRef HR: {but_signal_info["Ref_HR"]}\nDetected peaks: {detected_peaks}\nHR info: {hr_info}')
+		 
+		print(f'File {i} done. ID: {but_signal_info["ID"]}')
+		# print(f'HR info: {hr_info}')
 		###################################################################################################################
 
 	# Global results - outsinde the loop
-	export.to_csv_global('all', None, None, type=name, database='BUT')
-	time.stop_terminal_time(start_time)
+	export.to_csv_global(None, None, type=name, database='BUT')
+	time_count.stop_terminal_time(start_time, stop_event)

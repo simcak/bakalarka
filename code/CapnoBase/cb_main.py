@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time_count
 
 import neurokit2 as nk
 import numpy as np
@@ -14,7 +14,7 @@ def _compute_global_results(name: str):
 	total_sensitivity = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FN_LIST))
 	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
-	export.to_csv_global('all', total_sensitivity, total_precision, type=name, database='CB')
+	export.to_csv_global(total_sensitivity, total_precision, type=name, database='CB')
 
 
 def _chunking_signal(file_info, chunk_idx):
@@ -123,7 +123,7 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 		None (exports the results to a CSV file)
 	"""
 	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
-	start_time = time.terminal_time()
+	start_time, stop_event = time_count.terminal_time()
 
 	for i in range(G.CB_FILES_LEN):
 		file_info = cb_data.extract(G.CB_FILES[i])
@@ -142,4 +142,4 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)
-	time.stop_terminal_time(start_time)
+	time_count.stop_terminal_time(start_time, stop_event)
