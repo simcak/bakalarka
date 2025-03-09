@@ -13,6 +13,7 @@ def but_ppg_main(method: str, show=False, first=False):
 
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
+		# print(f'File {i}: ID: {but_signal_info["ID"]}')
 		if but_error.police(but_signal_info, i):
 			continue
 

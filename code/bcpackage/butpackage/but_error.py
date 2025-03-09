@@ -15,6 +15,7 @@ def police(but_signal_info: dict, i: int, print_err=False) -> bool:
 						2349, 2455, 2465, 2515, 2527, 2557, 2613, 2729, 2891, 2945, 3106, 3161, 3210, 3213, 3322,
 						3431, 3444, 3510, 3514, 3525, 3527, 3584, 3631, 3633, 3693, 3731, 3739, 3742, 3797, 3851]
 	corrupted_signals_2 = [337, 908, 3635]
+	corrupted_signals_3 = [1118, 1637]
 
 	if but_signal_info['PPG_Signal'] is None:
 		if print_err:
@@ -40,6 +41,15 @@ def police(but_signal_info: dict, i: int, print_err=False) -> bool:
 			print('\nFile "/Users/peta/.pyenv/versions/3.10.0/lib/python3.10/site-packages/neurokit2/misc/listify.py", line 39, in _multiply_list')
 			print('\t q, r = divmod(length, len(lst))')
 			print(f'ZeroDivisionError:\033[91m integer division or modulo by zero \nFile {but_signal_info["ID"]} skipped.\033[0m')
+		return True
+	
+	if (i in corrupted_signals_3):
+		if print_err:
+			print('\n/Users/peta/.pyenv/versions/3.10.0/lib/python3.10/site-packages/numpy/core/fromnumeric.py:3432: RuntimeWarning: Mean of empty slice.')
+			print('return _methods._mean(a, axis=axis, dtype=dtype')
+			print('/Users/peta/.pyenv/versions/3.10.0/lib/python3.10/site-packages/numpy/core/_methods.py:190: RuntimeWarning: invalid value encountered in double_scalars')
+			print('ret = ret.dtype.type(ret / rcount)')
+			print(f'RuntimeWarning:\033[91m invalid value encountered in double_scalars \nFile {but_signal_info["ID"]} skipped.\033[0m')
 		return True
 
 	return False
