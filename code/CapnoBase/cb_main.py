@@ -142,4 +142,4 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)
-	time_count.stop_terminal_time(start_time, stop_event)
+	time_count.stop_terminal_time(start_time, stop_event, func_name=f'{method}: capnobase_main')

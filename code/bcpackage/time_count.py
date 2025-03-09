@@ -24,11 +24,11 @@ def terminal_time():
 
 	return start_time, stop_event
 
-def stop_terminal_time(start_time, stop_event):
+def stop_terminal_time(start_time, stop_event, func_name='function'):
 	"""
 	Stop the loading icon and print the elapsed time.
 	"""
 	end_time = time.time()
 	elapsed_time = end_time - start_time
-	print(f"\nTime spent in this function: {elapsed_time:.2f} seconds")
+	print(f"\nTime spent in {func_name}: {elapsed_time:.2f} seconds")
 	stop_event.set()

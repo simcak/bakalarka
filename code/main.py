@@ -9,11 +9,11 @@ def main():
 	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
 	G.BUT_DATA_LEN = but_data.info()
 
-	# capnobase_main('my', chunk=True, first=True)
-	# capnobase_main('neurokit', chunk=True)
-	# capnobase_main('my')
-	# capnobase_main('neurokit')
-	# but_ppg_main('my', show=True)
+	capnobase_main('my', chunk=True, first=True)
+	capnobase_main('neurokit', chunk=True)
+	capnobase_main('my')
+	capnobase_main('neurokit')
+	but_ppg_main('my', show=True)
 	but_ppg_main('neurokit', show=True, first=True)
 
 	tables = show.full_results()
