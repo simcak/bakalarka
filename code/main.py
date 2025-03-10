@@ -6,21 +6,25 @@ from CapnoBase.cb_main import capnobase_main
 from BUT_PPG.but_main import but_ppg_main
 
 def main():
-	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
-	G.BUT_DATA_LEN = but_data.info()
-
 	####### CapnoBase Database #######
-	capnobase_main('my', chunk=True, first=True)
+	# G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
+	# capnobase_main('my', chunk=True, first=True)
 	# capnobase_main('neurokit', chunk=True)
 	# capnobase_main('my')
 	# capnobase_main('neurokit')
+
 	####### BUT Database #######
-	but_ppg_main('my')
+	# G.BUT_DATA_LEN = but_data.info()
+	# but_ppg_main('my')
 	# but_ppg_main('neurokit')
 
+	####### Show the results #######
 	tables = show.full_results()
-	show.plotting_SePPV(tables[0], tables[2], chunked=True)
-	show.plotting_SePPV(tables[4], tables[6])
+	table_dict = {table['title']: table for table in tables}
+	if 'CB My chunked' in table_dict and 'CB NK chunked' in table_dict:
+		show.plotting_SePPV(table_dict['CB My chunked'], table_dict['CB NK chunked'], chunked=True)
+	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
+		show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
 
 if __name__ == "__main__":
 	main()

@@ -143,10 +143,10 @@ def full_results(print_head=True):
 		tables.append(table_data)
 
 	# Inspect each sub-table = we can easily check and fix any problems
-	if print_head:
-		for table in tables:
-			print(f" Title: {table['title']}")
-			print(table['df'].head())
-			print("\n============================")
+	# if print_head:
+	# 	for table in tables:
+	# 		print(f" Title: {table['title']}")
+	# 		print(table['df'].head())
+	# 		print("\n============================")
 
 	return tables
