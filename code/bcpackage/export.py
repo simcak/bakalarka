@@ -5,7 +5,7 @@ import numpy as np
 import csv
 
 ###################################################################################
-def to_csv_local(id, chunk_idx, i, hr_info, quality_info, statistical_info,
+def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 				 type='My', database='CB', first=False):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
@@ -21,7 +21,7 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info, statistical_info,
 
 		if (type == 'My'):
 			rows.append({
-				'ID': f'{id}_{chunk_idx}min',
+				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
 				'Our Quality': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
@@ -29,27 +29,27 @@ def to_csv_local(id, chunk_idx, i, hr_info, quality_info, statistical_info,
 			})
 		elif (type == 'NK'):
 			rows.append({
-				'ID': f'{id}_{chunk_idx}min',
+				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD} = 1)': quality_info['Calc Q.'] * 100,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 	elif (database == 'BUT'):
 		if (type == 'My'):
 			rows.append({
-				'ID': id,
+				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'Ref. Quality': quality_info['Ref Q.'],
-				f'Our Q. (>={G.MORPHO_THRESHOLD})': quality_info['Calc Q.'] * 100,
+				f'Our Q. (>={G.MORPHO_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
 		elif (type == 'NK'):
 			rows.append({
-				'ID': id,
+				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'Ref. Quality': quality_info['Ref Q.'],
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD})': quality_info['Calc Q.'] * 100,
+				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
 			})
 	else:

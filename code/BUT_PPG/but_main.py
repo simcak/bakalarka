@@ -13,7 +13,6 @@ def but_ppg_main(method: str, show=False, first=False):
 
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
-		# print(f'File {i}: ID: {but_signal_info["ID"]}')
 		if but_error.police(but_signal_info, i):
 			continue
 
@@ -43,9 +42,8 @@ def but_ppg_main(method: str, show=False, first=False):
 		hr_info = calcul.heart_rate(detected_peaks, but_signal_info['Ref_HR'], but_signal_info['PPG_fs'])
 		if quality_info['Ref Q.'] == 1:
 			G.DIFF_HR_LIST_QUALITY.append(hr_info['Diff HR'])
-
-		# export.to_csv_local(but_signal_info['ID'], 8, i, hr_info, quality_info, None,
-		# 			  type=name, database='BUT', first=first)
+			export.to_csv_local(but_signal_info['ID'], 8, i, hr_info, quality_info, None,
+						  type=name, database='BUT', first=first)
 
 		############################################### For testing purposes ##############################################
 		if method == 'my' and show:

@@ -97,8 +97,5 @@ def extract(i, export=False):
 		but_signal_info['PPG_Green']	= list(signal_data[:, 1])
 		but_signal_info['PPG_Blue']		= list(signal_data[:, 2])
 		but_signal_info['PPG_Signal']	= list(but_signal_info['PPG_Red'])
-	
-	# print(f'File {i} extracted.')
-	# print(but_signal_info)
 
 	return but_signal_info
