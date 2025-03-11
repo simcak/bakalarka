@@ -26,7 +26,7 @@ def main():
 	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
 		show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
 	if 'BUT My all' in table_dict and 'BUT NK all' in table_dict:
-		show.plotting_diffs(table_dict['BUT My all'], table_dict['BUT NK all'])
+		show.plotting_hr_diffs(table_dict['BUT My all'], table_dict['BUT NK all'])
 
 if __name__ == "__main__":
 	main()

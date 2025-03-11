@@ -7,21 +7,21 @@ def plotting_SePPV(table1, table2, chunked=False):
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 7))
 
 	# name of the figure
-	fig.suptitle(f"Comparison of My and Elgendi methods for CapnoBase dataset", fontsize=16)
+	fig.suptitle(f"Porovnání Mé a Elgendiho metody pro CapnoBase dababázi", fontsize=16)
 
 	################ Plot Sensitivity ################
-	ax1.set_title(f"Sensitivity (Se)")
-	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'My', color=G.CESA_BLUE)
-	ax1.plot(table2['df']['ID'], table2['df']['Sensitivity'], label=f'Elgendi', color=G.BUT_RED)
+	ax1.set_title(f"Citlivost (Se)")
+	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'Má metoda', color=G.CESA_BLUE)
+	ax1.plot(table2['df']['ID'], table2['df']['Sensitivity'], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average sensitivity
 	avg_sensitivity_table1 = table1['df']['Sensitivity'].mean()
 	avg_sensitivity_table2 = table2['df']['Sensitivity'].mean()
-	ax1.axhline(avg_sensitivity_table1, color=G.CESA_BLUE, linestyle='--', label=f'Avg My: {avg_sensitivity_table1:.2f}')
-	ax1.axhline(avg_sensitivity_table2, color=G.BUT_RED, linestyle='--', label=f'Avg Elgendi: {avg_sensitivity_table2:.2f}')
+	ax1.axhline(avg_sensitivity_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_sensitivity_table1:.2f}')
+	ax1.axhline(avg_sensitivity_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_sensitivity_table2:.2f}')
 	##################################################
 
 	######################################## SET AXIS ########################################
-	ax1.set_ylabel('Se [%]')
+	ax1.set_ylabel('Citlivost [%]')
 	if chunked:
 		# Show only every 8th label on the x-axis
 		ax1.set_xticks(range(0, len(table1['df']['ID']), 8))
@@ -36,22 +36,22 @@ def plotting_SePPV(table1, table2, chunked=False):
 	#############################################################################################
 
 	ax1.margins(x=0, y=0.1)
-	ax1.legend()
+	ax1.legend(fontsize='small')
 	ax1.tick_params(axis='x', rotation=90)
 
 	#################### Plot Positive Predictive Value (PPV) ####################
-	ax2.set_title(f"Positive Predictive Value (PPV)")
-	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'My', color=G.CESA_BLUE)
-	ax2.plot(table2['df']['ID'], table2['df']['Precision (PPV)'], label=f'Elgendi', color=G.BUT_RED)
+	ax2.set_title(f"Přesnost (PPV)")
+	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'Má metoda', color=G.CESA_BLUE)
+	ax2.plot(table2['df']['ID'], table2['df']['Precision (PPV)'], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average precision
 	avg_precision_table1 = table1['df']['Precision (PPV)'].mean()
 	avg_precision_table2 = table2['df']['Precision (PPV)'].mean()
-	ax2.axhline(avg_precision_table1, color=G.CESA_BLUE, linestyle='--', label=f'Avg My: {avg_precision_table1:.2f}')
-	ax2.axhline(avg_precision_table2, color=G.BUT_RED, linestyle='--', label=f'Avg Elgendi: {avg_precision_table2:.2f}')
+	ax2.axhline(avg_precision_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_precision_table1:.2f}')
+	ax2.axhline(avg_precision_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_precision_table2:.2f}')
 	##############################################################################
 
 	######################################## SET AXIS ########################################
-	ax2.set_ylabel('PPV [%]')
+	ax2.set_ylabel('Přesnost [%]')
 	if chunked:
 		# Show only every 8th label on the x-axis
 		ax2.set_xticks(range(0, len(table1['df']['ID']), 8))
@@ -68,43 +68,88 @@ def plotting_SePPV(table1, table2, chunked=False):
 	#############################################################################################
 
 	ax2.margins(x=0, y=0.1)
-	ax2.legend()
+	ax2.legend(fontsize='small')
 	ax2.tick_params(axis='x', rotation=90)
 
 	plt.tight_layout()
 	plt.show()
 
 
-def plotting_diffs(table1, table2):
-	fig, ax1 = plt.subplots(1, 1, figsize=(13, 5))
-
+def plotting_hr_diffs(table1, table2):
+	fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(13, 9))
 	# name of the figure
-	fig.suptitle(f"Comparison of My and Elgendi methods for CapnoBase dataset", fontsize=16)
+	fig.suptitle(f"Porovnání Mé a Elgendiho metody pro kvalitní signály VUT PPG databáze", fontsize=16)
 
-	####################### Plot Diff HR #######################
-	ax1.set_title(f"Diff HR [bpm]")
-	ax1.plot(table1['df']['ID'], table1['df']['Diff HR[bpm]'], label=f'My', color=G.CESA_BLUE)
-	ax1.plot(table2['df']['ID'], table2['df']['Diff HR[bpm]'], label=f'Elgendi', color=G.BUT_RED)
+	table_len = len(table1['df']['ID'])
+	first_tr = int(table_len/3)
+	second_tr = int(2 * first_tr)
+
+	####################### Plot Diff HR 1st part #######################
+	ax1.set_title(f'Rozdíly naměřených TF')
+	ax1.plot(table1['df']['ID'][:first_tr], table1['df']['Diff HR[bpm]'][:first_tr], label=f'Má metoda', color=G.CESA_BLUE)
+	ax1.plot(table2['df']['ID'][:first_tr], table2['df']['Diff HR[bpm]'][:first_tr], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average Diff HR
-	avg_diff_hr_table1 = table1['df']['Diff HR[bpm]'].mean()
-	avg_diff_hr_table2 = table2['df']['Diff HR[bpm]'].mean()
-	ax1.axhline(avg_diff_hr_table1, color=G.CESA_BLUE, linestyle='--', label=f'Avg My: {avg_diff_hr_table1:.2f}')
-	ax1.axhline(avg_diff_hr_table2, color=G.BUT_RED, linestyle='--', label=f'Avg Elgendi: {avg_diff_hr_table2:.2f}')
-	############################################################
-
+	avg_table1 = table1['df']['Diff HR[bpm]'][:first_tr].mean()
+	avg_table2 = table2['df']['Diff HR[bpm]'][:first_tr].mean()
+	ax1.axhline(avg_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1:.2f}')
+	ax1.axhline(avg_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2:.2f}')
+	#####################################################################
 	######################################## SET AXIS ########################################
-	ax1.set_ylabel('Diff HR [bpm]')
+	ax1.set_ylabel('Rozdíl [tep/min]')
 	# Show only every 8th label on the x-axis
-	ax1.set_xticks(range(0, len(table1['df']['ID']), 13))
-	ax1.set_xticklabels([label for i, label in enumerate(table1['df']['ID']) if i % 13 == 0])
+	ax1.set_xticks(range(0, len(table1['df']['ID'][:first_tr]), 4))
+	ax1.set_xticklabels([label for i, label in enumerate(table1['df']['ID'][:first_tr]) if i % 4 == 0])
 	# Add small marks for the rest of the signals
 	ax1.xaxis.set_minor_locator(plt.MultipleLocator(1))
 	ax1.tick_params(axis='x', which='minor', length=4, color='gray')
-	#############################################################################################
-
+	###########################################################################################
 	ax1.margins(x=0, y=0.1)
-	ax1.legend()
+	ax1.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small')
 	ax1.tick_params(axis='x', rotation=90)
+
+	####################### Plot Diff HR 2nd part #######################
+	ax2.plot(table1['df']['ID'][first_tr:second_tr], table1['df']['Diff HR[bpm]'][first_tr:second_tr], label=f'Má metoda', color=G.CESA_BLUE)
+	ax2.plot(table2['df']['ID'][first_tr:second_tr], table2['df']['Diff HR[bpm]'][first_tr:second_tr], label=f'Elgendiho metoda', color=G.BUT_RED)
+	# Calculate and plot the average Diff HR
+	avg_table1b = table1['df']['Diff HR[bpm]'][first_tr:second_tr].mean()
+	avg_table2b = table2['df']['Diff HR[bpm]'][first_tr:second_tr].mean()
+	ax2.axhline(avg_table1b, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1b:.2f}')
+	ax2.axhline(avg_table2b, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2b:.2f}')
+	#####################################################################
+	######################################## SET AXIS ########################################
+	ax2.set_ylabel('Rozdíl [tep/min]')
+	# Show only every 8th label on the x-axis
+	ax2.set_xticks(range(0, len(table1['df']['ID'][first_tr:second_tr]), 4))
+	ax2.set_xticklabels([label for i, label in enumerate(table1['df']['ID'][first_tr:second_tr]) if i % 4 == 0])
+	# Add small marks for the rest of the signals
+	ax2.xaxis.set_minor_locator(plt.MultipleLocator(1))
+	ax2.tick_params(axis='x', which='minor', length=4, color='gray')
+	###########################################################################################
+	ax2.margins(x=0, y=0.1)
+	ax2.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small')
+	ax2.tick_params(axis='x', rotation=90)
+
+	####################### Plot Diff HR 3rd part #######################
+	ax3.plot(table1['df']['ID'][second_tr:], table1['df']['Diff HR[bpm]'][second_tr:], label=f'Má metoda', color=G.CESA_BLUE)
+	ax3.plot(table2['df']['ID'][second_tr:], table2['df']['Diff HR[bpm]'][second_tr:], label=f'Elgendiho metoda', color=G.BUT_RED)
+	# Calculate and plot the average Diff HR
+	avg_table1c = table1['df']['Diff HR[bpm]'][second_tr:].mean()
+	avg_table2c = table2['df']['Diff HR[bpm]'][second_tr:].mean()
+	ax3.axhline(avg_table1c, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1c:.2f}')
+	ax3.axhline(avg_table2c, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2c:.2f}')
+	#####################################################################
+	######################################## SET AXIS ########################################
+	ax3.set_ylabel('Rozdíl [tep/min]')
+	# Show only every 8th label on the x-axis
+	ax3.set_xticks(range(0, len(table1['df']['ID'][second_tr:]), 4))
+	ax3.set_xticklabels([label for i, label in enumerate(table1['df']['ID'][second_tr:]) if i % 4 == 0])
+	# Add small marks for the rest of the signals
+	ax3.xaxis.set_minor_locator(plt.MultipleLocator(1))
+	ax3.tick_params(axis='x', which='minor', length=4, color='gray')
+	###########################################################################################
+	ax3.margins(x=0, y=0.1)
+	ax3.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small')
+	ax3.tick_params(axis='x', rotation=90)
 
 	plt.tight_layout()
 	plt.show()
@@ -179,10 +224,10 @@ def full_results(print_head=True):
 		tables.append(table_data)
 
 	# Inspect each sub-table = we can easily check and fix any problems
-	if print_head:
-		for table in tables:
-			print(f" Title: {table['title']}")
-			print(table['df'].head())
-			print("\n====================================================================================")
+	# if print_head:
+	# 	for table in tables:
+	# 		print(f" Title: {table['title']}")
+	# 		print(table['df'].head())
+	# 		print("\n====================================================================================")
 
 	return tables
