@@ -1,13 +1,15 @@
 \chapter{\acl{PPG}}
 
-\acl{PPG} (\acs{PPG}) je neinvazivní, optická metoda, která se využívá k monitorování změn objemu krve v mikrovaskulárním ložisku tkáně, a to v závislosti na čase.
-Tato technika je založena na detekci světla absorbovaného nebo odráženého v měřené tkáni, což umožňuje sledovat kardiovaskulární parametry jako je srdeční tep, saturace kyslíkem nebo krevní tlak.
-Předností \acs{PPG} je, že se jedná o levnou, neinvazivní metodu měření, i to, že se dá snadno integrovat do nositelných zařízení.
-Subjekt může být díky \acs{PPG} dlouhodobě monitorován bez zásahu do běžného života.
+Fotopletysmografie (\acs{PPG}) je neinvazivní optická metoda sloužící k monitorování změn objemu krve v mikrovaskulárním řečišti tkáně, obvykle na prstu, zápěstí či ušním lalůčku \cite{Park2022}.
+Zejména díky snadné integraci do nositelných zařízení (např. chytrých hodinek) a relativně nízkým nákladům na realizaci se \acs{PPG} stává klíčovým nástrojem pro dlouhodobé sledování kardiovaskulárních parametrů,
+jako je tepová frekvence (HR), saturace krve kyslíkem (SpO\textsubscript{2}) či hodnocení variability tepových intervalů \cite{Orphanidou2018}.
 
-Jak je znázorněno na obrázku \ref{fig:snimaniPPG}, základní princip \acs{PPG} spočívá v emisi světla do tkáně a následném měření množství světla, které je od tkáně reflektováno zpět.
-Intenzita reflektovaného světla se mění v závislosti na množství krve procházející měřenou oblastí, což je ovlivněno srdečním pumpováním krve.
-Tyto změny jsou zaznamenány fotodetektorem a převedeny na elektrický signál, který je dále analyzován \cite{Park2022}.
+Na obrázku \ref{fig:snimaniPPG} jsou schematicky znázorněny dvě základní měřicí konfigurace.
+Transmisní režim (a) - zdroj světla a fotodetektor jsou na opačných stranách tkáně (typicky prst či ušní lalůček).
+Reflexní režim (b) - zdroj i detektor leží na téže straně tkáně (např. zápěstí).
+
+Metoda \acs{PPG} je založena na měření intenzity světla, která se po interakci s tkání dostane k detektoru.
+Množství absorbovaného/odraženého světla závisí na aktuálním průtoku krve, který je modulován srdečními cykly \cite{Park2022}.
 
 \begin{figure}[h]
 	\centering
@@ -16,34 +18,20 @@ Tyto změny jsou zaznamenány fotodetektorem a převedeny na elektrický signál
 	\label{fig:snimaniPPG}
 \end{figure}
 
-\acs{PPG} senzory jsou obvykle umístěny na prstech, uchu nebo na zápěstí, kde mohou efektivně monitorovat průtok krve.
-
-V současné době se \acs{PPG} technologie neustále vyvíjí a rozšiřuje o nové aplikace.
-Například, pokročilé algoritmy zpracování signálu a strojové učení otevírají cestu k přesnějšímu a spolehlivějšímu odhadu různých fyziologických parametrů.
-Tato vylepšení mají potenciál výrazně zlepšit diagnostiku a monitorování zdravotního stavu v reálném čase.
-To může vést ke kvalitnější prevenci a efektivnější léčbě mnoha kardiovaskulárních či respiračních onemocnění.
-
-Tato technologie funguje na fyzikálním principu, při kterém okysličeným hemoglobinem prochází do fotoreceptoru jiná vlnová délka než odkysličeným hemoglobinem \cite{Orphanidou2018}.
-
 % ----------------------------------------------------------------------- %
-\section{\acs{PPG} signál}
+\section{Složení \acs{PPG} signálu}
 
-Obrázek \ref{fig:signalPPG} nám ukazuje, že \acs{PPG} signál vykreslujeme na základě množství světla, které dopadlo na detektor a prošlo skrz tkáň, nebo se od ní odrazilo.
-Signál se skládá ze dvou hlavních složek: pulzní (\acs{AC}) složky a ne-pulzní (\acs{DC}) složky.
+Jak ukazuje obrázek \ref{fig:signalPPG}, naměřený \acs{PPG} signál zahrnuje pulzní (AC) složku synchronizovanou se srdeční aktivitou a stabilní, nepulzní (DC) složku.
+AC složka odráží periodické změny objemu arteriální krve v rozsahu typického frekvenčního pásma srdeční činnosti (zhruba 0,5-3 Hz) a je klíčová pro přesnou detekci \acs{TF}.
+DC složka představuje základní linii danou absorpcí tkáně a žilní krve a ovlivňuje ji například barva kůže, okolní osvětlení a anatomické poměry měřené oblasti \cite{ENIKÖ, Park2022}.
+Je důležité si uvědomit, že \acs{PPG} signál je inverzní k měřenému optickému signálu, protože reprezentuje objem krve v tkáni, nikoli množství světla odraženého zpět, což je patrné i z obrázku \ref{fig:signalPPG}.
 
-Pulzní složka (\acs{AC}) \acs{PPG} signálu je synchronní se srdečními cykly a odráží změny objemu krve spojené s každým srdečním cyklem.
-Tato složka je pro účel naší práce zásadní.
-\acs{AC} složka je ovlivněna cyklickými změnami v objemu arteriální krve pod tlakem srdečních kontrakcí.
-
-Na druhé straně ne-pulzní složka (\acs{DC}) představuje základní hodnotu absorpce světla tkání, která je ovlivněna různými faktory jako například barva kůže, složení tkáně a stabilní objem krve v místě umístěného senzoru.
-Dále je ovlivněna vnějšími faktory, jako jsou specifikace měřicí technologie a podmínky okolního osvětlení \cite{ENIKÖ}\cite{Park2022}.
-
-Počátek pulzu v \acs{PPG} signálu je obvykle pozorován v nejnižším bodě předcházejícím systolické fázi, což také odpovídá bodu minimálního objemu krve v tepnách.
-Vrchol systolické fáze, představující maximální objem krve, je klíčovým bodem pro analýzu dynamiky průtoku krve.
-Po systolickém vrcholu klesá \acs{PPG} signál do diastolické fáze, kde se objevuje výrazný rys známý jako "diastolický zářez".
-Tento zářez, následovaný sekundárním vrcholem, indikuje obrácení tlakového gradientu, jak srdeční cyklus pokračuje do diastoly.
-
-Tvar \acs{PPG} vlny se mění na základě vnějších podnětů, fyziologického stavu a složení těla \cite{Park2022}.
+Za počátek pulzu v \acs{PPG} signálu je obvykle označen nejnižší bod předcházející systolické fázi, který odpovídá bodu minimálního objemu krve v měřené oblasti.
+Pro účel vypočítání \acs{TF} se využívá systolického vrcholu, což je bod s maximálním objemem krve.
+Z více systolických vrcholů lze odvodit interval mezi srdečními údery a z toho stanovit \acs{TF}.
+Po systolickém vrcholu přichází diastola, což je fáze srdečního cyklu, během které dochází k relaxaci srdečního svalu a plnění srdce krví.
+V průběhu diastoly bývá často patrný typický dikrotický zářez, který odráží elastické vlastnosti cévní stěny a uzávěr aortální chlopně.
+Jeho přítomnost a tvar mohou poskytovat užitečné informace o stavu krevního řečiště \cite{Orphanidou2018, Park2022}.
 
 \begin{figure}[ht]
 	\centering
