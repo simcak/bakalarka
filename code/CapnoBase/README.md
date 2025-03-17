@@ -91,4 +91,11 @@ The data are stored in the following structure (using first recording as an exam
     ├── id [1x9 uint16]
     └── pleth/
         └── y [144001x1 double]
+
+'SFresults': RR obtained using Smart Fusion approach, and steps thereof
+'labels': labels for beats, breaths and artifacts obtained from a human rater
+'meta': meta information such as demographics
+'param': samplingrates and case name, ventilation mode
+'reference': trends derived from labels
+'signal': raw co2 and pleth signals
 ```

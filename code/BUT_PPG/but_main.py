@@ -14,6 +14,7 @@ def but_ppg_main(method: str, show=False, first=False):
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
 		if but_error.police(but_signal_info, i):
+			print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
 			continue
 
 		# Execute my method
@@ -42,8 +43,9 @@ def but_ppg_main(method: str, show=False, first=False):
 		hr_info = calcul.heart_rate(detected_peaks, but_signal_info['Ref_HR'], but_signal_info['PPG_fs'])
 		if quality_info['Ref Q.'] == 1:
 			G.DIFF_HR_LIST_QUALITY.append(hr_info['Diff HR'])
-			export.to_csv_local(but_signal_info['ID'], 8, i, hr_info, quality_info, None,
-						  type=name, database='BUT', first=first)
+
+		export.to_csv_local(but_signal_info['ID'], 8, i, hr_info, quality_info, None,
+					  type=name, database='BUT', first=first)
 
 		############################################### For testing purposes ##############################################
 		if method == 'my' and show:
@@ -51,9 +53,10 @@ def but_ppg_main(method: str, show=False, first=False):
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
 		# print(f'File {i}: \nsignal:{but_signal_info["PPG_Signal"]}\nRef HR: {but_signal_info["Ref_HR"]}\nDetected peaks: {detected_peaks}\nHR info: {hr_info}')
+		print(f'File {i} done. ID: {but_signal_info["ID"]}, Ref Quality: {quality_info['Ref Q.']}')
 		# print(f'HR info: {hr_info}')
 		###################################################################################################################
 
 	# Global results - outsinde the loop
 	export.to_csv_global(None, None, type=name, database='BUT')
-	time_count.stop_terminal_time(start_time, stop_event, func_name=f'{method}: but_ppg_main')
+	time_count.stop_terminal_time(start_time, stop_event)
