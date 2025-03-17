@@ -1,47 +1,42 @@
+\raggedbottom
 \chapter{Databáze}
 
-V této práci jsme využívali dvě databáze fotopletysmografických signálů: CapnoBase a BUT PPG.
+V této práci jsme využívali dvě databáze fotopletysmografických (\acs{PPG}) signálů: CapnoBase a \acl{BUT PPG} (BUT PPG).
 
 Na těchto databázích jsme testovali a porovnávali výsledky použitých algoritmů.
-U databáze CapnoBase jsme porovnávali naměřené systolické vrcholy s referenčními hodnotami a díky tomu jsme porovnávali i rozdíl v srdeční tepové frekvenci.
-U databáze BUT PPG nebyly referenční hodnoty systolických vrcholů k dispozici, ale byly zde referenční hodnoty tepové frekvence signálů.
+U databáze CapnoBase jsme porovnávali naměřené systolické vrcholy s referenčními hodnotami a díky tomu jsme porovnávali i rozdíl v srdeční tepové frekvenci (\acs{TF}).
+U databáze \acs{BUT PPG} nebyly referenční hodnoty systolických vrcholů k dispozici, ale byly zde referenční hodnoty \acs{TF} signálů a s nimi jsme porovnávali výsledky algoritmů.
 
-% ----------------------------------------------------------------------- %
 \section{CapnoBase}
 
-CapnoBase je databáze, která obsahuje signály získané během čtyřiceti dvou různých, klinických, situací.
-V databázi jsou 8 minut dlouhé, elektrokardiografické, respirační a pro naši práci nejdůležitější, fotopletysmofrafické (PPG) signály.
-Signály jsou vzorkovány při frekvenci 300 Hz a obsahují ručně označené referenční systolické vrcholy, což jsme využili pro vypočítání matice záměn \cite{Karlen2013}.
-Tyto vrcholy jsou označené podle záznamů elektrokardiogramů (EKG) \cite{Charlton2022}.
+CapnoBase je veřejně dostupná databáze, která byla vytvořena primárně za účelem zkoumání respiračních a kardiovaskulárních parametrů z klinického prostředí.
+Poskytuje záznamy obvykle dlouhé osm minut včetně \acs{PPG} a elektrokardiografických (EKG) signálů.
+Jelikož jsou v této databázi u jednotlivých \acs{PPG} křivek k dispozici ručně označené referenční systolické vrcholy odvozené z EKG \cite{CapnoBase},
+lze ji využít k přímému vyhodnocení úspěšnosti zvoleného algoritmu při detekci tepových komplexů i odhadu \acs{TF}.
+Vzhledem k relativní délce a stabilitě záznamů vzniká prostor k testování robustních metod potlačení rušení či detekci \acs{TF} v různých, převážně nemocničních, situacích \cite{Karlen2013, Charlton2022}.
+CapnoBase obsahuje údaje od 42 dětských a dospělých subjektů podstupujících plánovaný chirurgický zákrok a anestezii \cite{Charlton2022}.
 
-% ----------------------------------------------------------------------- %
-\section{BUT PPG}
-
-\acl{BUT PPG} (\acs{BUT PPG}) je databáze vytvořená na Fakultě elektrotechniky a komunikačních technologií Vysokého učení technického v Brně.
-Tato databáze byla vytvořena za účelem hodnocení kvality PPG signálů a odhadu srdeční frekvence (TF).
-Data obsahují 48 desetisekundových záznamů PPG a souvisejících elektrokardiografických (EKG) signálů, které byly použity pro určení referenční TF.
-Data byla shromážděna od 12 subjektů (6 žen a 6 mužů) ve věku od 21 do 61 let.
-Záznamy byly provedeny mezi srpnem 2020 a říjnem 2020 pomocí smartphonu Xiaomi Mi9 se vzorkovací frekvencí 30 Hz \cite{Charlton2023}.
-
-Určení kvality PPG signálů bylo stanoveno pěti experty.
-Tito experti určili TF pouze ze signálu PPG a výsledek porovnali s referenční TF vypočítané z EKG signálů.
-Během hodnocení měli přístup k softwaru, který využíval techniky stacionární vlnkové transformace.
-Využití tohoto programu bylo dobrovolné \cite{BUT_PPG}.
-
-Jak bylo řečeno, data z BUT PPG byla nasnímána telefonem.
-V této podkapitole tedy popíšeme postup, jak extrahovat PPG signál z videa.
-Pro měření potřebujeme pouze kameru v mobilním telefonu a zapnutý blesk. 
-
-Při sběru dat pro Brněnskou databázi přiložil subjekt ukazováček na fotoaparát tak, aby překrýval objektiv a LED svítilnu.
-Při snímání vyzařuje LED světlo. Rozlišení videa bylo nastaveno na 720 x 1280 px a snímkovací frekvence na 30 Hz \cite{ENIKÖ}.
-
-Z videa byl extrahován průměr červené složky, který sloužil jako surový PPG signál.
-Jelikož fotoaparát pracuje se světlem odraženým, surový signál byl invertován.
+\section{\acs{BUT PPG}}
+Databáze \acs{BUT PPG} vznikla na Fakultě elektrotechniky a komunikačních technologií \acs{VUT} za účelem zkoumání kvality \acs{PPG} záznamů a odhadu \acs{TF}.
+V nové rozšířené verzi obsahuje 3,888 desetisekundových měření od 50 dobrovolníků (25 žen a 25 mužů) ve věku 19 až 76 let, a to v klidu i při různých typech pohybových aktivit.
+Záznamy byly pořízeny chytrými telefony (Xiaomi Mi9 a Huawei P20 Pro) se vzorkovací frekvencí 30 Hz, zatímco pro referenční EKG a akcelerometrická (ACC) data byl použit mobilní rekordér Bittium Faros 360 či 180 se vzorkovacími frekvencemi 1,000 Hz (EKG) a 100 Hz (ACC) \cite{BUT_PPG}.
+Z videa byl extrahován průměr červené složky, který sloužil jako surový \acs{PPG} signál.
 Postup je zobrazen na obrázku \ref{fig:videoZaznamPPG}.
 
-\begin{figure}[h]
+Každý \acs{PPG} záznam byl synchronizován s ECG a rozdělen do desetisekundových segmentů, které následně hodnotili tři až pět expertů.
+Pro označení kvality vycházeli výhradně z rozdílu mezi \acs{TF} odhadnutou z \acs{PPG} a referenční tepovou frekvencí z EKG.
+Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako „dobré“ (1), jinak jako „špatné“ (0)
+Tato hranice vychází z mezinárodní normy IEC 60601-2-27 a v databázi \acs{BUT PPG} je aplikována ještě přísněji \cite{BUT_PPG}.
+Přibližně polovina záznamů vznikla přiložením prstu na zadní kameru a LED, druhá pak snímáním ucha v poloze připomínající telefonování.
+V novější části databáze se rozšiřuje množství subjektů i situací, včetně manipulací s osvětlením, vyšším tlakem prstu na čočku, mluvením či chůzí, a nově se přidávají i údaje o krevním tlaku, glykémii a saturaci krve kyslíkem.
+Díky této variabilitě podmínek a bohatým anotacím je \acs{BUT PPG} unikátním zdrojem pro testování robustnosti algoritmů detekce \acs{TF} a pro posuzování použitelnosti krátkých PPG signálů z mobilního telefonu v reálné praxi.
+
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./obrazky/videoZaznamPPG.png}
-	\caption[Získání PPG signálu pro databázi BUT PPG]{Záznam videa na kameru mobilního telefonu (a), jeden vybraný snímek ze záznamu (b), snímek rozložen na tři barevné složky (c), PPG signál vykreslený z červené složky (d), upraveno z \cite{Siddiqui2016}.}
+	\caption[Získání PPG signálu pro databázi \acs{BUT PPG}]{Záznam videa na kameru mobilního telefonu (a), jeden vybraný snímek ze záznamu (b), snímek rozložen na tři barevné složky (c), PPG signál vykreslený z červené složky (d), upraveno z \cite{Siddiqui2016}.}
 	\label{fig:videoZaznamPPG}
 \end{figure}
+
+Spojením klinicky orientované databáze CapnoBase a mobilně zaměřené \acs{BUT PPG} vzniká možnost vzájemného porovnání a ověření přesnosti metod,
+které musejí obstát v rozdílných kontextech: v relativně stabilním operačním prostředí a v krátkých záznamech z chytrého telefonu.
