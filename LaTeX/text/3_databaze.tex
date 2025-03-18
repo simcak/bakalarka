@@ -11,8 +11,7 @@ U databáze \acs{BUT PPG} nebyly referenční hodnoty systolických vrcholů k d
 
 CapnoBase je veřejně dostupná databáze, která byla vytvořena primárně za účelem zkoumání respiračních a kardiovaskulárních parametrů z klinického prostředí.
 Poskytuje záznamy obvykle dlouhé osm minut včetně \acs{PPG} a elektrokardiografických (EKG) signálů.
-Jelikož jsou v této databázi u jednotlivých \acs{PPG} křivek k dispozici ručně označené referenční systolické vrcholy odvozené z EKG \cite{CapnoBase},
-lze ji využít k přímému vyhodnocení úspěšnosti zvoleného algoritmu při detekci tepových komplexů i odhadu \acs{TF}.
+Jelikož jsou v této databázi u jednotlivých \acs{PPG} křivek k dispozici ručně označené referenční systolické vrcholy odvozené z EKG \cite{CapnoBase}, lze ji využít k přímému vyhodnocení úspěšnosti zvoleného algoritmu při detekci tepových komplexů i odhadu \acs{TF}.
 Vzhledem k relativní délce a stabilitě záznamů vzniká prostor k testování robustních metod potlačení rušení či detekci \acs{TF} v různých, převážně nemocničních, situacích \cite{Karlen2013, Charlton2022}.
 CapnoBase obsahuje údaje od 42 dětských a dospělých subjektů podstupujících plánovaný chirurgický zákrok a anestezii \cite{Charlton2022}.
 
@@ -25,7 +24,7 @@ Postup je zobrazen na obrázku \ref{fig:videoZaznamPPG}.
 
 Každý \acs{PPG} záznam byl synchronizován s ECG a rozdělen do desetisekundových segmentů, které následně hodnotili tři až pět expertů.
 Pro označení kvality vycházeli výhradně z rozdílu mezi \acs{TF} odhadnutou z \acs{PPG} a referenční tepovou frekvencí z EKG.
-Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako „dobré“ (1), jinak jako „špatné“ (0)
+Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako „dobré“ (1), jinak jako „špatné“ (0).
 Tato hranice vychází z mezinárodní normy IEC 60601-2-27 a v databázi \acs{BUT PPG} je aplikována ještě přísněji \cite{BUT_PPG}.
 Přibližně polovina záznamů vznikla přiložením prstu na zadní kameru a LED, druhá pak snímáním ucha v poloze připomínající telefonování.
 V novější části databáze se rozšiřuje množství subjektů i situací, včetně manipulací s osvětlením, vyšším tlakem prstu na čočku, mluvením či chůzí, a nově se přidávají i údaje o krevním tlaku, glykémii a saturaci krve kyslíkem.
@@ -38,5 +37,4 @@ Díky této variabilitě podmínek a bohatým anotacím je \acs{BUT PPG} unikát
 	\label{fig:videoZaznamPPG}
 \end{figure}
 
-Spojením klinicky orientované databáze CapnoBase a mobilně zaměřené \acs{BUT PPG} vzniká možnost vzájemného porovnání a ověření přesnosti metod,
-které musejí obstát v rozdílných kontextech: v relativně stabilním operačním prostředí a v krátkých záznamech z chytrého telefonu.
+Spojením klinicky orientované databáze CapnoBase a mobilně zaměřené \acs{BUT PPG} vzniká možnost vzájemného porovnání a ověření přesnosti metod, které musejí obstát v rozdílných kontextech: v relativně stabilním operačním prostředí a v krátkých záznamech z chytrého telefonu.
