@@ -18,9 +18,10 @@ Vstupem je surový fotopletysmografický záznam, zatímco výstupem jsou konkr�
 \end{figure}
 
 \section{Předzpracování signálu}
-Před samotnou detekcí je potřeba potlačit šum a odstranit pomalé změny amplitudy.
-Elgendi používá druhý řád Butterworthova filtru se zpracováním v~přímém i reverzním směru (tzv.~zero-phase filtering).
-Frekvenční charakteristika takového filtru byla nastavena na pásmo 0,5--8~Hz, což postačí pro typické PPG kmitočty aby potlačila pásmový posun nebo i vyšší frekvence, které nesouvisí se systolickými vrcholy \cite{Elgendi2013}.
+Před samotnou detekcí je vhodné potlačit šum a odstranit pomalé změny amplitudy.
+Elgendi~\cite{Elgendi2013} používá druhý řád Butterworthova filtru se zpracováním v~přímém i reverzním směru (tzv.~filtrace s nulovým fázovým posuvem).
+Frekvenční charakteristika filtru byla nastavena na pásmo 0,5--8~Hz, což postačuje pro typické PPG kmitočty a dostatečně potlačí pásmový posun i vyšší frekvence nesouvisející se systolickými vrcholy.
+
 Na obrázku~\ref{fig:filter-example} je ukázka amplitudové charakteristiky a zfiltrovaného úseku signálu.
 
 \begin{figure}[htbp]
@@ -30,14 +31,13 @@ Na obrázku~\ref{fig:filter-example} je ukázka amplitudové charakteristiky a z
 	\label{fig:filter-example}
 \end{figure}
 
-\section{Umocnění signálu}
 Po filtraci se signál umocňuje na druhou, aby se zdůraznily rozdíly mezi systolickou vlnou a ostatními složkami (například diastolickými zářezy).
 Výsledná hodnota $y[n]$ po umocnění je:
 \begin{equation}
-	y[n] = x[n]^2,
+	y[n] = Z[n]^2,
 	\label{eq:square}
 \end{equation}
-kde $x[n]$ je již vyfiltrovaný signál.
+kde $Z[n]$ je již vyfiltrovaný signál.
 V~důsledku toho bývá systolický vrchol zdůrazněn na úkor diastolických zářezů nebo šumu~\cite{Elgendi2013}, jak je ilustrováno na obrázku~\ref{fig:squared-signal}.
 
 \begin{figure}[htbp]
@@ -47,27 +47,31 @@ V~důsledku toho bývá systolický vrchol zdůrazněn na úkor diastolických z
 	\label{fig:squared-signal}
 \end{figure}
 
-% \section{Dvoufázové prahování a nalezení vrcholů}
-% Po umocnění je nutné určit, kde přesně hledat potenciální maximum.
-% Elgendiho algoritmus často využívá dvě různé délky klouzavého průměru: 
-% \begin{itemize}
-%  \item Krátké okno, které přibližně odpovídá šířce systolické vlny.
-%  \item Delší okno, jež pokrývá přibližně délku celého srdečního cyklu.
-% \end{itemize}
-% Na základě jejich rozdílu a adaptivních prahů se definují bloky, kde by mohl ležet vrchol. V takto vymezeném úseku se bere maximum jako systolický vrchol. Souhrnně lze postup vyjádřit rovnicí
-% \begin{equation}
-% 	\text{blok}[n] = \begin{cases}
-% 		1 & \text{pokud } \overline{y}_{\text{krátké}}[n] > \overline{y}_{\text{dlouhé}}[n] + \text{offset}, \\
-% 		0 & \text{jinak},
-% 	\end{cases}
-% 	\label{eq:thresh}
-% \end{equation}
-% kde $\overline{y}_{\text{krátké}}$ a $\overline{y}_{\text{dlouhé}}$ jsou hodnoty klouzavých průměrů ve vzorku $n$ a \emph{offset} je tepově závislá konstanta. Vše je schematicky zobrazeno na obrázku~\ref{fig:block-detection}.
+\section{Dvoufázové prahování a nalezení vrcholů}
+Po umocnění je potřeba určit, kde přesně hledat potenciální maximum, tedy systolický vrchol.
+Pro tento účel využívá Elgendiho algoritmus dva různé klouzavé průměry~(\acs{MA}), které se liší délkou okna a následně dva prahy pro finální detekci vrcholů~\cite{Elgendi2013}.
+
+% Krátké okno prvního klouzavého průměru přibližně odpovídá šířce systolické vlny, zatímco delší okno (druhého průměru) pokrývá délku celého srdečního cyklu.
+% Na základě jejich rozdílu a adaptivních prahů se definují \uv{bloky zájmu}, kde by mohl ležet vrchol.
+% V takto vymezeném úseku se hledá a bere maximální hodnota jako systolický vrchol.
+% Souhrnně lze postup vyjádřit rovnicí
+
+% Elgendiho algoritmus určuje systolické vrcholy dvoustupňovým postupem s~využitím dvou klouzavých průměrů a následného prahování~\cite{Elgendi2013}.
+% Nejprve jsou zkonstruovány dva klouzavé průměry, které se liší délkou okna.
+\acs{MA_P} zvýrazňuje oblast systolického vrcholu, zatímco \acs{MA_B} reprezentuje průměrnou úroveň v rámci celého tepu~\cite{Elgendi2013}.
+Pomocí \acs{MA_B} se definuje první práh \acs{THR_1}, a to přičtením posuvného členu $\alpha$ k \acs{MA_B}, kde $\alpha$ je definována jako $\alpha = \beta\,\overline{z^2}$; v~této formuli je $\beta$ empirická konstanta (např.\ 0,02) a $\overline{z^2}$ střední hodnota umocněného a zfiltrovaného PPG signálu.
+Porovnáním \acs{MA_P} s~\acs{THR_1} se identifikují tzv.\ bloky zájmu, které mohou obsahovat systolický vrchol či rušení.
+
+V další fázi se tyto bloky podrobí druhému prahování, aby se odstranily ty, jejichž šířka je nižší, než se očekává pro systolickou vlnu~\cite{Elgendi2013}.
+Pokud například platí $\mathrm{THR}_2 = W_1$, kde $W_1$ odpovídá délce systolického pulzu, pak všechny bloky užší než $\mathrm{THR}_2$ se považují za šum a odfiltrují se.
+V akceptovaných blocích se následně najde nejvyšší hodnota signálu, která je interpretována jako poloha systolického vrcholu.
+Tímto dvoustupňovým přístupem lze eliminovat falešné úseky způsobené diastolickou vlnou či jinými artefakty, a robustně tak určit polohu hlavního vrcholu~\cite{Elgendi2013}.
 
 % \begin{figure}[htbp]
 % 	\centering
 % 	\includegraphics[width=0.78\textwidth]{blocks_detection.jpg}
 % 	\caption[Oblasti hledání vrcholů]{Zobrazení umocněného signálu (tmavě modře), filtrovaného signálu (světle modře) a dvou klouzavých průměrů (zelené křivky). Šedé pruhy znázorňují vybrané úseky (bloky), kde hledáme maximum jako systolický vrchol (červené body).}
+
 % 	\label{fig:block-detection}
 % \end{figure}
 
