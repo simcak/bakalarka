@@ -14,7 +14,8 @@ def but_ppg_main(method: str, show=False, first=False):
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
 		if but_error.police(but_signal_info, i):
-			print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
+			if show:
+				print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
 			continue
 
 		# Execute my method
@@ -53,7 +54,7 @@ def but_ppg_main(method: str, show=False, first=False):
 		elif method == 'neurokit' and show:
 			but_show.neurokit_show(nk_signals, info, i)
 		# print(f'File {i}: \nsignal:{but_signal_info["PPG_Signal"]}\nRef HR: {but_signal_info["Ref_HR"]}\nDetected peaks: {detected_peaks}\nHR info: {hr_info}')
-		print(f'File {i} done. ID: {but_signal_info["ID"]}, Ref Quality: {quality_info['Ref Q.']}')
+		# print(f'File {i} done. ID: {but_signal_info["ID"]}, Ref Quality: {quality_info["Ref Q."]}')
 		# print(f'HR info: {hr_info}')
 		###################################################################################################################
 

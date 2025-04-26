@@ -11,12 +11,12 @@ def plotting_SePPV(table1, table2, chunked=False):
 
 	################ Plot Sensitivity ################
 	ax1.set_title(f"Citlivost (Se)")
-	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'Má metoda', color=G.CESA_BLUE)
+	ax1.plot(table1['df']['ID'], table1['df']['Sensitivity'], label=f'Naše metoda', color=G.CESA_BLUE)
 	ax1.plot(table2['df']['ID'], table2['df']['Sensitivity'], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average sensitivity
 	avg_sensitivity_table1 = table1['df']['Sensitivity'].mean()
 	avg_sensitivity_table2 = table2['df']['Sensitivity'].mean()
-	ax1.axhline(avg_sensitivity_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_sensitivity_table1:.2f}')
+	ax1.axhline(avg_sensitivity_table1, color=G.CESA_BLUE, linestyle='--', label=f'Náš průměr: {avg_sensitivity_table1:.2f}')
 	ax1.axhline(avg_sensitivity_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_sensitivity_table2:.2f}')
 	##################################################
 
@@ -41,12 +41,12 @@ def plotting_SePPV(table1, table2, chunked=False):
 
 	#################### Plot Positive Predictive Value (PPV) ####################
 	ax2.set_title(f"Přesnost (PPV)")
-	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'Má metoda', color=G.CESA_BLUE)
+	ax2.plot(table1['df']['ID'], table1['df']['Precision (PPV)'], label=f'Naše metoda', color=G.CESA_BLUE)
 	ax2.plot(table2['df']['ID'], table2['df']['Precision (PPV)'], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average precision
 	avg_precision_table1 = table1['df']['Precision (PPV)'].mean()
 	avg_precision_table2 = table2['df']['Precision (PPV)'].mean()
-	ax2.axhline(avg_precision_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_precision_table1:.2f}')
+	ax2.axhline(avg_precision_table1, color=G.CESA_BLUE, linestyle='--', label=f'Náš průměr: {avg_precision_table1:.2f}')
 	ax2.axhline(avg_precision_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_precision_table2:.2f}')
 	##############################################################################
 
@@ -86,12 +86,12 @@ def plotting_hr_diffs(table1, table2):
 
 	####################### Plot Diff HR 1st part #######################
 	ax1.set_title(f'Rozdíly naměřených TF')
-	ax1.plot(table1['df']['ID'][:first_tr], table1['df']['Diff HR[bpm]'][:first_tr], label=f'Má metoda', color=G.CESA_BLUE)
+	ax1.plot(table1['df']['ID'][:first_tr], table1['df']['Diff HR[bpm]'][:first_tr], label=f'Naše metoda', color=G.CESA_BLUE)
 	ax1.plot(table2['df']['ID'][:first_tr], table2['df']['Diff HR[bpm]'][:first_tr], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average Diff HR
 	avg_table1 = table1['df']['Diff HR[bpm]'][:first_tr].mean()
 	avg_table2 = table2['df']['Diff HR[bpm]'][:first_tr].mean()
-	ax1.axhline(avg_table1, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1:.2f}')
+	ax1.axhline(avg_table1, color=G.CESA_BLUE, linestyle='--', label=f'Náš průměr: {avg_table1:.2f}')
 	ax1.axhline(avg_table2, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2:.2f}')
 	#####################################################################
 	######################################## SET AXIS ########################################
@@ -108,12 +108,12 @@ def plotting_hr_diffs(table1, table2):
 	ax1.tick_params(axis='x', rotation=90)
 
 	####################### Plot Diff HR 2nd part #######################
-	ax2.plot(table1['df']['ID'][first_tr:second_tr], table1['df']['Diff HR[bpm]'][first_tr:second_tr], label=f'Má metoda', color=G.CESA_BLUE)
+	ax2.plot(table1['df']['ID'][first_tr:second_tr], table1['df']['Diff HR[bpm]'][first_tr:second_tr], label=f'Naše metoda', color=G.CESA_BLUE)
 	ax2.plot(table2['df']['ID'][first_tr:second_tr], table2['df']['Diff HR[bpm]'][first_tr:second_tr], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average Diff HR
 	avg_table1b = table1['df']['Diff HR[bpm]'][first_tr:second_tr].mean()
 	avg_table2b = table2['df']['Diff HR[bpm]'][first_tr:second_tr].mean()
-	ax2.axhline(avg_table1b, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1b:.2f}')
+	ax2.axhline(avg_table1b, color=G.CESA_BLUE, linestyle='--', label=f'Náš průměr: {avg_table1b:.2f}')
 	ax2.axhline(avg_table2b, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2b:.2f}')
 	#####################################################################
 	######################################## SET AXIS ########################################
@@ -130,12 +130,12 @@ def plotting_hr_diffs(table1, table2):
 	ax2.tick_params(axis='x', rotation=90)
 
 	####################### Plot Diff HR 3rd part #######################
-	ax3.plot(table1['df']['ID'][second_tr:], table1['df']['Diff HR[bpm]'][second_tr:], label=f'Má metoda', color=G.CESA_BLUE)
+	ax3.plot(table1['df']['ID'][second_tr:], table1['df']['Diff HR[bpm]'][second_tr:], label=f'Naše metoda', color=G.CESA_BLUE)
 	ax3.plot(table2['df']['ID'][second_tr:], table2['df']['Diff HR[bpm]'][second_tr:], label=f'Elgendiho metoda', color=G.BUT_RED)
 	# Calculate and plot the average Diff HR
 	avg_table1c = table1['df']['Diff HR[bpm]'][second_tr:].mean()
 	avg_table2c = table2['df']['Diff HR[bpm]'][second_tr:].mean()
-	ax3.axhline(avg_table1c, color=G.CESA_BLUE, linestyle='--', label=f'Můj průměr: {avg_table1c:.2f}')
+	ax3.axhline(avg_table1c, color=G.CESA_BLUE, linestyle='--', label=f'Náš průměr: {avg_table1c:.2f}')
 	ax3.axhline(avg_table2c, color=G.BUT_RED, linestyle='--', label=f'Elgendiho průměr: {avg_table2c:.2f}')
 	#####################################################################
 	######################################## SET AXIS ########################################
