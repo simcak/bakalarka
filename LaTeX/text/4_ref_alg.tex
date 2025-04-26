@@ -1,98 +1,155 @@
 \chapter{Elgendiho referenční algoritmus}
 \label{chap:elgendi_neurokit}
 
+% ⚠️ NeuroKit2 - je to balíček/modul/knohovna/...
 Tato kapitola popisuje, jak lze ve fotopletysmografickém (\acs{PPG}) signálu nalézt systolické vrcholy s využitím Elgendiho algoritmu, který je implementován v~knihovně NeuroKit2.
-NeuroKit2 reaguje na \uv{krizi reprodukovatelnosti} v psychologii a neurovědách a nabízí open-source kód, strukturovanou dokumentaci i podporu k začleňování funkcí přímo do výzkumných prací~\cite{NeuroKit2}.
-Knihovna je dostupná na \url{https://github.com/neuropsychology/NeuroKit} (zdrojový kód) a \url{https://neurokit2.readthedocs.io/} (dokumentace) a její návrh umožňuje průběžný vývoj a modifikace.
+
+Tato knihovna reaguje na \uv{krizi reprodukovatelnosti} v psychologii a neurovědách, což je problém, kdy vědecké studie nelze opakovaně potvrdit kvůli nedostatečné nedostupnosti dat a kódu.
+Proto nabízí open-source kód, strukturovanou dokumentaci i podporu k začleňování funkcí přímo do výzkumných prací~\cite{NeuroKit2}.
+Zdrojový kód pro NeuroKit2 je dostupný na \url{https://github.com/neuropsychology/NeuroKit} a dokumentace na \url{https://neurokit2.readthedocs.io/}.
+Knihovnu je možné průběžně modifikovat a vyvíjet.
+
 V~kapitole~\ref{chap:PPG_teorie} byly již podrobně shrnuty principy \acs{PPG}, proto se zde zaměříme na samotnou detekci vrcholů a její realizaci.
 
 \section{Obecná struktura algoritmu}
-Algoritmus se skládá z několika kroků: \emph{filtrace} pomocí pásmové propusti, \emph{umocnění} signálu, vytvoření dvou \emph{klouzavých průměrů} a dvou \emph{prahů}, jak je zobrazeno na obrázku~\ref{fig:alg-scheme}~\cite{Elgendi2013}.
+\label{sec:alg_structure}
+
+Algoritmus se skládá z několika kroků: \emph{filtrace} pomocí pásmové propusti, \emph{umocnění} signálu, vytvoření dvou \emph{klouzavých průměrů} a dvou \emph{prahů} (viz.~\ref{fig:alg-scheme})~\cite{Elgendi2013}.
 Vstupem je surový fotopletysmografický záznam, zatímco výstupem jsou konkrétní časové pozice nalezených systolických vrcholů.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/ElgendiBlokSchema.png}
+	\vspace{-5mm}
 	\caption[Struktura Elgendiho algoritmu]{Zjednodušené schéma Elgendiho algoritmu~\cite{Elgendi2013}.}
+	\vspace{-5mm}
 	\label{fig:alg-scheme}
 \end{figure}
 
 \section{Předzpracování signálu}
+\label{sec:preprocess}
+
 Před samotnou detekcí je vhodné potlačit šum a odstranit pomalé změny amplitudy.
 Elgendi~\cite{Elgendi2013} používá druhý řád Butterworthova filtru se zpracováním v~přímém i reverzním směru (tzv.~filtrace s nulovým fázovým posuvem).
 Frekvenční charakteristika filtru byla nastavena na pásmo 0,5--8~Hz, což postačuje pro typické PPG kmitočty a dostatečně potlačí pásmový posun i vyšší frekvence nesouvisející se systolickými vrcholy.
-
 Na obrázku~\ref{fig:filter-example} je ukázka amplitudové charakteristiky a zfiltrovaného úseku signálu.
 
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{./obrazky/ElgendiBandpass.png}
-	\caption[Filtrace PPG signálu]{Horní graf: příklad amplitudové přenosové charakteristiky pásmové propusti. Dolní graf: znázornění filtrace PPG (šedě původní signál, červeně po filtraci).}
-	\label{fig:filter-example}
-\end{figure}
-
-Po filtraci se signál umocňuje na druhou, aby se zdůraznily rozdíly mezi systolickou vlnou a ostatními složkami (například diastolickými zářezy).
-Výsledná hodnota $y[n]$ po umocnění je:
+Po filtraci se signál umocňuje na druhou (viz. rovnice~\ref{eq:square}).
+To je provedeno s cílem zdůraznit rozdíly mezi systolickou vlnou a ostatními složkami, jako jsou diastolické zářezy nebo šum~\cite{Elgendi2013}.
+Výsledná hodnota $y[n]$ po umocnění je dána vztahem:
 \begin{equation}
 	y[n] = Z[n]^2,
 	\label{eq:square}
 \end{equation}
-kde $Z[n]$ je již vyfiltrovaný signál.
-V~důsledku toho bývá systolický vrchol zdůrazněn na úkor diastolických zářezů nebo šumu~\cite{Elgendi2013}, jak je ilustrováno na obrázku~\ref{fig:squared-signal}.
+kde $Z[n]$ představuje již vyfiltrovaný signál.
+Porovnání filtrovaného a umocněného signálu je ilustrováno na obrázku~\ref{fig:filter-example}.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./obrazky/ElgendiUpravenySignal.png}
-	\caption[Umocněný a filtrovaný PPG]{Porovnání filtrovaného umocněného PPG.}
-	\label{fig:squared-signal}
+	\includegraphics[width=0.97\textwidth]{./obrazky/ElgendiAFC_PP_Sq.png}
+	\vspace{-9mm}
+	\caption[Elgendiho předzpracování PPG signálu]{Filtrace PPG signálu pomocí Butterworthova filtru a umocnění.}
+	\vspace{-15mm}
+	\label{fig:filter-example}
 \end{figure}
 
-\section{Dvoufázové prahování a nalezení vrcholů}
-Po umocnění je potřeba určit, kde přesně hledat potenciální maximum, tedy systolický vrchol.
-Pro tento účel využívá Elgendiho algoritmus dva různé klouzavé průměry~(\acs{MA}), které se liší délkou okna a následně dva prahy pro finální detekci vrcholů~\cite{Elgendi2013}.
+\section{Určení bloků zájmů a nalezení vrcholů}
+\label{sec:thr_peaks}
 
-% Krátké okno prvního klouzavého průměru přibližně odpovídá šířce systolické vlny, zatímco delší okno (druhého průměru) pokrývá délku celého srdečního cyklu.
-% Na základě jejich rozdílu a adaptivních prahů se definují \uv{bloky zájmu}, kde by mohl ležet vrchol.
-% V takto vymezeném úseku se hledá a bere maximální hodnota jako systolický vrchol.
-% Souhrnně lze postup vyjádřit rovnicí
+Po úvodní filtraci a umocnění fotopletysmografického signálu, vypočítává Elgendiho algoritmus dva klouzavé průměry (\acs{MA}), které se od sebe liší v samotné šířce průměrujícího okna~\cite{Elgendi2013}.
+Kratší okno \(W_1\) je nastaveno tak, aby sloužilo ke zdůraznění systolické špičky, zatímco delší okno \(W_2\) se vybralo tak, aby zdůraznilo období celého srdečního cyklu.
 
-% Elgendiho algoritmus určuje systolické vrcholy dvoustupňovým postupem s~využitím dvou klouzavých průměrů a následného prahování~\cite{Elgendi2013}.
-% Nejprve jsou zkonstruovány dva klouzavé průměry, které se liší délkou okna.
-\acs{MA_P} zvýrazňuje oblast systolického vrcholu, zatímco \acs{MA_B} reprezentuje průměrnou úroveň v rámci celého tepu~\cite{Elgendi2013}.
-Pomocí \acs{MA_B} se definuje první práh \acs{THR_1}, a to přičtením posuvného členu $\alpha$ k \acs{MA_B}, kde $\alpha$ je definována jako $\alpha = \beta\,\overline{z^2}$; v~této formuli je $\beta$ empirická konstanta (např.\ 0,02) a $\overline{z^2}$ střední hodnota umocněného a zfiltrovaného PPG signálu.
-Porovnáním \acs{MA_P} s~\acs{THR_1} se identifikují tzv.\ bloky zájmu, které mohou obsahovat systolický vrchol či rušení.
+Pro vypočítání konkrétních velikostí oken bylo provedeno \uv{brute force} hledání vhodných parametrů tak, že se vyzkoušely různé kombinace délek těchto a dalších a konstant.
+Jako nejlepší kombinace se vybrala ta, po které dosahoval algoritmus nejvyššího skóre v citlivosti (\acs{Se}) a pozitivní prediktivní hodnotě (\acs{PPV}) na trénovací sadě dat~\cite{Elgendi2013}.
 
-V další fázi se tyto bloky podrobí druhému prahování, aby se odstranily ty, jejichž šířka je nižší, než se očekává pro systolickou vlnu~\cite{Elgendi2013}.
-Pokud například platí $\mathrm{THR}_2 = W_1$, kde $W_1$ odpovídá délce systolického pulzu, pak všechny bloky užší než $\mathrm{THR}_2$ se považují za šum a odfiltrují se.
-V akceptovaných blocích se následně najde nejvyšší hodnota signálu, která je interpretována jako poloha systolického vrcholu.
-Tímto dvoustupňovým přístupem lze eliminovat falešné úseky způsobené diastolickou vlnou či jinými artefakty, a robustně tak určit polohu hlavního vrcholu~\cite{Elgendi2013}.
+\subsection*{Výpočet klouzavých průměrů} % ⚠️ Lépe popsat = porozumět + dodat graf
+\label{sec:MA}
 
-% \begin{figure}[htbp]
-% 	\centering
-% 	\includegraphics[width=0.78\textwidth]{blocks_detection.jpg}
-% 	\caption[Oblasti hledání vrcholů]{Zobrazení umocněného signálu (tmavě modře), filtrovaného signálu (světle modře) a dvou klouzavých průměrů (zelené křivky). Šedé pruhy znázorňují vybrané úseky (bloky), kde hledáme maximum jako systolický vrchol (červené body).}
+Elgendi definuje umocěný a vyfiltrovaný \acs{PPG} signál jako \(y[n]\).
+Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypočítá rovnicí
 
-% 	\label{fig:block-detection}
-% \end{figure}
+\begin{equation}
+	MA_{peak}[n] \;=\;
+	\frac{1}{W_1}
+	(y[n - \frac{W_1-1}{2}] + \ldots + y[n] + \ldots + y[n + \frac{W_1-1}{2}]),
+	\label{eq:MA_P}
+\end{equation}
 
-% Aby se předešlo vícenásobné detekci blízko sebe, zavádí se také minimální vzdálenost mezi detekovanými vrcholy. Tato vzdálenost je obvykle nastavena podle reálné fyziologie, např. 200~ms při klidové tepové frekvenci.
+kde \(W_1\) je výše popsaná konstanta~(\ref{sec:thr_peaks})~\cite{Elgendi2013}
+Podobně se s delším oknem \(W_2\) vypočítá \acs{MA_B}, který reprezentuje přibližnou obálku jednoho srdečního cyklu:
 
-% \section{Integrace do NeuroKit2}
-% Popsaný postup je implementován v knihovně NeuroKit2 volbou \verb|method="elgendi"| při volání funkce \verb|ppg_process|:
-% \begin{verbatim}
-% import neurokit2 as nk
+\begin{equation}
+	MA_{beat}[n] \;=\;
+	\frac{1}{W_2}
+	(y[n - \frac{W_2-1}{2}] + \ldots + y[n] + \ldots + y[n + \frac{W_2-1}{2}]).
+	\label{eq:MA_B}
+\end{equation}
 
-% signals, info = nk.ppg_process(
-% 	ppg_signal, sampling_rate=fs,
-% 	method="elgendi",
-% 	method_quality="templatematch"
-% )
-% \end{verbatim}
-% Výstup \verb|signals| typicky obsahuje sloupec s~pozicemi vrcholů a okamžitými hodnotami TF, zatímco \verb|info| nese další kontextové informace, například seznam indexů vrcholů či parametry filtrace.
+Výsledky výpočtů jsou zobrazeny na obrázcích~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks}.
+Tyto klouzavé průměry slouží k vypočítání \acs{THR_1} a následných bloků zájmu, které vedou k~určení systolických vrcholů.
 
-% \section{Zhodnocení kvality signálu}
-% Metoda \verb|templatematch| porovnává tvar každého detekovaného pulzu s~referenční šablonou a vyhodnocuje, do jaké míry odpovídá typické morfologii PPG. Takový přístup zjišťuje, zda je příslušný úsek skutečně “kvalitní” a nemá výrazné artefakty. Výsledkem může být číselné skóre kvality nebo binární označení (kvalitní / nekvalitní).
+\subsection*{Nastavení dvou dynamických prahů}
+\label{sec:thresholds}
 
-% \section{Závěr}
-% Elgendiho algoritmus, s~částečnými modifikacemi v NeuroKit2, nabízí robustní a do značné míry automatizované řešení detekce systolických vrcholů v PPG. Díky adaptivním prahům a využití dvou klouzavých průměrů dokáže úspěšně potlačit různé formy šumu a spolehlivě najít systolický vrchol. K~praktickému použití navíc poslouží modul \emph{Template-Matching}, který vyhodnotí důvěryhodnost každého detekovaného pulzu.
+Pro další zpracování se zvolí dvě prahové hodnoty.
+První dynamický práh \acs{THR_1} se vpočítá posunutím signálu \acs{MA_B} o konstantu \(\beta\) vynásobenou průměrnou hodnotou umocněného signálu \(\overline{z}\) (rovnice~\ref{eq:THR_1}).
+Tato průměrná hodnota se určuje z celého umocněného signálu.
+Konstanta \(\beta\) je jedním z~parametrů, které se nastavují pomocí \uv{brute force} hledání~\cite{Elgendi2013}.
 
+První práh je vykreslen na obrázcích~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks} společně s klouzavými průměry a umocněným signálem.
+
+\begin{equation}
+	THR_1[n] \;=\; MA_{beat}[n] \;+\; \beta \,\cdot\, \overline{z}.
+	\label{eq:THR_1}
+\end{equation}
+
+Porovnáním \acs{MA_P}[n] s~\acs{THR_1}[n] získáme časové úseky (tzv. bloky zájmu), které odpovídají částem, kde je signál nad úrovní \acs{MA_B}.
+
+Druhý práh \acs{THR_2} slouží k pročištění již stanovených bloků zájmů.
+Je roven konstantě \(W_1\), jak je definováno rovnicí~\ref{eq:THR_2}.
+Elgendi využívá tento práh pro eliminaci všech bloků zájmů, které jsou kratší než předem stanovená konstanta reprezentující očekávanou šířku systolické vlny~\cite{Elgendi2013}.
+
+\begin{equation}
+	THR_2 \;=\; W_1.
+	\label{eq:THR_2}
+\end{equation}
+
+\subsection*{Určení bloků zájmů}
+\label{sec:blocks}
+
+Porovnáním výše uvedeného klouzavého průměru \acs{MA_P} a prvního prahu (\acs{THR_1}) jsou určeny bloky zájmu.
+Tyto bloky jsou definovány jako úseky, kde je \acs{MA_P} větší než \acs{THR_1} a zároveň jejich šířka je větší než \acs{THR_2}~(rovnice~\ref{eq:blocks})~\cite{Elgendi2013}.
+Bloky zájmu jsou zobrazeny jako šedé úseky na obrázcích~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks}.
+
+\begin{equation}
+	\{n : MA_{peak}[n] > THR_1[n] \; \land \; okno > THR_2\}.
+	\label{eq:blocks}
+\end{equation}
+
+Na obrázku~\ref{fig:thresholds_peaks} vidíme tři systolické vrcholy, které nebyly detekovány (kolem vzorků 4000, 4600 a 5000).
+U prvního z nich je patrné, že umocněný signál překračuje \acs{THR_1}, avšak blok je příliš krátký, a proto je vyřazen.
+Druhý a třetí vrchol mají ve filtrovaném signálu příliš nízkou amplitudu, což způsobuje, že po umocnění nejsou dostatečně výrazné.
+
+\subsection*{Nalezení vrcholů}
+\label{sec:peaks}
+
+Samotné systolické vrcholy jsou určeny jako lokální maxima v~oblastech bloků zájmu.
+Funkce \(find\_peaks\) z~knihovny NeuroKit2 zpracovává jednodimenzionální signál a porovnáváním hodnot v~každém bloku zájmu určuje lokální maxima~\cite{NeuroKit2}.
+
+\begin{figure}[t]
+	\vspace{-9mm}
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/Elgendi_THR_Peaks_Clean.png}
+	\vspace{-9mm}
+	\caption[Elgendiho zpracování pravidelného signálu]{Nastavení bloků zájmu a určení systolických vrcholů pro pravidelný signál.}
+	\label{fig:thresholds_peaks_clean}
+\end{figure}
+
+\begin{figure}[b]
+	\centering
+	\vspace{-10mm}
+	\includegraphics[width=1\textwidth]{./obrazky/Elgendi_THR_Peaks.png}
+	\caption[Elgendiho zpracování nepravidelného signálu]{Nastavení bloků zájmu a určení systolických vrcholů pro nepravidelný signál.}
+	\vspace{-15mm}
+	\label{fig:thresholds_peaks}
+\end{figure}
