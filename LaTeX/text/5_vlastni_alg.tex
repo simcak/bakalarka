@@ -44,31 +44,51 @@ Výsledné minutové úseky byly dále považovány za samostatné signály, kte
 \label{sec:alg_filter}
 % - Bandpass filter - Butterworthův filtr - vlastní nastavení.
 % - Na konec signál standardizujeme od -1 do 1.
-Po načtení a případném rozdělení záznamů následovalo filtrování signálu, které je klíčové pro odstranění šumu.
-Pro tento účel jsme aplikovali pásmový filtr typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti PPG signálu.
+Po načtení a případném rozdělení záznamů následovalo filtrování signálu.
+Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti PPG signálu.
+Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za minutu).
+Amplitudová charakteristika filtru je znázorněna na obrázku~\ref{fig:my_AFC}.
 
-Konkrétně jsme použili pásmový filtr druhého řádu s dolní mezní frekvencí 0,5~Hz (30 úderů za minutu) a horní mezní frekvencí 3,35~Hz (201 úderů za minutu).
-Tento rozsah byl zvolen tak, aby odstranil velmi pomalé změny v signálu, například dechovou frekvenci, a zároveň potlačil vysokofrekvenční šum, který by mohl negativně ovlivnit detekci vrcholů.
-% order explain
-% normované mezní frekvence vzhledem k Nyquistově frekvenci - explain
-% aplikace nulofázového filtru - explain
+Tento rozsah byl zvolen tak, aby odstranil velmi pomalé změny v signálu, například dechovou frekvenci. Zároveň tak, aby potlačil vysokofrekvenční šum, který by mohl negativně ovlivnit detekci vrcholů.
+V nastavení prahů vycházíme z obecných hraničních hodnot lidské tepové frekvence popsané v kapitole~\ref{sec:STF}.
+
+Samotný Butterworthův filtr byl zvolen pro jeho rovnost v propustném pásmu, takže amplitudová charakteristika filtru je hladká a nevykazuje vlnění, které je typické pro některé jiné typy filtrů.
+Čtvrtý řád zajišťuje dostatečný kompromis mezi strmostí přechodu a numerickou stabilitou filtru.
+Pro odstranění fázového posunu, který je charakteristický pro použitý filtr, jsme použili nulofázový filtr, jenž provádí filtraci v obou směrech.
+
+\begin{figure}[h]
+	\label{fig:my_AFC}
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/My_AFC.png}
+	\vspace{-5mm}
+	\caption[Vlastní amplitudová charakteristika Butterworthova filtru]{Amplitudová charakteristika Butterworthova filtru.}
+	\vspace{-5mm}
+\end{figure}
 
 Po filtraci jsme signál standardizovali do rozsahu od \(-1\) do \(1\).
-Tato normalizace zajišťuje jednotné měřítko napříč všemi záznamy, což je důležité pro následné kroky detekce, kde algoritmus pracuje s relativními prahy a hodnotami.
+Tato normalizace zajišťuje jednotné měřítko napříč všemi záznamy, což je důležité pro následné kroky detekce, kde algoritmus pracuje s relativními prahy.
 
-Výsledkem těchto kroků byl očištěný a normalizovaný signál, připravený pro detekci systolických vrcholů.
-Na obrázku~\ref{fig:filter-peaks} jsou ilustrovány různé části původních a filtrovaných signálů (oba signály jsou pro lepší přehlednost standardizovány).
+Výsledky filtrace a standardizace jsou zřetelné z obrázku~\ref{fig:filter-peaks}.
+Po těchto krocích jsme získali očištěný a normalizovaný signál, připravený pro detekci systolických vrcholů.
 
 \section{Detekce vrcholů}
 \label{sec:alg_peaks}
 % - Detekce vrcholů v 5ti sekundových oknech, které se z 50ti procent překrývají.
 %   - koukáme na 5 sekund, pak posuneme o 2,5 sekundy a znovu koukáme na dalších 5 sekund.
-% - standardizace signálu v okně: -1 do 1
+% - standardizace signálu v okně: -1 do 1 = děláme to znovu
 % - nastavení prahů - min_peak_height (lokální brute force 0,3), min_peak_distance (200 bps)
 % - lokal max detektor:
 %       - koukne na každý vzorek a porovná ho s předchozím a následujícím vzorkem.
 %       - pokud je větší než oba AND je větší než nastavené prahy, tak je to vrchol.
 % - na konci jen odstraníme vrcholy, které jsou na stejném vzorku (kvůli překrývání oken), protože chceme v budoucnu pracovat i s tím, kolik jsme našli vrcholů v okně - duplikáty by nám to zkreslily.
+Samotná detekce vrcholů probíhá v pětisekundových oknech, která se překrývají o 50\%.
+
+\begin{figure} [h]
+	\label{fig:my-detection}
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/My_peaks.png}
+	\caption[Vlastní detekce vrcholů]{Druhá minuta záznamu s vizualizací oken a s překryvem.}
+\end{figure}
 
 \section{Výpočet tepové frekvence}
 \label{sec:alg_hr}
