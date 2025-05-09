@@ -88,6 +88,57 @@ def heart_rate(peaks, ref_hr, fs, init=False, math_method='median'):
 	Returns:
 		hr_info: dictionary containing calculated HR, reference HR, and difference HR
 	"""
+	def compute_sdnn(ibi):
+		"""
+		Compute SDNN from interbeat intervals.
+
+		Args:
+			ibi: list of interbeat intervals
+
+		Returns:
+			sdnn: standard deviation of the interbeat intervals
+		"""
+		sdnn = np.std(ibi)
+		return sdnn
+	def compute_rmssd(ibi):
+		"""
+		Compute RMSSD from interbeat intervals.
+
+		Args:
+			ibi: list of interbeat intervals
+
+		Returns:
+			rmssd: root mean square of successive differences
+		"""
+		rmssd = np.sqrt(np.mean(np.square(np.diff(ibi))))
+		return rmssd
+	def plot_histogram(ibi, fs):
+		"""
+		Plot histogram of interbeat intervals.
+
+		Args:
+			ibi: list of interbeat intervals
+			fs: sampling frequency
+		"""
+		import matplotlib.pyplot as plt
+		from scipy.stats import mode
+
+		instant_hr = 60 / ibi
+		median_hr = np.median(instant_hr)
+		modus_hr = mode(instant_hr, nan_policy='omit').mode[0]
+		mean_hr = np.mean(instant_hr)
+
+		plt.hist(instant_hr, bins=20, color='black', alpha=0.5)
+		plt.title('Histogram okamžitých srdečních frekvencí')
+		plt.xlabel('Tepová frekvence (tepy za minutu)')
+		plt.ylabel('Počet vzorků')
+		plt.axvline(median_hr, color='red', linestyle='dashed', linewidth=2, label=f'Medián: {median_hr:.2f} bpm')
+		plt.axvline(mean_hr, color='blue', linestyle='dashed', linewidth=2, label=f'Průměr: {mean_hr:.2f} bpm')
+		plt.axvline(modus_hr, color='green', linestyle='dashed', linewidth=2, label=f'Modus: {modus_hr:.2f} bpm')
+		plt.legend()
+		plt.grid()
+		plt.show()
+
 	our_ibi = interbeat_intervals(peaks, fs)
 
 	if math_method == 'mean':
@@ -100,17 +151,21 @@ def heart_rate(peaks, ref_hr, fs, init=False, math_method='median'):
 	# Comparing our detected peaks with ref_hr (BUT) or ref_peaks hr (CB)
 	if init == False:
 		diff_hr = abs(ref_hr - hr_out)
+		sdnn = compute_sdnn(our_ibi)
+		rmssd = compute_rmssd(our_ibi)
 		G.DIFF_HR_LIST.append(diff_hr)
+		# plot_histogram(our_ibi, fs)
 	# For detecting HR from referential peaks (CB)
 	elif init == True:
 		ref_hr = hr_out
-		hr_out = None
-		diff_hr = None
+		hr_out, diff_hr, sdnn, rmssd = None, None, None, None
 
 	hr_info = {
 		'Calculated HR': hr_out,
 		'Ref HR': ref_hr,
-		'Diff HR': diff_hr
+		'Diff HR': diff_hr,
+		'SDNN': sdnn,
+		'RMSSD': rmssd
 	}
 
 	return hr_info

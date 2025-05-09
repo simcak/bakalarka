@@ -28,6 +28,15 @@ def detect_peaks(ppg_signal, fs):
 	"""
 	Detect peaks in the PPG signal.
 	"""
+	def too_close_peaks(peaks, min_distance):
+		if len(peaks) == 0:
+			return peaks
+
+		# Remove peaks that are too close to each other
+		diffs = np.diff(peaks)
+		to_remove = np.where(diffs < min_distance)[0] + 1
+		return np.delete(peaks, to_remove)
+
 	# 'time_size' seconds window with 50% overlap
 	time_size = 5
 	window_size = int(time_size * fs)
@@ -52,5 +61,8 @@ def detect_peaks(ppg_signal, fs):
 
 	# Now we remove duplicates and return
 	peaks_detected = np.unique(peaks_detected)
+
+	# Remove peaks that are too close to each other
+	peaks_detected = too_close_peaks(peaks_detected, min_peak_distance)
 
 	return peaks_detected

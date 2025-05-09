@@ -1,5 +1,42 @@
 from scipy.signal import butter, filtfilt
 import numpy as np
+from scipy.signal import freqz
+
+import matplotlib.pyplot as plt
+
+def plot_frequency_response(fs, lowcut=0.5, highcut=3.35, order=4):
+	"""
+	Vykreslí amplitudovou charakteristiku Butterworthova filtru.
+	Amplitudová charakteristika je graf, který ukazuje, jak filtr ovlivňuje různé frekvence signálu.
+
+	Parametry:
+		fs (float): Vzorkovací frekvence.
+		lowcut (float): Dolní mezní frekvence.
+		highcut (float): Horní mezní frekvence.
+		order (int): Řád filtru.
+	"""
+	nyquist = 0.5 * fs
+	low = lowcut / nyquist
+	high = highcut / nyquist
+	b, a = butter(order, [low, high], btype="band")
+	w, h = freqz(b, a, worN=2000, fs=fs)
+
+	plt.figure(figsize=(13, 5))
+
+	plt.plot(w, np.abs(h), label="Amplitudová odezva", color="black")
+	plt.axvspan(lowcut, highcut, color="green", alpha=0.3, label=f"Pásmo průchodu ({lowcut}-{highcut} Hz)")
+	plt.title("Amplitudová charakteristika Butterworthova filtru", fontsize=16)
+	plt.ylabel("Zesílení [-]", fontsize=14)
+	plt.xlabel("Frekvence [Hz]", fontsize=14)
+	plt.xlim(0, fs / 2)
+	plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
+	plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(1))
+	plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+	plt.legend(loc="upper right", fontsize=12)
+	plt.tick_params(axis='both', which='major', labelsize=12)
+	plt.tight_layout()
+
+	plt.show()
 
 def standardize_signal(signal):
 	"""
@@ -24,17 +61,17 @@ def standardize_signal(signal):
 	
 	return standardized_signal
 
-def remove_noise(input_signal, fs, lowcut=0.7, highcut=4.0, order=4):
+def remove_noise(input_signal, fs, lowcut=0.5, highcut=3.35, order=4):
 	"""
 	Remove noise from the signal.
 
 	Arguments:
 		input_signal and fs are straightforward
-		lowcut: lowcut frequency for 42 bpm
-		highcut: highcut frequency for 200 bpm
+		lowcut: lowcut frequency for 30 bpm (0.5 Hz)
+		highcut: highcut frequency for 201 bpm (3.35 Hz)
 		order: higher order means steeper roll-off, but can cause errors
 	"""
-	def butter_bandpass(fs, lowcut, highcut, order=5):
+	def butter_bandpass(fs, lowcut, highcut, order=4):
 		"""
 		Butterworth bandpass filter.
 		"""
@@ -54,7 +91,8 @@ def filter_signal(ppg_signal, fs):
 	"""
 	Filter the PPG signal.
 	"""
-	denoised_signal = remove_noise(ppg_signal, fs, lowcut=0.7, highcut=4.0)
+	# plot_frequency_response(fs, lowcut=0.5, highcut=3.35, order=4)
+	denoised_signal = remove_noise(ppg_signal, fs, lowcut=0.5, highcut=3.35)
 	# no_BLD_signal = remove_baseline_drift(denoised_signal, fs, highcut=0.5)
 	standardized_signal = standardize_signal(denoised_signal)
 	# remove motion artifacts?

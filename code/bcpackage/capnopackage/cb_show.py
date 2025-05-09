@@ -16,7 +16,7 @@ def test_hub(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, hr_info, cap
 	"""
 	Here we choose which function for showing we want to use.
 	"""
-	if i == G.SAMPLE_NUMBER_CB:
+	if i >= G.SAMPLE_NUMBER_CB:
 		# one_signal_peaks(filtered_ppg_signal, our_peaks, capnobase_file)
 		two_signals_peaks(ppg_signal, filtered_ppg_signal, ref_peaks, our_peaks, capnobase_file)
 		# two_signals(ppg_signal, filtered_ppg_signal, capnobase_file)
@@ -44,16 +44,24 @@ def two_signals(signal1, signal2, capnobase_file):
 	plt.ylabel('Signal')
 	plt.show()
 
-def two_signals_peaks(signal1, signal2, peaks1, peaks2, capnobase_file):
+def two_signals_peaks(signal_raw, signal_filtr, ref_peaks, peaks_our, capnobase_file):
 	"""
 	Plot two signals with their peaks.
 	"""
+	fs = 300
+
 	plt.figure(figsize=(14.4, 6))
-	plt.plot(signal1)
-	plt.scatter(peaks1, signal1[peaks1], c='r')
-	plt.plot(signal2)
-	plt.scatter(peaks2, signal2[peaks2], c='g')
-	plt.title(f'Two Signals with Peaks (mat file num.: {os.path.basename(capnobase_file)[0:4]})')
-	plt.xlabel('Samples')
-	plt.ylabel('Signal')
+	plt.title(f'CapnoBase ID: {os.path.basename(capnobase_file)[0:4]}', fontsize=16)
+	plt.plot(signal_raw, label='Původní signál', color='#E23F44')
+	plt.plot(signal_filtr, label='Filtrovaný signál', color='black', alpha=0.5)
+	plt.scatter(peaks_our, signal_filtr[peaks_our], c='#02CCFF', label='Detekované vrcholy')
+	plt.scatter(ref_peaks, signal_filtr[ref_peaks], c='black', label='Referenční vrcholy', marker='x', alpha=0.5)
+	plt.xticks(ticks=range(0, len(signal_raw), 5 * fs), labels=[x // fs for x in range(0, len(signal_raw), 5 * fs)])
+	plt.xticks(ticks=range(0, len(signal_raw) + 1, fs), minor=True)
+	plt.tick_params(axis='both', which='major', labelsize=12)
+	plt.xlabel('Čas [s]', fontsize=14)
+	plt.ylabel('Amplituda', fontsize=14)
+	plt.legend(loc='upper right', fontsize=14)
+	plt.grid()
+	plt.tight_layout()
 	plt.show()

@@ -25,6 +25,8 @@ def main():
 		show.plotting_SePPV(table_dict['CB My chunked'], table_dict['CB NK chunked'], chunked=True)
 	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
 		show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
+	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
+		show.plotting_SDNR(table_dict['CB My all'], table_dict['CB NK all'])
 	# if 'BUT My all' in table_dict and 'BUT NK all' in table_dict:
 	# 	show.plotting_hr_diffs(table_dict['BUT My all'], table_dict['BUT NK all'])
 

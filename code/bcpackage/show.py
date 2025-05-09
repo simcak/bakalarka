@@ -2,12 +2,44 @@ from . import globals as G
 import pandas as pd
 from io import StringIO
 from matplotlib import pyplot as plt
+import numpy as np
+
+def plotting_SDNR(table1, table2):
+	plt.figure()
+	plt.scatter(table2['df']['SDNN [s]'], table1['df']['SDNN [s]'])
+	plt.plot([0, max(table2['df']['SDNN [s]'])], [0, max(table1['df']['SDNN [s]'])], 'r--')	# diagonála
+	plt.xlabel('Referenční SDNN')
+	plt.ylabel('Naše SDNN')
+	plt.title('Porovnání SDNN (CapnoBase)')
+	plt.show()
+
+	mean_sdnn = (table1['df']['SDNN [s]'] + table2['df']['SDNN [s]']) / 2
+	diff_sdnn = table1['df']['SDNN [s]'] - table2['df']['SDNN [s]']
+
+	plt.figure()
+	plt.scatter(mean_sdnn, diff_sdnn)
+	plt.axhline(np.mean(diff_sdnn), color='gray', linestyle='--')
+	plt.axhline(np.mean(diff_sdnn) + 1.96 * np.std(diff_sdnn), color='red', linestyle='--')
+	plt.axhline(np.mean(diff_sdnn) - 1.96 * np.std(diff_sdnn), color='red', linestyle='--')
+	plt.xlabel('Průměr SDNN')
+	plt.ylabel('Rozdíl SDNN (My - Ref)')
+	plt.title('Bland-Altman SDNN')
+	plt.show()
+
+	abs_error_sdnn = np.abs(table1['df']['SDNN [s]'] - table2['df']['SDNN [s]'])
+	abs_error_rmssd = np.abs(table1['df']['RMSSD [s]'] - table2['df']['RMSSD [s]'])
+
+	plt.boxplot([abs_error_sdnn, abs_error_rmssd], labels=['SDNN', 'RMSSD'])
+	plt.ylabel('Absolutní chyba')
+	plt.title('Rozložení chyb (CapnoBase)')
+	plt.show()
+
 
 def plotting_SePPV(table1, table2, chunked=False):
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 7))
 
 	# name of the figure
-	fig.suptitle(f"Porovnání Mé a Elgendiho metody pro CapnoBase dababázi", fontsize=16)
+	fig.suptitle(f"Porovnání naší a Elgendiho metody pro CapnoBase dababázi", fontsize=16)
 
 	################ Plot Sensitivity ################
 	ax1.set_title(f"Citlivost (Se)")
@@ -78,7 +110,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 def plotting_hr_diffs(table1, table2):
 	fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(13, 9))
 	# name of the figure
-	fig.suptitle(f"Porovnání Mé a Elgendiho metody pro kvalitní signály VUT PPG databáze", fontsize=16)
+	fig.suptitle(f"Porovnání naší a Elgendiho metody pro kvalitní signály VUT PPG databáze", fontsize=16)
 
 	table_len = len(table1['df']['ID'])
 	first_tr = int(table_len/3)

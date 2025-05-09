@@ -26,7 +26,7 @@ def _chunking_signal(file_info, chunk_idx):
 		chunk_idx (int): The index of the chunk.
 	"""
 	chunk_len = file_info['fs'] * 60
-	right_buffer = chunk_len # * 0.1 # for 10% overlap
+	right_buffer = chunk_len * 0.05 # for 5% overlap
 
 	right_border_samples = int(chunk_len + right_buffer)
 

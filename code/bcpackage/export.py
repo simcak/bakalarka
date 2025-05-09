@@ -25,6 +25,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
 				'Our Quality': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
+				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 		elif (type == 'NK'):
@@ -33,6 +34,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
 				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
+				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
 			})
 	elif (database == 'BUT'):
@@ -40,6 +42,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 			rows.append({
 				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
+				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'Ref. Quality': quality_info['Ref Q.'],
 				f'Our Q. (>={G.MORPHO_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
@@ -48,6 +51,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 			rows.append({
 				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
+				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'Ref. Quality': quality_info['Ref Q.'],
 				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff Quality': quality_info['Diff Q.']
