@@ -39,7 +39,7 @@ Mohlo by se tedy stát, že referenční a naše tepové frekvence by vykazovaly
 Proto jsme přistoupili k rozdělení každého dlouhého záznamu na kratší, minutové segmenty, které měly pětiprocentní překryv.
 Takový překryv byl zaveden proto, abychom testovali algoritmy na všech vrcholech v záznamu a nedošlo k vynechání některých vrcholů na začátku nebo na konci segmentu.
 Navíc takový překryv vyhovoval i proto, že počet oken popsaných v podkapitole~\ref{sec:alg_peaks} se rozšíří pouze o jeden.
-Rozdělený signál je znázorněn na obr.~\ref{fig:my-detection}.
+Rozdělený signál je znázorněn na Obr.~\ref{fig:my-detection}.
 Výsledné, 63 sekund dlouhé úseky byly dále považovány za samostatné signály, které byly zpracovány jednotlivě.
 
 \subsection*{Filtrace}
@@ -49,7 +49,7 @@ Výsledné, 63 sekund dlouhé úseky byly dále považovány za samostatné sign
 Po načtení a případném rozdělení záznamů následovalo filtrování signálu.
 Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti PPG signálu.
 Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za minutu).
-Amplitudová charakteristika filtru je znázorněna na obr.~\ref{fig:my_AFC}.
+Amplitudová charakteristika filtru je znázorněna na Obr.~\ref{fig:my_AFC}.
 
 Tento rozsah byl zvolen tak, aby odstranil velmi pomalé změny v signálu, například dechovou frekvenci. Zároveň tak, aby potlačil vysokofrekvenční šum, který by mohl negativně ovlivnit detekci vrcholů.
 V nastavení prahů vycházíme z obecných hraničních hodnot lidské tepové frekvence popsané v kapitole~\ref{sec:STF}.
@@ -70,7 +70,7 @@ Pro odstranění fázového posunu, který je charakteristický pro použitý fi
 Po filtraci jsme signál standardizovali do rozsahu od \(-1\) do \(1\).
 Tato normalizace zajišťuje jednotné měřítko napříč všemi záznamy, což je důležité pro následné kroky detekce, kde algoritmus pracuje s relativními prahy.
 
-Výsledky filtrace a standardizace jsou zřetelné z obr.~\ref{fig:filter-peaks}.
+Výsledky filtrace a standardizace jsou zřetelné z Obr.~\ref{fig:filter-peaks}.
 Po těchto krocích jsme získali očištěný a normalizovaný signál, připravený pro detekci systolických vrcholů.
 
 \section{Detekce vrcholů}
@@ -87,7 +87,7 @@ Hledání vrcholů probíhá v pětisekundových oknech, která se překrývají
 Funguje to tak, že nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
 Tímto způsobem pokryjeme celý signál a zajistíme, že žádný vrchol nebude vynechán.
 Na jeden minutový úsek obvykle připadá 23 oken, ale protože máme 5\% překryv celého minutového záznamu, délka výsledného signálu je 63 sekund, a proto analyzujeme o jedno okno navíc.
-Vizuálně je to znázorněno na obr.~\ref{fig:my-detection}.
+Vizuálně je to znázorněno na Obr.~\ref{fig:my-detection}.
 
 Pro celý signál jsme nastavili dva prahy.
 První prahová hodnota odpovídala minimální výšce vrcholu, který považujeme za platný.
@@ -116,7 +116,7 @@ Duplicitní detekce by vedly ke zkreslení metrik a nesprávné interpretaci vý
 
 Posledním krokem je zpětná kontrola minimální vzdálenosti mezi detekovanými vrcholy.
 Bez této kontroly by se mohlo stát, že bychom detekovali vrchol na konci prvního okna a u dalšího okna bychom detekovali nový vrchol příliš blízko, protože si nové okno nepamatuje pozici předchozího vrcholu.
-Příklad takové chyby je zobrazen na obr.~\ref{fig:filter-peaks}, ve druhém okně.
+Příklad takové chyby je zobrazen na Obr.~\ref{fig:filter-peaks}, ve druhém okně.
 
 \section{Výpočet tepové frekvence}
 \label{sec:alg_hr}
@@ -131,14 +131,14 @@ Ten jsme vypočítali tak, že jsme vzali rozdíl mezi časem detekce aktuální
 \end{equation}
 Výsledkem je sekvence hodnot, které odpovídají časovým intervalům mezi jednotlivými systolickými vrcholy.
 
-Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném rovnicí (\ref{eq:TF}).
+Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném rovnicí~(\ref{eq:TF}).
 \begin{equation}
 	\label{eq:TF}
 	TF = \frac{60}{IBI_{median}}
 \end{equation}
 Po volbě mezi průměrem, mediánem a modusem jsme se rozhodli pro medián.
 Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty, které by mohly zkreslit výpočet průměru.
-Na příklad na obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
+Na příklad na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
 
 \begin{figure}[b]
 	\label{fig:HR_hist}
