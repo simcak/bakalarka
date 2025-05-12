@@ -197,12 +197,12 @@ def hjorth_final_calculation():
 
 	# Plot Hjorth HR and Ref HR
 	plt.subplot(2, 1, 1)
-	plt.plot(hjorth_hr, label='Hjorth HR (bpm)', marker='o')
-	plt.plot(ref_hr, label='Ref HR (bpm)', marker='x')
+	plt.plot(hjorth_hr, label='Hjorthova TF (tepů/min)', marker='o')
+	plt.plot(ref_hr, label='Referenční TF (tepů/min)', marker='x')
 
-	plt.title('Hjorth HR vs Ref HR')
-	plt.xlabel('Signal Index')
-	plt.ylabel('Heart Rate (bpm)')
+	plt.title('Hjorthova TF vs Referenční TF')
+	plt.xlabel('Index signálu')
+	plt.ylabel('Srdeční frekvence (tepů/min)')
 	plt.legend()
 	plt.grid()
 
@@ -212,10 +212,10 @@ def hjorth_final_calculation():
 
 	# Plot HR difference
 	plt.subplot(2, 1, 2)
-	plt.plot(hr_diff, label='HR Difference (bpm)', color='red', marker='s')
-	plt.title('HR Difference (Hjorth HR - Ref HR)')
-	plt.xlabel('Signal Index')
-	plt.ylabel('HR Difference (bpm)')
+	plt.plot(hr_diff, label='Rozdíl TF (tepů/min)', color='red', marker='s')
+	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF)')
+	plt.xlabel('Index signálu')
+	plt.ylabel('Rozdíl TF (tepů/min)')
 	plt.legend()
 	plt.grid()
 
@@ -228,4 +228,4 @@ def hjorth_final_calculation():
 
 	# Calculate and print the average HR difference
 	average_hr_diff = hr_diff.mean()
-	print(f"Average HR Difference (bpm): {average_hr_diff:.2f}")
+	print(f"Průměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}")
