@@ -61,10 +61,12 @@ Porovnání filtrovaného a umocněného signálu je ilustrováno na Obr.~\ref{f
 \label{sec:thr_peaks}
 
 Po úvodní filtraci a umocnění fotopletysmografického signálu, vypočítává Elgendiho algoritmus dva klouzavé průměry (\acs{MA}), které se od sebe liší v samotné šířce průměrujícího okna~\cite{Elgendi2013}.
-Kratší okno \(W_1\) je nastaveno tak, aby sloužilo ke zdůraznění systolické špičky, zatímco delší okno \(W_2\) se vybralo tak, aby zdůraznilo období celého srdečního cyklu.
 
-Pro vypočítání konkrétních velikostí oken bylo provedeno \uv{brute force} hledání vhodných parametrů tak, že se vyzkoušely různé kombinace délek těchto a dalších a konstant.
+Kratší okno \(W_1\) je nastaveno tak, aby sloužilo ke zdůraznění systolické špičky, zatímco delší okno \(W_2\) se vybralo tak, aby zdůraznilo období celého srdečního cyklu.
+Tyto konstanty odpovídají šířkám oken v milisekundách, ve kterých se počítají klouzavé průměry (\ref{eq:MA_P}) a (\ref{eq:MA_B}).
+Pro vypočítání konkrétních velikostí oken bylo provedeno metodou \uv{hrubé sily} vhodných parametrů tak, že se vyzkoušely různé kombinace délek těchto a dalších a konstant.
 Jako nejlepší kombinace se vybrala ta, po které dosahoval algoritmus nejvyššího skóre v citlivosti (\acs{Se}) a pozitivní prediktivní hodnotě (\acs{PPV}) na trénovací sadě dat~\cite{Elgendi2013}.
+Pro \(W_1\) byla zvolena hodnota 111 (odpovídající milisekundám) a pro \(W_2\) hodnota 667.
 
 \subsection*{Výpočet klouzavých průměrů} % ⚠️ Lépe popsat = porozumět + dodat graf
 \label{sec:MA}
@@ -80,7 +82,7 @@ Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypoč�
 \end{equation}
 
 kde je \(W_1\) konstanta popsaná v podkapitole~\ref{sec:thr_peaks}~\cite{Elgendi2013}
-Podobně se s delším oknem \(W_2\) vypočítá \acs{MA_B}, který reprezentuje přibližnou obálku jednoho srdečního cyklu:
+Podobně se s delším oknem \(W_2\) vypočítá \acs{MA_B}, který reprezentuje přibližnou délku jednoho srdečního cyklu:
 
 \begin{equation}
 	MA_{beat}[n] \;=\;
@@ -89,7 +91,7 @@ Podobně se s delším oknem \(W_2\) vypočítá \acs{MA_B}, který reprezentuje
 	\label{eq:MA_B}
 \end{equation}
 
-Výsledky výpočtů jsou zobrazeny na Obr.~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks}.
+Výsledky výpočtů jsou zobrazeny na Obr.~\ref{fig:thresholds_peaks_clean} a Obr.~\ref{fig:thresholds_peaks}.
 Tyto klouzavé průměry slouží k vypočítání \acs{THR_1} a následných bloků zájmu, které vedou k~určení systolických vrcholů.
 
 \subsection*{Nastavení dvou dynamických prahů}
@@ -97,15 +99,16 @@ Tyto klouzavé průměry slouží k vypočítání \acs{THR_1} a následných bl
 
 Pro další zpracování se zvolí dvě prahové hodnoty.
 První dynamický práh \acs{THR_1} se vpočítá posunutím signálu \acs{MA_B} o konstantu \(\beta\) vynásobenou průměrnou hodnotou umocněného signálu \(\overline{z}\) viz.~(\ref{eq:THR_1}).
-Tato průměrná hodnota se určuje z celého umocněného signálu.
-Konstanta \(\beta\) je jedním z~parametrů, které se nastavují pomocí \uv{brute force} hledání~\cite{Elgendi2013}.
-
-První práh je vykreslen na Obr.~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks} společně s klouzavými průměry a umocněným signálem.
+Tato průměrná hodnota se vypočítává z celého umocněného signálu.
+\(\beta\) je jedním z~parametrů, který se nastavuje metodou \uv{hrubé síly} a nejlepší výsledky vyšly, když se \(\beta\) nastavila na hodnotu 2~\cite{Elgendi2013}.
 
 \begin{equation}
 	THR_1[n] \;=\; MA_{beat}[n] \;+\; \beta \,\cdot\, \overline{z}.
 	\label{eq:THR_1}
 \end{equation}
+
+První práh je vykreslen na Obr.~\ref{fig:thresholds_peaks_clean} a Obr.~\ref{fig:thresholds_peaks} společně s klouzavými průměry a umocněným signálem.
+Z těchto obrázků je patrné, že parametry \(\beta\) ani \(\overline{z}\) nemají na práh \acs{THR_1} příliš významný viditelný efekt, tudíž je křivka \acs{THR_1} velmi podobná křivce \acs{MA_B}.
 
 Porovnáním \acs{MA_P}[n] s~\acs{THR_1}[n] získáme časové úseky (tzv. bloky zájmu), které odpovídají částem, kde je signál nad úrovní \acs{MA_B}.
 
@@ -144,7 +147,7 @@ Funkce \(find\_peaks\) z~knihovny NeuroKit2 zpracovává jednodimenzionální si
 	\vspace{-9mm}
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/Elgendi_THR_Peaks_Clean.png}
-	\vspace{-9mm}
+	\vspace{-10mm}
 	\caption[Elgendiho zpracování pravidelného signálu]{Nastavení bloků zájmu a určení systolických vrcholů pro pravidelný signál.}
 	\label{fig:thresholds_peaks_clean}
 \end{figure}

@@ -59,12 +59,12 @@ Samotný Butterworthův filtr byl zvolen pro jeho rovnost v propustném pásmu, 
 Pro odstranění fázového posunu, který je charakteristický pro použitý filtr, jsme použili nulofázový filtr, jenž provádí filtraci v obou směrech.
 
 \begin{figure}[h]
-	\label{fig:my_AFC}
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/My_AFC.png}
 	\vspace{-5mm}
 	\caption[Vlastní amplitudová charakteristika Butterworthova filtru]{Amplitudová charakteristika Butterworthova filtru.}
 	\vspace{-5mm}
+	\label{fig:my_AFC}
 \end{figure}
 
 Po filtraci jsme signál standardizovali do rozsahu od \(-1\) do \(1\).
@@ -96,14 +96,14 @@ Druhá prahová hodnota odpovídala minimálnímu časovému intervalu mezi dvě
 To bylo nastaveno na počet vzorků odpovídající 200 tepů za minutu.
 
 \begin{figure} [h]
-	\label{fig:my-detection}
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/My_peaks.png}
 	\caption[Vlastní detekce vrcholů]{Druhá minuta záznamu s vizualizací oken a s překryvem.}
+	\label{fig:my-detection}
 \end{figure}
 
 V každém okně jsme provedli standardizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným morfologickým vlastnostem PPG signálu.
-U signálů jako je zobrazený na obr.~\ref{fig:my-detection} je opětovná standardizace potřebná, protože se amplituda systolické vlny může snižovat a nastavený prah na minimální výšku vrcholu by mohl být příliš nízký, což by vedlo k falešně negativním výsledkům.
+U signálů jako je zobrazený na Obr.~\ref{fig:my-detection} je opětovná standardizace potřebná, protože se amplituda systolické vlny může snižovat a nastavený prah na minimální výšku vrcholu by mohl být příliš nízký, což by vedlo k falešně negativním výsledkům.
 
 Samotná detekce vrcholů je realizována jednoduchým algoritmem hledající lokální maxima.
 Funguje tak, že každý vzorek v okně je porovnán se svým předchozím a následujícím sousedem.
@@ -141,18 +141,16 @@ Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na 
 Na příklad na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
 
 \begin{figure}[b]
-	\label{fig:HR_hist}
 	\centering
 	\includegraphics[width=0.7\textwidth]{./obrazky/HR_Hist.png}
 	\caption[Histogram IBI]{Stanovení TF z IBI pomocí průměru, mediánu a modusu.}
 	\vspace{-5mm}
+	\label{fig:HR_hist}
 \end{figure}
 
 \begin{figure}[t]
-	\label{fig:filter-peaks}
 	\centering
-	\vspace{-10mm}
 	\includegraphics[width=1\textwidth]{./obrazky/MyFilterPeaks.png}
-	\caption[Vlastní zpracování signálů]{...}
-	\vspace{-15mm}
+	\caption[Vlastní zpracování signálů]{Ukázky zpracování signálů.}
+	\label{fig:filter-peaks}
 \end{figure}

@@ -5,9 +5,10 @@ Fotopletysmografie (\acs{PPG}) je neinvazivní optická metoda sloužící k mon
 Zejména díky snadné integraci do nositelných zařízení (např. chytrých hodinek) a relativně nízkým nákladům na realizaci se \acs{PPG} stává klíčovým nástrojem pro dlouhodobé sledování kardiovaskulárních parametrů,
 jako je tepová frekvence (\acs{TF}), saturace krve kyslíkem (SpO\textsubscript{2}) či hodnocení variability tepových intervalů~\cite{Orphanidou2018}.
 
-Na obrázku~\ref{fig:snimaniPPG} jsou znázorněny dvě základní měřicí konfigurace.
+Na Obr.~\ref{fig:snimaniPPG} jsou znázorněny dvě základní měřicí konfigurace.
 Transmisní režim~(a), kde je zdroj světla a fotodetektor na opačných stranách tkáně (typicky při měření na prstu či ušním lalůčku).
 A reflexní režim~(b), zde je umístěn zdroj světla i detektor na téže straně tkáně, což se používá v běžných sportovních zařízeních, jakou jsou chytré hodinky.
+Tento režim je z morfologických důvodů náchylnější k chybám~\cite{Peralta2017}.
 
 Metoda \acs{PPG} je založena na měření intenzity světla, která se po interakci s tkání dostane k detektoru.
 Množství absorbovaného/odraženého světla závisí na aktuálním průtoku krve, který je modulován srdečními cykly~\cite{Park2022}.
@@ -22,10 +23,10 @@ Množství absorbovaného/odraženého světla závisí na aktuálním průtoku 
 % ----------------------------------------------------------------------- %
 \section{Složení \acs{PPG} signálu}
 
-Jak ukazuje obrázek \ref{fig:signalPPG}, naměřený \acs{PPG} signál zahrnuje pulzní (AC) složku synchronizovanou se srdeční aktivitou a stabilní, nepulzní (DC) složku.
+Jak ukazuje Obr.~\ref{fig:signalPPG}, naměřený \acs{PPG} signál zahrnuje pulzní (AC) složku synchronizovanou se srdeční aktivitou a stabilní, nepulzní (DC) složku.
 AC složka odráží periodické změny objemu arteriální krve v rozsahu typického frekvenčního pásma srdeční činnosti (zhruba 0,5--3~Hz) a je klíčová pro přesnou detekci \acs{TF}.
 DC složka představuje základní linii danou absorpcí tkáně a žilní krve a ovlivňuje ji například barva kůže, okolní osvětlení a anatomické poměry měřené oblasti~\cite{ENIKÖ, Park2022}.
-Je důležité si uvědomit, že \acs{PPG} signál je inverzní k měřenému optickému signálu, protože reprezentuje objem krve v tkáni, nikoli množství světla dopadajícího na senzor, což je patrné i z obrázku~\ref{fig:signalPPG}.
+Je důležité si uvědomit, že \acs{PPG} signál je inverzní k měřenému optickému signálu, protože reprezentuje objem krve v tkáni, nikoli množství světla dopadajícího na senzor, což je patrné i z Obr.~\ref{fig:signalPPG}.
 
 Za počátek pulzu v \acs{PPG} signálu se obvykle považuje nejnižší bod předcházející systolické fázi, který odpovídá minimálnímu objemu krve v měřené oblasti.
 Pro výpočet \acs{TF} se využívají systolické vrcholy, tedy body s maximálním objemem krve, z nichž lze určit intervaly mezi srdečními údery a následně stanovit \acs{TF}.
