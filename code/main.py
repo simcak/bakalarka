@@ -19,6 +19,9 @@ def main():
 	but_ppg_main('neurokit')
 
 	####### Show the results #######
+	# from bcpackage import hjorth
+	# hjorth.hjorth_final_calculation()
+
 	tables = show.full_results()
 	table_dict = {table['title']: table for table in tables}
 	if 'CB My chunked' in table_dict and 'CB NK chunked' in table_dict:

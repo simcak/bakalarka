@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time_count
+from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time_count, hjorth
 
 import neurokit2 as nk
 import numpy as np
@@ -74,13 +74,15 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 								  None, None,
 								  method='my_morpho', database='CB')
 		name = 'My'
+		# hjorth_info = hjorth.compute_hjorth_parameters(ppg_signal, fs, detected_peaks, ref_hr, file_info['ID'], chunk_idx)
 
 	# Execute the NeuroKit package with:
 	#	Elgendi method for peak detection and
 	#	Orphanidou method for quality estimation == templatematch
 	#	nk_signal returns: PPG_Raw  PPG_Clean  PPG_Rate  PPG_Quality  PPG_Peaks for each sample
 	elif method == 'neurokit':
-		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs, method="elgendi", method_quality="templatematch")
+		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs,
+									   method="elgendi", method_quality="templatematch")
 		detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
 		quality_info = quality.evaluate(None, detected_peaks, fs,
 								  nk_signals['PPG_Quality'], None,
