@@ -33,9 +33,16 @@ def autocorrelate_signal(signal, num_iterations=1):
 	result = signal.copy()
 	for _ in range(num_iterations):
 		result = np.correlate(result, result, mode='same')
-		# Normalize the result to avoid scaling issues
-		result = result / np.max(result)
 	return result
+
+def highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
+	from scipy.signal import butter, filtfilt
+
+	nyquist_frequency = 0.5 * sampling_frequency
+	normalized_cutoff = cutoff_frequency / nyquist_frequency
+	b, a = butter(order, normalized_cutoff, btype='high', analog=False)
+	filtered_signal = filtfilt(b, a, signal)
+	return filtered_signal
 
 def compute_hjorth_parameters(signal, sampling_frequency, detected_peaks, ref_hr, capnobase_file, index=0, quality=None):
 	"""
@@ -62,25 +69,15 @@ def compute_hjorth_parameters(signal, sampling_frequency, detected_peaks, ref_hr
 	# Compute sampling interval from frequency
 	sampling_interval = 1 / sampling_frequency
 
-	# DC removal
-	signal = signal - np.mean(signal)
-
-	# Respiration removal - high pass
-	def highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
-		from scipy.signal import butter, filtfilt
-
-		nyquist_frequency = 0.5 * sampling_frequency
-		normalized_cutoff = cutoff_frequency / nyquist_frequency
-		b, a = butter(order, normalized_cutoff, btype='high', analog=False)
-		filtered_signal = filtfilt(b, a, signal)
-		return filtered_signal
+	# DC removal - if we dont want to filter the signal
+	# signal = signal - np.mean(signal)
 
 	# Apply the high-pass filter to remove respiratory frequencies
 	respiratory_cutoff_frequency = 0.5  # Example cutoff frequency for respiration [Hz] = equivalent to 30 bpm
 	signal = highpass_filter(signal, respiratory_cutoff_frequency, sampling_frequency)
 
 	# Autocorrelate the signal
-	autocorrelated_signal = autocorrelate_signal(signal, num_iterations=3)
+	autocorrelated_signal = autocorrelate_signal(signal, num_iterations=1)
 
 	# First derivative (velocity)
 	first_derivative = np.diff(np.insert(autocorrelated_signal, 0, 0))
@@ -113,8 +110,8 @@ def compute_hjorth_parameters(signal, sampling_frequency, detected_peaks, ref_hr
 		hjorth_info["Ref Quality"] = quality
 	# Calculate the heart rate
 	local_hr_info = calcul.heart_rate(detected_peaks, ref_hr, sampling_frequency)
-	hjorth_info["Hjorth HR"] = mobility_hz * 60
 	hjorth_info["Ref HR"] = local_hr_info['Calculated HR']
+	hjorth_info["Hjorth HR"] = mobility_hz * 60
 	hjorth_info["HR diff"] = abs(local_hr_info['Calculated HR'] - (hjorth_info['Hjorth HR']))
 
 	_export = True
@@ -190,16 +187,15 @@ def hjorth_final_calculation():
 
 	# Select every 16th file name for labeling
 	selected_indices = range(0, len(file_names), 16)
-	selected_file_names = file_names.iloc[selected_indices]
 
-	# Plot the results
+	####################### Plot the results #######################
+	################################################################
 	plt.figure(figsize=(12, 6))
 
 	# Plot Hjorth HR and Ref HR
 	plt.subplot(2, 1, 1)
 	plt.plot(hjorth_hr, label='Hjorthova TF (tepů/min)', marker='o')
 	plt.plot(ref_hr, label='Referenční TF (tepů/min)', marker='x')
-
 	plt.title('Hjorthova TF vs Referenční TF')
 	plt.xlabel('Index signálu')
 	plt.ylabel('Srdeční frekvence (tepů/min)')
@@ -225,6 +221,8 @@ def hjorth_final_calculation():
 
 	plt.tight_layout()
 	plt.show()
+	################################################################
+	################################################################
 
 	# Calculate and print the average HR difference
 	average_hr_diff = hr_diff.mean()
