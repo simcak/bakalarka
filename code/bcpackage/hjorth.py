@@ -63,6 +63,11 @@ def standardize_signal(signal):
 def autocorrelate_signal(signal, num_iterations=1):
 	"""
 	Perform repeated autocorrelation on the input signal.
+	Autocorrelation is a method to find repeating patterns in the signal.
+
+	Autocorrelation VS Correlation:
+	- Autocorrelation: Correlation of a signal with itself at different time lags.
+	- Correlation: Correlation of two different signals.
 	"""
 	from scipy.signal import correlate
 
