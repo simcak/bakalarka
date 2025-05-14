@@ -208,6 +208,7 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 
 def hjorth_alg(database, chunked_pieces=1, show=False):
 	"""
+	Calculate by Hjorth parameters the HR for the given database and evaluate the results.
 	"""
 	from bcpackage import hjorth, time_count, globals as G
 	from bcpackage.capnopackage import cb_data
@@ -258,7 +259,7 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 					hjorth.compute_hjorth_parameters(chunked_singal, file_info['fs'],
 										 chunk_ref_hr, file_info['ID'], j)
 			else:
-				raise ValueError(f"Invalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 5s long chunks>")
+				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 5s long chunks>\033[0m")
 
 	elif database == "BUT_PPG":
 		for i in range(G.BUT_DATA_LEN):
@@ -269,11 +270,11 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 				hjorth.compute_hjorth_parameters(signal, fs, ref_hr, file_id, 0,
 									 quality=ref_quality, only_quality=True)
 			else:
-				raise ValueError("Chunking is not supported for BUT PPG database.")
+				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10
 
 	else:
-		raise ValueError("Invalid database. Use 'CapnoBase' or 'BUT_PPG'.")
+		raise ValueError("\033[91m\033[1mInvalid database. Use 'CapnoBase' or 'BUT_PPG'.\033[0m")
 
 	# Stop the timer and print the elapsed time
 	time_count.stop_terminal_time(start_time, stop_event, func_name=f'Hjorth - {database}')
