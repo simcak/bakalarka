@@ -215,10 +215,9 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 
 	def _chunking_signal(chunked_pieces, file_info, chunk_idx):
 		"""
-		Chunk the signal.
-		Args:
-			file_info (dict): The file info.
-			chunk_idx (int): The index of the chunk.
+		Chunk the signal into smaller segments for processing them.
+		Last chunk may be longer than the others.
+		Chunking is only supported for CapnoBase database.
 		"""
 		if chunked_pieces == 1:
 			return file_info['Raw Signal'], file_info['Ref HR']
