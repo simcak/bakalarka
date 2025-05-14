@@ -30,5 +30,5 @@ def stop_terminal_time(start_time, stop_event, func_name='function'):
 	"""
 	end_time = time.time()
 	elapsed_time = end_time - start_time
-	print(f"\nTime spent in {func_name}: {elapsed_time:.2f} seconds")
+	print(f"\n\033[96mTime spent in {func_name}: {elapsed_time:.2f} seconds\033[0m")
 	stop_event.set()

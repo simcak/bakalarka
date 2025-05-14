@@ -9,22 +9,24 @@ def main():
 	############# CapnoBase Database #############
 	##############################################
 	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
-	capnobase_main('my', chunk=True, first=True)
+	# capnobase_main('my', chunk=True, first=True)
 	# capnobase_main('neurokit', chunk=True)
 	# capnobase_main('my')
 	# capnobase_main('neurokit')
 
 	################ BUT Database ################
 	##############################################
-	# G.BUT_DATA_LEN = but_data.info()
+	G.BUT_DATA_LEN = but_data.info()
 	# but_ppg_main('my')
 	# but_ppg_main('neurokit')
 
+	############## HJORTH Algorithm ##############
+	from bcpackage import hjorth
+	hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=4, show=True)
+	# hjorth.hjorth_alg(database='BUT_PPG', show=True)
+
 	############## Show the results ##############
 	##############################################
-	from bcpackage import hjorth
-	hjorth.hjorth_final_calculation()
-
 	# tables = show.full_results()
 	# table_dict = {table['title']: table for table in tables}
 	# if 'CB My chunked' in table_dict and 'CB NK chunked' in table_dict:

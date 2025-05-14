@@ -74,7 +74,6 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 								  None, None,
 								  method='my_morpho', database='CB')
 		name = 'My'
-		hjorth_info = hjorth.compute_hjorth_parameters(ppg_signal, fs, detected_peaks, ref_hr, file_info['ID'], chunk_idx)
 
 	# Execute the NeuroKit package with:
 	#	Elgendi method for peak detection and

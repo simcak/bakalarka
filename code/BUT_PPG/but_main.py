@@ -26,7 +26,6 @@ def but_ppg_main(method: str, show=False, first=False):
 								   None, but_signal_info['Ref_Quality'],
 								   method='my_morpho', database='BUT')
 			quality_info['Ref Q.'] = but_signal_info['Ref_Quality']
-			# hjorth.compute_hjorth_parameters(but_signal_info['PPG_Signal'], but_signal_info['PPG_fs'], detected_peaks, but_signal_info['Ref_HR'], but_signal_info['ID'], quality=but_signal_info['Ref_Quality'])
 			name = 'My'
 		
 		# Execute NeuroKit library with:
