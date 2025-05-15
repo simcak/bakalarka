@@ -160,7 +160,7 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index
 			spi_q = 0  # If division by zero occurs
 
 		return mobility_q, complexity_q, spi_q
-	
+
 	mobility_filtr, complexity_filtr, spi_filtr = _hjorth_quality(filtered_signal)
 	###############################################################
 
