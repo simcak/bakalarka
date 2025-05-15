@@ -22,6 +22,9 @@ def main():
 
 	############## HJORTH Algorithm ##############
 	from bcpackage import hjorth
+	# chunked_pieces 1 == 8min is full signal
+	# chunked_pieces 3 / 4 == 160s / 2min have best results
+	# chunked_pieces 48 == 10s like in BUT PPG
 	hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=4, show=True)
 	# hjorth.hjorth_alg(database='BUT_PPG', show=True)
 

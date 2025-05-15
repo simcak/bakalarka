@@ -89,8 +89,8 @@ def highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 	filtered_signal = filtfilt(b, a, signal)
 	return filtered_signal
 
-def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
-							  file_id, index, quality=None, only_quality=False):
+def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index, 
+							  autocorr_iterations, ref_quality=None, only_quality=False):
 	"""
 	Compute Hjorth parameters: mobility, complexity, and spectral purity index (SPI).
 
@@ -103,7 +103,7 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 	- complexity_hz: bandwidth (complexity / (2 * pi * T)) [Hz]
 	- spectral_purity_index: SPI, value between 0 and 1, 1 means pure harmonic
 	"""
-	if quality == 0 and only_quality:
+	if ref_quality == 0 and only_quality:
 		return None
 
 	# Name of the file
@@ -115,49 +115,67 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 	# Compute sampling interval from frequency
 	sampling_interval = 1 / sampling_frequency
 
-	# DC removal - if we dont want to filter the signal
-	# signal = signal - np.mean(signal)
-
 	# Apply the high-pass filter to remove respiratory frequencies
 	respiratory_cutoff_frequency = 0.5  # Example cutoff frequency for respiration [Hz] = equivalent to 30 bpm
-	signal = highpass_filter(signal, respiratory_cutoff_frequency, sampling_frequency)
+	filtered_signal = highpass_filter(signal, respiratory_cutoff_frequency, sampling_frequency)
 
 	# Autocorrelate the signal
-	autocorrelated_signal = autocorrelate_signal(signal, num_iterations=4)
+	autocorrelated_signal = autocorrelate_signal(filtered_signal, num_iterations=autocorr_iterations)
 
-	# First derivative (velocity)
-	first_derivative = np.diff(np.insert(autocorrelated_signal, 0, 0))
-	# Second derivative (acceleration)
-	second_derivative = np.diff(np.insert(first_derivative, 0, 0))
+	############################## HR #############################
+	###############################################################
+	def _hjorth_hr(signal, sampling_interval):
+		# 1st derivative (velocity)
+		first_derivative_hr = np.diff(np.insert(signal, 0, 0))
+		# Mean square values
+		mean_square_derivative_hr = np.mean(first_derivative_hr ** 2)
+		mean_square_signal_hr = np.mean(signal ** 2)
+		# Hjorth MOBILITY
+		mobility_hr = np.sqrt(mean_square_derivative_hr / mean_square_signal_hr)
+		# Convert to Hz (dominant frequency)
+		mobility_hz_hr = mobility_hr / (2 * np.pi * sampling_interval)
 
-	# Mean square values
-	mean_square_signal = np.mean(autocorrelated_signal ** 2)
-	mean_square_derivative = np.mean(first_derivative ** 2)
-	mean_square_second_derivative = np.mean(second_derivative ** 2)
+		return mobility_hz_hr
 
-	# Hjorth MOBILITY
-	mobility = np.sqrt(mean_square_derivative / mean_square_signal)
-	# Hjorth COMPLEXITY
-	complexity = np.sqrt((mean_square_second_derivative / mean_square_derivative) - (mean_square_derivative / mean_square_signal))
-	# Spectral purity index = SPI
-	spectral_purity_index = np.sqrt((mean_square_derivative / mean_square_signal) / (mean_square_second_derivative / mean_square_derivative))
+	mobility_hz_autocorr = _hjorth_hr(autocorrelated_signal, sampling_interval)
 
-	# Convert to Hz (dominant frequency and bandwidth)
-	mobility_hz = mobility / (2 * np.pi * sampling_interval)
-	complexity_hz = complexity / (2 * np.pi * sampling_interval)
+	########################### Quality ###########################
+	###############################################################
+	def _hjorth_quality(signal):
+		# 1st derivative (velocity) and 2nd derivative (acceleration)
+		first_derivative_q = np.diff(np.insert(signal, 0, 0))
+		second_derivative_q = np.diff(np.insert(first_derivative_q, 0, 0))
+		# Mean square values
+		mean_square_signal_q = np.mean(signal ** 2)
+		mean_square_derivative_q = np.mean(first_derivative_q ** 2)
+		mean_square_second_derivative_q = np.mean(second_derivative_q ** 2)
+		# Hjorth MOBILITY
+		mobility_q = np.sqrt(mean_square_derivative_q / mean_square_signal_q)
+		# Hjorth COMPLEXITY
+		complexity_q = np.sqrt((mean_square_second_derivative_q / mean_square_derivative_q) - (mean_square_derivative_q / mean_square_signal_q))
+		# Spectral purity index = SPI
+		if mean_square_derivative_q > 0 and mean_square_signal_q > 0:
+			spi_q = np.sqrt((mean_square_derivative_q / mean_square_signal_q) / (mean_square_second_derivative_q / mean_square_derivative_q))
+		else:
+			spi_q = 0  # If division by zero occurs
+
+		return mobility_q, complexity_q, spi_q
+	
+	mobility_filtr, complexity_filtr, spi_filtr = _hjorth_quality(filtered_signal)
+	###############################################################
 
 	hjorth_info = {
 		"File name": file_name,
-		"Mobility": mobility_hz,
-		"Complexity": complexity_hz,
-		"Spectral Purity Index": spectral_purity_index,
+		"Mobility Autocorr [Hz]": mobility_hz_autocorr,
+		"Ref HR": ref_hr,
+		"Hjorth HR": mobility_hz_autocorr * 60,
+		"HR diff": abs(ref_hr - (mobility_hz_autocorr * 60)),
+		"Mobility Filtered": mobility_filtr,
+		"Complexity Filtered": complexity_filtr,
+		"SPI Filtered": spi_filtr,
 	}
-	if quality is not None:
-		hjorth_info["Ref Quality"] = quality
-	# Calculate the heart rate
-	hjorth_info["Ref HR"] = ref_hr
-	hjorth_info["Hjorth HR"] = mobility_hz * 60
-	hjorth_info["HR diff"] = abs(ref_hr - (hjorth_info['Hjorth HR']))
+	if ref_quality is not None:
+		hjorth_info["Ref Quality"] = ref_quality
 
 	_export = True
 	if _export:
@@ -173,8 +191,8 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 	_show = False
 	if _show and hjorth_info["HR diff"] > 42:
 		# Frekvenční charakteristika (FFT)
-		freqs = np.fft.rfftfreq(len(signal), d=1/sampling_frequency)
-		fft_magnitude = np.abs(np.fft.rfft(signal))
+		freqs = np.fft.rfftfreq(len(filtered_signal), d=1/sampling_frequency)
+		fft_magnitude = np.abs(np.fft.rfft(filtered_signal))
 		freqs_autocorr = np.fft.rfftfreq(len(autocorrelated_signal), d=1/sampling_frequency)
 		fft_magnitude_autocorr = np.abs(np.fft.rfft(autocorrelated_signal))
 
@@ -186,19 +204,21 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 		plt.figure(figsize=(12, 6))
 
 		plt.subplot(2, 1, 1)
-		plt.title("Původní a autokorelovaný signál s derivacemi")
+		plt.title("Přeškálovaný filtrovaný a autokorelovaný signál s derivacemi")
 		plt.xlabel("Čas [s]")
-		plt.ylabel("Amplituda")
-		time_axis = np.arange(len(signal)) / sampling_frequency
-		plt.plot(time_axis, standardize_signal(signal), label="Původní signál")
+		plt.ylabel("Relativní amplituda")
+		time_axis = np.arange(len(filtered_signal)) / sampling_frequency
+		plt.plot(time_axis, standardize_signal(filtered_signal), label="Filtrovaný signál")
 		plt.plot(time_axis, standardize_signal(autocorrelated_signal), label="Autokorelovaný signál")
 		plt.legend()
 		plt.grid()
 
 		# Vykreslení frekvenční charakteristiky
 		plt.subplot(2, 1, 2)
-		plt.plot(freqs, fft_magnitude_rescaled, label="Frekvenční charakteristika původního signálu")
-		plt.plot(freqs_autocorr, fft_magnitude_autocorr_rescaled, label="Frekvenční charakteristika autokorelovaného signálu")
+		freq_max = 20
+		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Frekvenční charakteristika filtrovaného signálu")
+		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Frekvenční charakteristika autokorelovaného signálu")
+		plt.axvline(x=hjorth_info["Mobility Autocorr [Hz]"], color='green', linestyle='--', label=f"Mobilita: {hjorth_info['Mobility Autocorr [Hz]']:.2f} Hz")
 		plt.title("Přeškálovaná frekvenční charakteristika signálů")
 		plt.ylabel("Relativní amplituda")
 		plt.xlabel("Frekvence [Hz]")
@@ -211,11 +231,11 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr,
 	return hjorth_info
 
 
-def hjorth_alg(database, chunked_pieces=1, show=False):
+def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 	"""
 	Calculate by Hjorth parameters the HR for the given database and evaluate the results.
 	"""
-	from bcpackage import hjorth, time_count, globals as G
+	from bcpackage import time_count, globals as G
 	from bcpackage.capnopackage import cb_data
 	from bcpackage.butpackage import but_data
 
@@ -256,15 +276,15 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 	if database == "CapnoBase":
 		for i in range(G.CB_FILES_LEN):
 			file_info = cb_data.extract(G.CB_FILES[i])
-			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 5) # 5s long chunks
+			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 10) # 10s long chunks
 			# Chunk the signal
 			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
 				for j in range(chunked_pieces):
 					chunked_singal, chunk_ref_hr = _chunking_signal(chunked_pieces, file_info, j)
-					hjorth.compute_hjorth_parameters(chunked_singal, file_info['fs'],
-										 chunk_ref_hr, file_info['ID'], j)
+					compute_hjorth_parameters(chunked_singal, file_info['fs'],
+										 chunk_ref_hr, file_info['ID'], j, autocorr_iterations)
 			else:
-				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 5s long chunks>\033[0m")
+				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 10s long chunks>\033[0m")
 
 	elif database == "BUT_PPG":
 		for i in range(G.BUT_DATA_LEN):
@@ -272,8 +292,8 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 				file_info = but_data.extract(i)
 				signal, fs, file_id = file_info['PPG_Signal'], file_info['PPG_fs'], file_info['ID']
 				ref_hr, ref_quality = file_info['Ref_HR'], file_info['Ref_Quality']
-				hjorth.compute_hjorth_parameters(signal, fs, ref_hr, file_id, 0,
-									 quality=ref_quality, only_quality=True)
+				compute_hjorth_parameters(signal, fs, ref_hr, file_id, 0, autocorr_iterations,
+									 ref_quality=ref_quality, only_quality=True)
 			else:
 				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10
@@ -286,11 +306,10 @@ def hjorth_alg(database, chunked_pieces=1, show=False):
 
 	# Show the results on graphs and in terminal
 	if show:
-		hjorth.hjorth_show(chunked_pieces)
+		hjorth_show(chunked_pieces)
 	else:
 		print("Hjorth parameters calculated and saved to hjorth.csv.")
 
 	data = pd.read_csv('./hjorth.csv')
-	hr_diff = data['HR diff']
-	average_hr_diff = hr_diff.mean()
+	average_hr_diff = data['HR diff'].mean()
 	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")
