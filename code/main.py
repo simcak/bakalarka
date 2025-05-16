@@ -22,11 +22,29 @@ def main():
 
 	############## HJORTH Algorithm ##############
 	from bcpackage import hjorth
-	# chunked_pieces 1 == 8min is full signal
-	# chunked_pieces 3 / 4 == 160s / 2min have best results
-	# chunked_pieces 48 == 10s like in BUT PPG
-	hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=4, show=True)
+	"""
+		chunked_pieces 1 == 8min is full signal
+		chunked_pieces 20 == 24s - best results
+		chunked_pieces 48 == 10s like in BUT PPG
+	"""
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, show=True)
 	# hjorth.hjorth_alg(database='BUT_PPG', show=True)
+	hjorth.quality_hjorth()
+
+	############## Quality Algorithm #############
+	##############################################
+	from bcpackage import quality
+	chunked_pieces = 48
+	# quality.ref_quality_orphanidou(database='CapnoBase', chunked_pieces=chunked_pieces)
+	# f1_arr = []
+	# for thr in [i * 0.01 for i in range(0, 101)]:
+	# 	f1_arr.append((thr, quality.orphanidou_quality_evaluation(thr)))
+	# max_f1 = max(f1_arr, key=lambda x: x[1])
+
+	# threshold = max_f1[0]
+	# quality.orphanidou_quality_evaluation(threshold, print_out=True)
+	threshold = 0.9
+	# quality.orphanidou_quality_plot(threshold, chunked_pieces)
 
 	############## Show the results ##############
 	##############################################
