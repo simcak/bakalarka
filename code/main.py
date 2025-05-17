@@ -24,12 +24,12 @@ def main():
 	from bcpackage import hjorth
 	"""
 		chunked_pieces 1 == 8min is full signal
-		chunked_pieces 20 == 24s - best results
-		chunked_pieces 48 == 10s like in BUT PPG
+		chunked_pieces 20 == 24s - best results = 0,66 avg HR diff
+		chunked_pieces 48 == 10s like in BUT PPG = 0,82 avg HR diff || 0,81 after eliminating by Orphanidu (22 samples removed)
 	"""
-	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, show=True)
-	# hjorth.hjorth_alg(database='BUT_PPG', show=True)
-	hjorth.quality_hjorth()
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=20, show=True)
+	hjorth.hjorth_alg(database='BUT_PPG', show=True)
+	# hjorth.quality_hjorth()
 
 	############## Quality Algorithm #############
 	##############################################

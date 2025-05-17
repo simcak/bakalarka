@@ -2,7 +2,6 @@ from bcpackage import globals as G
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.signal import correlate
 
 def quality_hjorth():
 	from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -17,15 +16,7 @@ def quality_hjorth():
 	df_butppg = pd.read_csv("./hjorth_butppg.csv")
 	df_butppg["source"] = "but"
 
-	df = pd.concat([
-		df_capno,
-		df_butppg
-	], ignore_index=True)
-
-	# just for but
-	df = pd.concat([
-		df_butppg
-	], ignore_index=True)
+	df = pd.concat([df_capno, df_butppg], ignore_index=True)
 
 	# Define what will we use for classification
 	features = ["Mobility Filtered",
@@ -43,16 +34,17 @@ def quality_hjorth():
 	X_scaled = scaler.fit_transform(X)
 
 	# Split the data into training and testing sets
-	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.2, random_state=42)
+	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.2, random_state=66)
 
 	# Model training
-	# clf = RandomForestClassifier(n_estimators=100, random_state=42)
 	_max_depth = 4
-	clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=_max_depth, random_state=42)
+	clf = RandomForestClassifier(n_estimators=100, random_state=6)
+	# clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=_max_depth, random_state=6)
 	clf.fit(X_train, y_train)
 
-	# Print && show
 	y_pred = clf.predict(X_test)
+
+	# Print && show)
 	print("Klasifikační zpráva:")
 	print(classification_report(y_test, y_pred, digits=3))
 	print("Matice záměn:")
@@ -130,10 +122,30 @@ def quality_hjorth():
 		plt.tight_layout()
 		plt.show()
 
-	_plot_confusion_matrix(y_test, y_pred)
-	_plot_feature_importance(clf, features)
+	def _plot_hr_diff_vs_quality(data):
+
+		plt.figure(figsize=(10, 6))
+		scatter = plt.scatter(
+			x=range(len(data)),
+			y=data["HR diff"],
+			c=data["Orphanidou Quality"],
+			cmap="viridis",
+			edgecolors="k",
+			alpha=0.7
+		)
+		plt.colorbar(scatter, label="Orphanidou Quality")
+		plt.title("Rozdíl TF vs Kvalita signálu", fontsize=14)
+		plt.xlabel("Vzorky", fontsize=12)
+		plt.ylabel("Rozdíl TF [bpm]", fontsize=12)
+		plt.grid(True, linestyle="--", alpha=0.5)
+		plt.tight_layout()
+		plt.show()
+
+	# _plot_confusion_matrix(y_test, y_pred)
+	# _plot_feature_importance(clf, features)
 	# _plot_2d_projection(X_scaled, y, df["source"], method='pca', title='2D projekce dat (PCA)')
 	# _plot_2d_projection(X_scaled, y, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
+	# _plot_hr_diff_vs_quality(df)
 
 def hjorth_show_hr(chunked_pieces):
 	# Load the data from the CSV file
@@ -210,6 +222,7 @@ def standardize_signal(signal):
 	return standardized_signal
 
 def autocorrelate_signal(signal, num_iterations=1):
+	from scipy.signal import correlate
 	"""
 	Perform repeated autocorrelation on the input signal.
 	Autocorrelation is a method to find repeating patterns in the signal.
@@ -249,8 +262,7 @@ def lowpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 
 	return filtered_signal
 
-def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index, autocorr_iterations,
-							  ref_quality=None, only_quality=False, orphanidou_quality=None):
+def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=False):
 	"""
 	Compute Hjorth parameters: mobility, complexity, and spectral purity index (SPI).
 
@@ -263,8 +275,15 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index
 	- complexity_hz: bandwidth (complexity / (2 * pi * T)) [Hz]
 	- spectral_purity_index: SPI, value between 0 and 1, 1 means pure harmonic
 	"""
-	if only_quality and ref_quality == 0:
-		return None
+	if only_quality and data["Orphanidou Quality"] is not None:
+		if data["Orphanidou Quality"] < 0.9:	# for CapnoBase
+			return None
+		if data["Ref Quality"] is not None:		# for BUT PPG
+			if data["Orphanidou Quality"] < 0.9 or data["Ref Quality"] == 0:
+				return None
+
+	file_id, signal, sampling_frequency, ref_hr = data["File name"], data["Raw Signal"], data["fs"], data["Ref HR"]
+	orphanidou_quality = data["Orphanidou Quality"]
 
 	# Name of the file
 	if index == 0:
@@ -306,6 +325,7 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index
 	def _hjorth_quality(signal, fs):
 		from scipy.stats import entropy
 		from numpy.fft import rfft, rfftfreq
+		from scipy.signal import correlate
 
 		signal = lowpass_filter(signal, 3.35, fs) # doesnt influence HR but SPI
 		# 1st derivative (velocity) and 2nd derivative (acceleration)
@@ -341,8 +361,10 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index
 
 		return mobility_q, complexity_q, spi_q, spectral_ratio, acf_peak, shannon_entropy
 
-	mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy = _hjorth_quality(filtered_signal, sampling_frequency)
-	# mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy =None, None, None, None, None, None
+	if orphanidou_quality is not None:
+		mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy = _hjorth_quality(filtered_signal, sampling_frequency)
+	else:
+		mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy =None, None, None, None, None, None
 	###############################################################
 
 	hjorth_info = {
@@ -357,11 +379,9 @@ def compute_hjorth_parameters(signal, sampling_frequency, ref_hr, file_id, index
 		"Spectral Ratio": spectral_ratio,
 		"ACF Peaks": acf_peak,
 		"Shannon Entropy": shannon_entropy,
+		"Orphanidou Quality": orphanidou_quality,
+		"Ref Quality": data["Ref Quality"],
 	}
-	if orphanidou_quality is not None:
-		hjorth_info["Orphanidou Quality"] = orphanidou_quality
-	if ref_quality is not None:
-		hjorth_info["Ref Quality"] = ref_quality
 
 	_export = True
 	if _export:
@@ -457,6 +477,26 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 
 		return ppg_chunk, chunk_ref_hr
 
+	def _prepare_data_for_hjorth(_name, _fs, _raw_signal, _ref_quality, _ref_hr, calculate_orphanidou_quality=False):
+		"""
+		Prepare the data for Hjorth parameters calculation.
+		"""
+		if calculate_orphanidou_quality:
+			nk_signals, info = nk.ppg_process(chunked_singal, sampling_rate=_fs, method_quality="templatematch") # Orphanidou method
+			_orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
+		else:
+			_orphanidou_quality = None
+
+		data = {
+			"File name": _name,
+			"fs": _fs,
+			"Raw Signal": _raw_signal,
+			"Orphanidou Quality": _orphanidou_quality,
+			"Ref Quality": _ref_quality,
+			"Ref HR": _ref_hr,
+		}
+		return data
+
 	# Start the timer
 	start_time, stop_event = time_count.terminal_time()
 
@@ -467,14 +507,13 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 			# Chunk the signal
 			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
 				for j in range(chunked_pieces):
+					# Preparing data
 					chunked_singal, chunk_ref_hr = _chunking_signal(chunked_pieces, file_info, j)
-					fs, file_id = file_info["fs"], file_info["ID"]
-					nk_signals, info = nk.ppg_process(chunked_singal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
-					orph_q = np.mean(nk_signals['PPG_Quality'])
-					compute_hjorth_parameters(
-						chunked_singal, fs, chunk_ref_hr, file_id, j, autocorr_iterations,
-						orphanidou_quality=orph_q
-						)
+					_data = _prepare_data_for_hjorth(
+						file_info["ID"], file_info["fs"], chunked_singal, None, chunk_ref_hr,
+						calculate_orphanidou_quality=False
+					)
+					compute_hjorth_parameters(_data, j, autocorr_iterations, only_quality=False)
 			else:
 				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 10s long chunks>\033[0m")
 
@@ -484,14 +523,12 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 				file_info = but_data.extract(i)
 				if but_error.police(file_info, i):
 					continue
-				signal, fs, file_id = file_info['PPG_Signal'], file_info['PPG_fs'], file_info['ID']
-				ref_hr, ref_quality = file_info['Ref_HR'], file_info['Ref_Quality']
-				nk_signals, info = nk.ppg_process(signal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
-				orph_q = np.mean(nk_signals['PPG_Quality'])
-				compute_hjorth_parameters(
-					signal, fs, ref_hr, file_id, 0, autocorr_iterations,
-					ref_quality=ref_quality, only_quality=False, orphanidou_quality=orph_q
-					)
+				# Preparing data
+				_data = _prepare_data_for_hjorth(
+					file_info['ID'], file_info['PPG_fs'], file_info['PPG_Signal'], file_info['Ref_Quality'], file_info['Ref_HR'],
+					calculate_orphanidou_quality=False
+				)
+				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=True)
 			else:
 				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10
