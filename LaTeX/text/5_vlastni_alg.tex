@@ -16,14 +16,14 @@ Jelikož pracujeme se dvěma databázemi - \emph{CapnoBase} a \emph{BUT~PPG}, v�
 Obě databáze mají odlišnou strukturu souborů a formát signálů, což vyžaduje samostatný přístup při jejich načítání.
 
 Databáze \emph{CapnoBase} obsahuje signály uložené v \texttt{.mat} souborech.
-Z každého souboru načítáme signál PPG, referenční systolické vrcholy a vzorkovací frekvenci~\cite{CapnoBase}.
+Z každého souboru načítáme signál \acs{PPG}, referenční systolické vrcholy a vzorkovací frekvenci~\cite{CapnoBase}.
 Navíc si vygenerujeme referenční tepovou frekvenci (TF) z referenčních vrcholů, a to pomocí stejného algoritmu, který později použijeme pro výpočet TF z našich detekovaných vrcholů.
 Pro účely čitelnější vizualizace a zpracování ukládáme též identifikátor záznamu, což jsou první čtyři znaky názvu souboru.
 
-Oproti tomu databáze \emph{BUT~PPG} používá formát \acl{WFDB} (\acs{WFDB}) a obsahuje PPG záznamy v \texttt{.dat} a \texttt{.hea} souborech.
+Oproti tomu databáze \emph{BUT~PPG} používá formát \acl{WFDB} (\acs{WFDB}) a obsahuje \acs{PPG} záznamy v \texttt{.dat} a \texttt{.hea} souborech.
 Tato databáze původně obsahovala 48 záznamů, které byly později rozšířeny o dalších 3~840 záznamů.
-Při načítání bylo nutné zohlednit, že starší PPG signály byly uloženy v jednom kanálu, zatímco ostatní signály byly rozděleny do tří kanálů, odpovídajících třem různým barevným složkám signálu~\cite{BUT_PPG_database}.
-Z novějších záznamů jsme jako referenční PPG signál vybrali pouze červenou složku, která nejvíce odpovídá standardnímu PPG signálu.
+Při načítání bylo nutné zohlednit, že starší \acs{PPG} signály byly uloženy v jednom kanálu, zatímco ostatní signály byly rozděleny do tří kanálů, odpovídajících třem různým barevným složkám signálu~\cite{BUT_PPG_database}.
+Z novějších záznamů jsme jako referenční \acs{PPG} signál vybrali pouze červenou složku, která nejvíce odpovídá standardnímu \acs{PPG} signálu.
 
 Výsledkem načtení jsou dvě knihovny, které obsahují dostupná data z~obou databází ve formátu vhodném pro další zpracování.
 
@@ -32,7 +32,7 @@ Výsledkem načtení jsou dvě knihovny, které obsahují dostupná data z~obou 
 % - Dlouhé záznamy z CapnoBase můžeme rozdělit na kratší úseky, které budou zpracovány jednotlivě.
 %   - Z osmiminutového záznamu vytvoříme 8x 1minutový úsek s 10ti procentním překryvem.
 Záznamy v databázi \emph{CapnoBase} jsou dlouhé osm minut.
-Tuto délku jsme považovali za nevhodnou pro výpočet tepové frekvence, protože výsledná hodnota TF by mohla být zkreslená kratšími úseky se zvýšenou nebo sníženou TF.
+Tuto délku jsme považovali za nevhodnou pro výpočet tepové frekvence, protože výsledná hodnota \acs{TF} by mohla být zkreslená kratšími úseky se zvýšenou nebo sníženou \acs{TF}.
 Mohlo by se tedy stát, že referenční a naše tepové frekvence by vykazovaly podobné výsledky, přestože by se v jednotlivých úsecích mohly výrazně lišit.
 
 Proto jsme přistoupili k rozdělení každého dlouhého záznamu na kratší, minutové segmenty, které měly pětiprocentní překryv.
@@ -46,7 +46,7 @@ Výsledné, 63 sekund dlouhé úseky byly dále považovány za samostatné sign
 % - Bandpass filter - Butterworthův filtr - vlastní nastavení.
 % - Na konec signál standardizujeme od -1 do 1.
 Po načtení a případném rozdělení záznamů následovalo filtrování signálu.
-Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti PPG signálu.
+Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti \acs{PPG} signálu.
 Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za minutu).
 Amplitudová charakteristika filtru je znázorněna na Obr.~\ref{fig:my_AFC}.
 
@@ -101,7 +101,7 @@ To bylo nastaveno na počet vzorků odpovídající 200 tepů za minutu.
 	\label{fig:my-detection}
 \end{figure}
 
-V každém okně jsme provedli standardizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným morfologickým vlastnostem PPG signálu.
+V každém okně jsme provedli standardizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným morfologickým vlastnostem \acs{PPG} signálu.
 U signálů jako je zobrazený na Obr.~\ref{fig:my-detection} je opětovná standardizace potřebná, protože se amplituda systolické vlny může snižovat a nastavený prah na minimální výšku vrcholu by mohl být příliš nízký, což by vedlo k falešně negativním výsledkům.
 
 Samotná detekce vrcholů je realizována jednoduchým algoritmem hledající lokální maxima.
@@ -128,6 +128,7 @@ Ten jsme vypočítali tak, že jsme vzali rozdíl mezi časem detekce aktuální
 	\label{eq:IBI}
 	IBI_{i} = t_{i} - t_{i-1}.
 \end{equation}
+
 Výsledkem je sekvence hodnot, které odpovídají časovým intervalům mezi jednotlivými systolickými vrcholy.
 
 Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném rovnicí~(\ref{eq:TF}).
@@ -135,6 +136,7 @@ Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném ro
 	\label{eq:TF}
 	TF = \frac{60}{IBI_{median}}
 \end{equation}
+
 Po volbě mezi průměrem, mediánem a modusem jsme se rozhodli pro medián.
 Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty, které by mohly zkreslit výpočet průměru.
 Na příklad na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
