@@ -22,20 +22,29 @@ def main():
 
 	############## HJORTH Algorithm ##############
 	from bcpackage import hjorth
+	import pandas as pd
 	"""
 		chunked_pieces 1 == 8min is full signal
 		chunked_pieces 20 == 24s - best results = 0,66 avg HR diff
 		chunked_pieces 48 == 10s like in BUT PPG = 0,82 avg HR diff || 0,81 after eliminating by Orphanidu (22 samples removed)
 	"""
-	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=20, show=True)
-	hjorth.hjorth_alg(database='BUT_PPG', show=True)
-	# hjorth.quality_hjorth()
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=5)
+	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=3)
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=5)
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=35, autocorr_iterations=5)
+
+	# our_quality = hjorth.quality_hjorth()
+
+	# hjorth.confusion_matrix()
+	# hjorth.hjorth_show_hr(48)
+	# hjorth.hjorth_show_only_quality_hr(48)
+	# hjorth.hjorth_show_spi()
 
 	############## Quality Algorithm #############
 	##############################################
 	from bcpackage import quality
 	chunked_pieces = 48
-	# quality.ref_quality_orphanidou(database='CapnoBase', chunked_pieces=chunked_pieces)
+	# quality.ref_quality_orphanidou(database='BUT_PPG', chunked_pieces=chunked_pieces)
 	# f1_arr = []
 	# for thr in [i * 0.01 for i in range(0, 101)]:
 	# 	f1_arr.append((thr, quality.orphanidou_quality_evaluation(thr)))
@@ -43,8 +52,8 @@ def main():
 
 	# threshold = max_f1[0]
 	# quality.orphanidou_quality_evaluation(threshold, print_out=True)
-	threshold = 0.9
-	# quality.orphanidou_quality_plot(threshold, chunked_pieces)
+	threshold = -0.1
+	quality.orphanidou_quality_plot(threshold, chunked_pieces)
 
 	############## Show the results ##############
 	##############################################

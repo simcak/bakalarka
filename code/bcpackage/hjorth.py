@@ -3,159 +3,54 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def quality_hjorth():
-	from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-	from sklearn.model_selection import train_test_split
-	from sklearn.metrics import classification_report, confusion_matrix
-	from sklearn.preprocessing import StandardScaler
+###############################################################
+##################### SHOWING && PLOTTING #####################
+###############################################################
 
-	# Define sources
-	df_capno = pd.read_csv("./hjorth_CBq.csv")
-	df_capno["source"] = "capno"
 
-	df_butppg = pd.read_csv("./hjorth_butppg.csv")
-	df_butppg["source"] = "but"
 
-	df = pd.concat([df_capno, df_butppg], ignore_index=True)
+def confusion_matrix():
+	import seaborn as sns
+	from sklearn.metrics import confusion_matrix
 
-	# Define what will we use for classification
-	features = ["Mobility Filtered",
-				"Complexity Filtered",
-				"SPI Filtered",
-				"Spectral Ratio",
-				"ACF Peaks",
-				"Shannon Entropy"
-				]
-	X = df[features]
-	y = (df["Orphanidou Quality"] >= 0.9).astype(int)
+	data_cb = pd.read_csv('./hjorth_CBq.csv')
+	data_but = pd.read_csv('./hjorth_butppg.csv')
+	data_all = pd.concat([data_cb, data_but], ignore_index=True)
 
-	# Scaling for uniformity of Hjorth parameters
-	scaler = StandardScaler()
-	X_scaled = scaler.fit_transform(X)
+	# Calculate confusion matrix
+	cm = confusion_matrix(
+		data_all['ourQ_this_only'],
+		(data_all['Orphanidou Quality'] >= 0.9).astype(int)
+	)
 
-	# Split the data into training and testing sets
-	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.2, random_state=66)
+	# Plot confusion matrix with colors
+	plt.figure(figsize=(6, 5))
+	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False, 
+				xticklabels=["Bad Quality", "Good Quality"], 
+				yticklabels=["Bad Quality", "Good Quality"])
+	plt.xlabel("Predicted Quality")
+	plt.ylabel("True Quality")
+	plt.title("Confusion Matrix")
+	plt.tight_layout()
+	plt.show()
 
-	# Model training
-	_max_depth = 4
-	clf = RandomForestClassifier(n_estimators=100, random_state=6)
-	# clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=_max_depth, random_state=6)
-	clf.fit(X_train, y_train)
-
-	y_pred = clf.predict(X_test)
-
-	# Print && show)
-	print("Klasifikační zpráva:")
-	print(classification_report(y_test, y_pred, digits=3))
-	print("Matice záměn:")
-	print(confusion_matrix(y_test, y_pred))
-
-	def _plot_confusion_matrix(y_true, y_pred, class_names=["Špatná kvalita", "Dobrá kvalita"]):
-		import seaborn as sns
-		from sklearn.metrics import classification_report, confusion_matrix
-
-		# Confusion matrix
-		cm = confusion_matrix(y_true, y_pred)
-		plt.figure(figsize=(6, 5))
-		sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
-					xticklabels=class_names, yticklabels=class_names)
-		plt.xlabel("Predikovaná třída")
-		plt.ylabel("Skutečná třída")
-		plt.title("Matice záměn (Confusion Matrix)")
-		plt.tight_layout()
-		plt.show()
-
-		# Classification report
-		print("\nKlasifikační zpráva:")
-		print(classification_report(y_true, y_pred, target_names=class_names))
-
-	def _plot_feature_importance(clf, feature_names):
-
-	# _plot_confusion_matrix(y_test, y_pred)
-
-		importances = clf.feature_importances_
-		indices = np.argsort(importances)[::-1]
-
-		plt.figure(figsize=(10, 6))
-		plt.title("Důležitost příznaků (Random Forest)")
-		plt.bar(range(len(importances)), importances[indices], align="center")
-		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=45, ha="right")
-		plt.tight_layout()
-		plt.grid(True, linestyle='--', alpha=0.5)
-		plt.show()
-
-	def _plot_2d_projection(X, y, source, method='pca', title='2D projekce dat'):
-		from sklearn.decomposition import PCA
-		from sklearn.manifold import TSNE
-		import seaborn as sns
-
-		# Dimenzionální redukce
-		if method == 'pca':
-			X_proj = PCA(n_components=2).fit_transform(X)
-		elif method == 'tsne':
-			X_proj = TSNE(n_components=2, perplexity=30, n_iter=1000).fit_transform(X)
-		else:
-			raise ValueError("Podporované metody: 'pca', 'tsne'")
-
-		# Příprava DataFrame pro seaborn
-		df_plot = pd.DataFrame({
-			"X1": X_proj[:, 0],
-			"X2": X_proj[:, 1],
-			"Třída": y,
-			"Databáze": source
-		})
-
-		plt.figure(figsize=(8, 6))
-		sns.scatterplot(
-			data=df_plot,
-			x="X1", y="X2",
-			hue="Třída",       # barva = kvalita
-			style="Databáze",  # tvar = zdroj dat
-			palette=["#d62728", "#1f77b4"],
-			alpha=0.7
-		)
-		plt.title(title)
-		plt.xlabel("1. komponenta")
-		plt.ylabel("2. komponenta")
-		plt.legend(title="Třída / Databáze", loc="best", fontsize=9)
-		plt.grid(True, linestyle='--', alpha=0.5)
-		plt.tight_layout()
-		plt.show()
-
-	def _plot_hr_diff_vs_quality(data):
-
-		plt.figure(figsize=(10, 6))
-		scatter = plt.scatter(
-			x=range(len(data)),
-			y=data["HR diff"],
-			c=data["Orphanidou Quality"],
-			cmap="viridis",
-			edgecolors="k",
-			alpha=0.7
-		)
-		plt.colorbar(scatter, label="Orphanidou Quality")
-		plt.title("Rozdíl TF vs Kvalita signálu", fontsize=14)
-		plt.xlabel("Vzorky", fontsize=12)
-		plt.ylabel("Rozdíl TF [bpm]", fontsize=12)
-		plt.grid(True, linestyle="--", alpha=0.5)
-		plt.tight_layout()
-		plt.show()
-
-	# _plot_confusion_matrix(y_test, y_pred)
-	# _plot_feature_importance(clf, features)
-	# _plot_2d_projection(X_scaled, y, df["source"], method='pca', title='2D projekce dat (PCA)')
-	# _plot_2d_projection(X_scaled, y, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
-	# _plot_hr_diff_vs_quality(df)
-
-def hjorth_show_hr(chunked_pieces):
+def hjorth_show_hr(chunked_pieces, database='CapnoBase'):
 	# Load the data from the CSV file
-	data = pd.read_csv('./hjorth.csv')
+	if database == 'CapnoBase':
+		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'BUT_PPG':
+		data = pd.read_csv('./hjorth_butppg.csv')
+	else:
+		data = pd.read_csv('./hjorth.csv')
 
 	# Extract relevant columns
 	file_names = data['File name']
 	hjorth_hr = data['Hjorth HR']
 	ref_hr = data['Ref HR']
 	hr_diff = data['HR diff']
+
+	average_hr_diff = data['HR diff'].mean()
+	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")
 
 	# Select every x-th file name for labeling (x = chunked_pieces)
 	selected_indices = range(0, len(file_names), chunked_pieces)
@@ -183,7 +78,7 @@ def hjorth_show_hr(chunked_pieces):
 	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF)')
 	plt.plot(hr_diff, label='Rozdíl TF (tepů/min)', color='red', marker='s')
 	plt.xlabel('Index signálu')
-	plt.ylabel('Rozdíl TF (tepů/min)')
+	plt.ylabel('|Δ TF| (tepů/min)')
 	plt.legend()
 	plt.grid()
 
@@ -195,9 +90,75 @@ def hjorth_show_hr(chunked_pieces):
 	plt.show()
 	################################################################
 
-def hjorth_show_spi():
+def hjorth_show_only_quality_hr(chunked_pieces, database='CapnoBase'):
+	# Load the data from the CSV file
+	if database == 'CapnoBase':
+		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'BUT_PPG':
+		data = pd.read_csv('./hjorth_butppg.csv')
+	else:
+		data = pd.read_csv('./hjorth.csv')
+
+	# data = data[data['Orphanidou Quality'] >= 0.9]
+	# data = data[data['HR diff'] <= 100]
+	data = data[data['Our Quality'] == 1]
+
+	# Extract relevant columns
+	file_names = data['File name']
+	hjorth_hr = data['Hjorth HR']
+	ref_hr = data['Ref HR']
+	hr_diff = data['HR diff']
+
+	average_hr_diff = hr_diff.mean()
+	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")
+
+	# Select every x-th file name for labeling (x = chunked_pieces)
+	selected_indices = range(0, len(file_names), chunked_pieces)
+
+	####################### Plot the results #######################
+	################################################################
+	plt.figure(figsize=(12, 6))
+
+	# Plot Hjorth HR and Ref HR
+	plt.subplot(2, 1, 1)
+	plt.title('Hjorthova TF vs Referenční TF (Our Quality = 1)')
+	plt.plot(hjorth_hr.values, label='Hjorthova TF (tepů/min)', marker='o')
+	plt.plot(ref_hr.values, label='Referenční TF (tepů/min)', marker='x')
+	plt.xlabel('Index signálu')
+	plt.ylabel('Srdeční frekvence (tepů/min)')
+	plt.legend()
+	plt.grid()
+
+	# Add vertical labels for selected file names
+	for idx in selected_indices:
+		plt.text(idx, hjorth_hr.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+
+	# Plot HR difference
+	plt.subplot(2, 1, 2)
+	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF) (Our Quality = 1)')
+	plt.plot(hr_diff.values, label='Rozdíl TF (tepů/min)', color='red', marker='s')
+	plt.xlabel('Index signálu')
+	plt.ylabel('|Δ TF| (tepů/min)')
+	plt.legend()
+	plt.grid()
+
+	# Add vertical labels for selected file names
+	for idx in selected_indices:
+		plt.text(idx, hr_diff.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+
+	plt.tight_layout()
+	plt.show()
+	################################################################
+
+def hjorth_show_spi(database='CapnoBase'):
 	# Plot the relationship between SPI and HR difference
-	data = pd.read_csv('./hjorth.csv')
+	if database == 'CapnoBase':
+		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'BUT_PPG':
+		data = pd.read_csv('./hjorth_butppg.csv')
+	else:
+		data = pd.read_csv('./hjorth.csv')
+
 	plt.figure(figsize=(8, 6))
 	plt.scatter(data["SPI Filtered"], data["HR diff"], alpha=0.7, c=G.CESA_BLUE, edgecolors='k')
 
@@ -211,17 +172,282 @@ def hjorth_show_spi():
 	# Zobraz
 	plt.show()
 
-def standardize_signal(signal):
-	"""
-	Standardize the signal to range [-1, 1].
-	"""
-	min_val = np.min(signal)
-	max_val = np.max(signal)
-	standardized_signal = 2 * (signal - min_val) / (max_val - min_val) - 1
+###############################################################
+######################### ML QUALITY ##########################
+###############################################################
 
+def quality_hjorth(find_best_parameters=False):
+	from bcpackage import time_count
+	import seaborn as sns
+	from sklearn.ensemble import RandomForestClassifier
+	from sklearn.model_selection import train_test_split, cross_val_score
+	from sklearn.preprocessing import StandardScaler
+	from sklearn.metrics import classification_report, confusion_matrix
+
+	def _plot_feature_importance(_X_df, _trained_model):
+		# Library of feature thresholds with keynames
+		feature_thresholds = {feature_name: [] for feature_name in _X_df.columns}
+
+		# Go through all trees in the forest
+		for tree_estimator in _trained_model.estimators_:
+			tree = tree_estimator.tree_
+			
+			# Go through all nodes in the tree
+			for i in range(tree.node_count):
+				# Check if the node is a leaf
+				if tree.feature[i] != -2:
+					feature_idx = tree.feature[i]
+					threshold_scaled = tree.threshold[i] # This is the threshold used in the tree
+					# Add the threshold to the list for the corresponding feature
+					feature_name = X_df.columns[feature_idx]
+					feature_thresholds[feature_name].append(threshold_scaled)
+
+		# Check threashold for each feature
+		for feature_name, thresholds_list in feature_thresholds.items():
+			if thresholds_list:
+				print(f"\nPrahové hodnoty pro příznak: {feature_name} (na škálovaných datech)")
+				print(f"  Počet použití:  {len(thresholds_list)}")
+				print(f"  Minimální práh: {np.min(thresholds_list):.4f}")
+				print(f"  Mediánový práh: {np.median(thresholds_list):.4f}")
+				print(f"  Průměrný práh:  {np.mean(thresholds_list):.4f}")
+				print(f"  Maximální práh: {np.max(thresholds_list):.4f}")
+
+				plt.figure(figsize=(10, 4))
+				sns.histplot(thresholds_list, kde=True, bins=20)
+				plt.title(f"Distribuce prahů pro {feature_name} (škálovaná data)")
+				plt.xlabel("Prahová hodnota (škálovaná)")
+				plt.ylabel("Frekvence")
+				plt.show()
+			else:
+				print(f"\nPro příznak {feature_name} nebyly v RF použity žádné přímé rozhodovací prahy (může být méně důležitý nebo použit v kombinaci).")
+
+	def _find_best_parameters(_X, _y):
+		"""
+		Printing out the best parameters for Random Forest Classifier that we use below.
+		"""
+		from sklearn.model_selection import GridSearchCV
+
+		param_grid = {
+			"n_estimators": [10, 25, 50, 100, 200],
+			"max_depth": [None, 2, 5, 10],
+			"max_features": ["sqrt", "log2", None],
+		}
+
+		search = GridSearchCV(RandomForestClassifier(class_weight="balanced", random_state=42), param_grid, cv=5, scoring="f1")
+		search.fit(_X, _y)
+		print(f"Nejlepší model: {search.best_estimator_}")
+		print(f"Nejlepší F1 skóre: {search.best_score_:.3f}")
+		print(f"Nejlepší parametry: {search.best_params_}")
+		
+		# Return the best parameters
+		return search.best_params_["max_depth"], search.best_params_["max_features"], search.best_params_["n_estimators"]
+
+	# Start the timer
+	start_time, stop_event = time_count.terminal_time()
+
+	### Load the data from the CSV files
+	df_capno = pd.read_csv("./hjorth_CBq.csv")
+	df_capno["source"] = "capno"
+	df_butppg = pd.read_csv("./hjorth_butppg.csv")
+	df_butppg["source"] = "but"
+	df = pd.concat([df_capno, df_butppg], ignore_index=True)
+
+	### Define what will we use for classification
+	features = ["Mobility Filtered", "Complexity Filtered", "SPI Filtered"]
+	X_df = df[features]
+
+	### Define the target variable
+	target = (df["Orphanidou Quality"] >= 0.9).astype(int)
+
+	### Scaling
+	scaler = StandardScaler()
+	X_scaled = scaler.fit_transform(X_df)
+
+	### Split the data into training and testing sets
+	X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, stratify=target, test_size=0.4, random_state=42)
+
+	if find_best_parameters:
+		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train)
+	else:
+		_max_depth, _max_features, _n_estimators = 5, "sqrt", 50
+
+	### Model training
+	trained_model = RandomForestClassifier(
+		n_estimators=_n_estimators, max_features=_max_features, max_depth=_max_depth, random_state=42, class_weight="balanced"
+		)
+	trained_model.fit(X_train, y_train)
+
+	### Cross-validation: evaluating estimator performance
+	_fold = 5
+	scores = cross_val_score(trained_model, X_scaled, target, cv=_fold, scoring="f1")
+	print(f"Průměrné F1 skóre ({_fold}-fold CV): {scores.mean():.3f} ± {scores.std():.3f}")
+
+	### predicting on the test set
+	y_pred = trained_model.predict(X_test)
+
+	### Print && show
+	# _plot_feature_importance(X_df, trained_model)
+	print("Klasifikační zpráva:")
+	print(classification_report(y_test, y_pred, digits=3))
+	print("Matice záměn:")
+	print("TN   FP\nFN   TP")
+	print(confusion_matrix(y_test, y_pred))
+
+	# Stop the timer and print the elapsed time
+	time_count.stop_terminal_time(start_time, stop_event, func_name='Random Forest Classifier')
+
+	return trained_model.predict(X_scaled)
+
+# def quality_hjorth():
+# 	from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+# 	from sklearn.model_selection import train_test_split
+# 	from sklearn.metrics import classification_report, confusion_matrix
+# 	from sklearn.preprocessing import StandardScaler
+
+# 	# Define sources
+# 	df_capno = pd.read_csv("./hjorth_CBq.csv")
+# 	df_capno["source"] = "capno"
+
+# 	df_butppg = pd.read_csv("./hjorth_butppg.csv")
+# 	df_butppg["source"] = "but"
+
+# 	df = pd.concat([df_capno, df_butppg], ignore_index=True)
+
+# 	# Define what will we use for classification
+# 	features = ["Mobility Filtered",
+# 				"Complexity Filtered",
+# 				"SPI Filtered",
+# 				"Spectral Ratio",
+# 				"ACF Peaks",
+# 				"Shannon Entropy"
+# 				]
+# 	X = df[features]
+# 	y = (df["Orphanidou Quality"] >= 0.9).astype(int)
+
+# 	# Scaling for uniformity of Hjorth parameters
+# 	scaler = StandardScaler()
+# 	X_scaled = scaler.fit_transform(X)
+
+# 	# Split the data into training and testing sets
+# 	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.2, random_state=66)
+
+# 	# Model training
+# 	_max_depth = 4
+# 	clf = RandomForestClassifier(n_estimators=100, random_state=6)
+# 	# clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=_max_depth, random_state=6)
+# 	clf.fit(X_train, y_train)
+
+# 	y_pred = clf.predict(X_test)
+
+# 	# Get feature importances
+# 	importances = clf.feature_importances_
+
+# 	# Sort the features by importance
+# 	sorted_indices = np.argsort(importances)[::-1]
+
+# 	print("Důležitost příznaků podle Random Forest:")
+# 	for i in sorted_indices:
+# 		print(f"{features[i]}: {importances[i]:.4f}")
+
+# 	# Print && show)
+# 	print("Klasifikační zpráva:")
+# 	print(classification_report(y_test, y_pred, digits=3))
+# 	print("Matice záměn:")
+# 	print(confusion_matrix(y_test, y_pred))
+
+# 	def _plot_confusion_matrix(y_true, y_pred, class_names=["Špatná kvalita", "Dobrá kvalita"]):
+# 		import seaborn as sns
+# 		from sklearn.metrics import classification_report, confusion_matrix
+
+# 		# Confusion matrix
+# 		cm = confusion_matrix(y_true, y_pred)
+# 		plt.figure(figsize=(6, 5))
+# 		sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
+# 					xticklabels=class_names, yticklabels=class_names)
+# 		plt.xlabel("Predikovaná třída")
+# 		plt.ylabel("Skutečná třída")
+# 		plt.title("Matice záměn (Confusion Matrix)")
+# 		plt.tight_layout()
+# 		plt.show()
+
+# 		# Classification report
+# 		print("\nKlasifikační zpráva:")
+# 		print(classification_report(y_true, y_pred, target_names=class_names))
+
+# 	def _plot_feature_importance(clf, feature_names):
+# 		importances = clf.feature_importances_
+# 		indices = np.argsort(importances)[::-1]
+
+# 		plt.figure(figsize=(10, 6))
+# 		plt.title("Důležitost příznaků (Random Forest)")
+# 		plt.bar(range(len(importances)), importances[indices], align="center")
+# 		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=45, ha="right")
+# 		plt.tight_layout()
+# 		plt.grid(True, linestyle='--', alpha=0.5)
+# 		plt.show()
+
+# 	def _plot_2d_projection(X, y, source, method='pca', title='2D projekce dat'):
+# 		from sklearn.decomposition import PCA
+# 		from sklearn.manifold import TSNE
+# 		import seaborn as sns
+
+# 		# Dimenzionální redukce
+# 		if method == 'pca':
+# 			X_proj = PCA(n_components=2).fit_transform(X)
+# 		elif method == 'tsne':
+# 			X_proj = TSNE(n_components=2, perplexity=30, n_iter=1000).fit_transform(X)
+# 		else:
+# 			raise ValueError("Podporované metody: 'pca', 'tsne'")
+
+# 		# Příprava DataFrame pro seaborn
+# 		df_plot = pd.DataFrame({
+# 			"X1": X_proj[:, 0],
+# 			"X2": X_proj[:, 1],
+# 			"Třída": y,
+# 			"Databáze": source
+# 		})
+
+# 		plt.figure(figsize=(8, 6))
+# 		sns.scatterplot(
+# 			data=df_plot,
+# 			x="X1", y="X2",
+# 			hue="Třída",       # barva = kvalita
+# 			style="Databáze",  # tvar = zdroj dat
+# 			palette=["#d62728", "#1f77b4"],
+# 			alpha=0.7
+# 		)
+# 		plt.title(title)
+# 		plt.xlabel("1. komponenta")
+# 		plt.ylabel("2. komponenta")
+# 		plt.legend(title="Třída / Databáze", loc="best", fontsize=9)
+# 		plt.grid(True, linestyle='--', alpha=0.5)
+# 		plt.tight_layout()
+# 		plt.show()
+
+# 	# _plot_confusion_matrix(y_test, y_pred)
+# 	# _plot_feature_importance(clf, features)
+# 	# _plot_2d_projection(X_scaled, y, df["source"], method='pca', title='2D projekce dat (PCA)')
+# 	# _plot_2d_projection(X_scaled, y, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
+
+###############################################################
+#################### SUPPORTING FUNCTIONS #####################
+###############################################################
+
+def _normalize_signal(signal):
+	"""
+	Normalize the signal to range [-1, 1].
+	"""
+	normalized_signal = signal / np.max(np.abs(signal)) if np.max(np.abs(signal)) > 0 else signal
+	return normalized_signal
+
+def _standardize_signal(signal):
+	"""
+	Standardize the signal to have mean 0 and standard deviation 1.
+	"""
+	standardized_signal = (signal - np.mean(signal)) / np.std(signal) if np.std(signal) > 0 else signal
 	return standardized_signal
 
-def autocorrelate_signal(signal, num_iterations=1):
+def _autocorrelate_signal(signal, num_iterations=1):
 	from scipy.signal import correlate
 	"""
 	Perform repeated autocorrelation on the input signal.
@@ -237,7 +463,7 @@ def autocorrelate_signal(signal, num_iterations=1):
 		# result = np.correlate(result, result, mode='same')			# O(i * N^2)
 	return result
 
-def highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
+def _highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 	"""
 	Apply a high-pass Butterworth filter to the input signal.
 	"""
@@ -249,7 +475,7 @@ def highpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 	filtered_signal = filtfilt(b, a, signal)
 	return filtered_signal
 
-def lowpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
+def _lowpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 	"""
 	Apply a low-pass Butterworth filter to the input signal.
 	"""
@@ -261,6 +487,10 @@ def lowpass_filter(signal, cutoff_frequency, sampling_frequency, order=4):
 	filtered_signal = filtfilt(b, a, signal)
 
 	return filtered_signal
+
+###############################################################
+####################### HJORTH ALGORITHM ######################
+###############################################################
 
 def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=False):
 	"""
@@ -284,6 +514,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 
 	file_id, signal, sampling_frequency, ref_hr = data["File name"], data["Raw Signal"], data["fs"], data["Ref HR"]
 	orphanidou_quality = data["Orphanidou Quality"]
+	our_quality = data["Our Quality"]
 
 	# Name of the file
 	if index == 0:
@@ -294,14 +525,14 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 	# Compute sampling interval from frequency
 	sampling_interval = 1 / sampling_frequency
 
-	# Remove DC offset just in case
-	signal -= np.mean(signal)
+	# Standardize the signal = remove DC component and keep the signal shape but still prevent from overflow later
+	signal = _standardize_signal(signal)
 	# Apply the high-pass filter to remove respiratory frequencies
 	respiratory_cutoff_frequency = 0.5  # Example cutoff frequency for respiration [Hz] = equivalent to 30 bpm
-	filtered_signal = highpass_filter(signal, respiratory_cutoff_frequency, sampling_frequency)
+	filtered_signal = _highpass_filter(signal, respiratory_cutoff_frequency, sampling_frequency)
 
 	# Autocorrelate the signal
-	autocorrelated_signal = autocorrelate_signal(filtered_signal, num_iterations=autocorr_iterations)
+	autocorrelated_signal = _autocorrelate_signal(filtered_signal, num_iterations=autocorr_iterations)
 
 	############################## HR #############################
 	###############################################################
@@ -323,48 +554,33 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 	########################### Quality ###########################
 	###############################################################
 	def _hjorth_quality(signal, fs):
-		from scipy.stats import entropy
-		from numpy.fft import rfft, rfftfreq
-		from scipy.signal import correlate
+		import numpy as np
 
-		signal = lowpass_filter(signal, 3.35, fs) # doesnt influence HR but SPI
-		# 1st derivative (velocity) and 2nd derivative (acceleration)
+		# Lowpass filtr (pro SPI)
+		signal = _lowpass_filter(signal, 3.35, fs)
+
+		# Derivace
 		first_derivative_q = np.diff(signal)
 		second_derivative_q = np.diff(first_derivative_q)
-		# Mean square values
+
+		# Výpočty Hjorth deskriptorů
 		mean_square_signal_q = np.mean(signal ** 2)
 		mean_square_derivative_q = np.mean(first_derivative_q ** 2)
 		mean_square_second_derivative_q = np.mean(second_derivative_q ** 2)
-		# Safe division to avoid division by zero
+
 		div_1 = mean_square_derivative_q / mean_square_signal_q if mean_square_signal_q > 0 else 0
 		div_2 = mean_square_second_derivative_q / mean_square_derivative_q if mean_square_derivative_q > 0 else 0
-		# Hjorth parameters
+
 		mobility_q = np.sqrt(div_1) if div_1 > 0 else 0
 		complexity_q = np.sqrt(div_2 - div_1) if div_2 > div_1 else 0
 		spi_q = np.sqrt(div_1 / div_2) if div_1 > 0 and div_2 > 0 else 0
 
-		# Spectral ratio (0.5–3.5 Hz)
-		fft_vals = np.abs(rfft(signal)) ** 2
-		freqs = rfftfreq(len(signal), d=1/fs)
-		signal_band = (freqs >= 0.5) & (freqs <= 3.5)
-		spectral_ratio = fft_vals[signal_band].sum() / fft_vals.sum() if fft_vals.sum() > 0 else 0
-
-		# ACF peak (secondary peak height normalized)
-		acf = correlate(signal, signal, mode='full', method='fft')
-		acf = acf[acf.size // 2:]  # keep right half
-		acf /= np.max(acf) if np.max(acf) > 0 else 1
-		acf_peak = np.max(acf[1:])  # skip lag=0
-
-		# Entropy (Shannon, from histogram)
-		hist, _ = np.histogram(signal, bins=50, density=True)
-		shannon_entropy = entropy(hist + 1e-12)  # small offset to avoid log(0)
-
-		return mobility_q, complexity_q, spi_q, spectral_ratio, acf_peak, shannon_entropy
+		return mobility_q, complexity_q, spi_q
 
 	if orphanidou_quality is not None:
-		mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy = _hjorth_quality(filtered_signal, sampling_frequency)
+		mobility, complexity, spi = _hjorth_quality(filtered_signal, sampling_frequency)
 	else:
-		mobility_filtr, complexity_filtr, spi_filtr, spectral_ratio, acf_peak, shannon_entropy =None, None, None, None, None, None
+		mobility, complexity, spi = None, None, None
 	###############################################################
 
 	hjorth_info = {
@@ -373,13 +589,11 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		"Hjorth HR": mobility_hz_autocorr * 60,
 		"Ref HR": ref_hr,
 		"HR diff": abs(ref_hr - (mobility_hz_autocorr * 60)),
-		"Mobility Filtered": mobility_filtr,
-		"Complexity Filtered": complexity_filtr,
-		"SPI Filtered": spi_filtr,
-		"Spectral Ratio": spectral_ratio,
-		"ACF Peaks": acf_peak,
-		"Shannon Entropy": shannon_entropy,
+		"Mobility Filtered": mobility,
+		"Complexity Filtered": complexity,
+		"SPI Filtered": spi,
 		"Orphanidou Quality": orphanidou_quality,
+		"Our Quality": our_quality,
 		"Ref Quality": data["Ref Quality"],
 	}
 
@@ -401,29 +615,33 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		fft_magnitude = np.abs(np.fft.rfft(filtered_signal))
 		freqs_autocorr = np.fft.rfftfreq(len(autocorrelated_signal), d=1/sampling_frequency)
 		fft_magnitude_autocorr = np.abs(np.fft.rfft(autocorrelated_signal))
+		freqs_raw = np.fft.rfftfreq(len(signal), d=1/sampling_frequency)
+		fft_magnitude_raw = np.abs(np.fft.rfft(signal))
 
 		# Rescale FFT magnitudes to the same scale
 		fft_magnitude_rescaled = fft_magnitude / np.max(fft_magnitude)
 		fft_magnitude_autocorr_rescaled = fft_magnitude_autocorr / np.max(fft_magnitude_autocorr)
+		fft_magnitude_raw_rescaled = fft_magnitude_raw / np.max(fft_magnitude_raw)
 
 		# Vykreslení autokorelovaného signálu a derivace
 		plt.figure(figsize=(12, 6))
 
 		plt.subplot(2, 1, 1)
-		plt.title("Přeškálovaný filtrovaný a autokorelovaný signál s derivacemi")
+		plt.title("Přeškálovaný filtrovaný a autokorelovaný signál")
 		plt.xlabel("Čas [s]")
 		plt.ylabel("Relativní amplituda")
 		time_axis = np.arange(len(filtered_signal)) / sampling_frequency
-		plt.plot(time_axis, standardize_signal(filtered_signal), label="Filtrovaný signál")
-		plt.plot(time_axis, standardize_signal(autocorrelated_signal), label="Autokorelovaný signál")
+		plt.plot(time_axis, _normalize_signal(filtered_signal), label="Filtrovaný signál")
+		plt.plot(time_axis, _normalize_signal(autocorrelated_signal), label="Autokorelovaný signál")
 		plt.legend()
 		plt.grid()
 
 		# Vykreslení frekvenční charakteristiky
 		plt.subplot(2, 1, 2)
-		freq_max = 20
+		freq_max = 15
 		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Frekvenční charakteristika filtrovaného signálu")
 		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Frekvenční charakteristika autokorelovaného signálu")
+		plt.plot(freqs_raw[freqs_raw <= freq_max], fft_magnitude_raw_rescaled[freqs_raw <= freq_max], label="Frekvenční charakteristika původního signálu", color='grey', alpha=0.5)
 		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color='green', linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz")
 		plt.title("Přeškálovaná frekvenční charakteristika signálů")
 		plt.ylabel("Relativní amplituda")
@@ -436,8 +654,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 
 	return hjorth_info
 
-
-def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
+def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_quality=False):
 	"""
 	Calculate by Hjorth parameters the HR for the given database and evaluate the results.
 	"""
@@ -461,10 +678,11 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 		chunk_len = len(file_info['Raw Signal']) // chunked_pieces
 
 		start_idx = chunk_idx * chunk_len
-		if chunk_idx == chunked_pieces - 1:
-			end_idx = len(file_info['Raw Signal'])
-		else:
-			end_idx = start_idx + chunk_len
+		end_idx = start_idx + chunk_len		# ignoring the last chunk if it is not full
+		# if chunk_idx == chunked_pieces - 1:
+		# 	end_idx = len(file_info['Raw Signal'])
+		# else:
+		# 	end_idx = start_idx + chunk_len
 
 		ppg_chunk = file_info['Raw Signal'][start_idx:end_idx]
 
@@ -482,7 +700,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 		Prepare the data for Hjorth parameters calculation.
 		"""
 		if calculate_orphanidou_quality:
-			nk_signals, info = nk.ppg_process(chunked_singal, sampling_rate=_fs, method_quality="templatematch") # Orphanidou method
+			nk_signals, info = nk.ppg_process(_raw_signal, sampling_rate=_fs, method_quality="templatematch") # Orphanidou method
 			_orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
 		else:
 			_orphanidou_quality = None
@@ -497,6 +715,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 		}
 		return data
 
+	our_quality = quality_hjorth()
 	# Start the timer
 	start_time, stop_event = time_count.terminal_time()
 
@@ -511,13 +730,15 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 					chunked_singal, chunk_ref_hr = _chunking_signal(chunked_pieces, file_info, j)
 					_data = _prepare_data_for_hjorth(
 						file_info["ID"], file_info["fs"], chunked_singal, None, chunk_ref_hr,
-						calculate_orphanidou_quality=False
+						calculate_orphanidou_quality=compute_quality
 					)
+					_data["Our Quality"] = our_quality[i * chunked_pieces + j]
 					compute_hjorth_parameters(_data, j, autocorr_iterations, only_quality=False)
 			else:
 				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 10s long chunks>\033[0m")
 
 	elif database == "BUT_PPG":
+		j = 0
 		for i in range(G.BUT_DATA_LEN):
 			if chunked_pieces == 1:
 				file_info = but_data.extract(i)
@@ -526,9 +747,11 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 				# Preparing data
 				_data = _prepare_data_for_hjorth(
 					file_info['ID'], file_info['PPG_fs'], file_info['PPG_Signal'], file_info['Ref_Quality'], file_info['Ref_HR'],
-					calculate_orphanidou_quality=False
+					calculate_orphanidou_quality=compute_quality
 				)
-				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=True)
+				_data["Our Quality"] = our_quality[j + 2016]
+				j += 1
+				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=False)
 			else:
 				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10
@@ -538,14 +761,3 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=4, show=False):
 
 	# Stop the timer and print the elapsed time
 	time_count.stop_terminal_time(start_time, stop_event, func_name=f'Hjorth - {database}')
-
-	# Show the results on graphs and in terminal
-	if show:
-		hjorth_show_hr(chunked_pieces)
-		hjorth_show_spi()
-	else:
-		print("Hjorth parameters calculated and saved to hjorth.csv.")
-
-	data = pd.read_csv('./hjorth.csv')
-	average_hr_diff = data['HR diff'].mean()
-	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")

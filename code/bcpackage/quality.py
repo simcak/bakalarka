@@ -307,29 +307,36 @@ def orphanidou_quality_plot(threshold, chunked_pieces):
 	from bcpackage import globals as G
 
 	# Load the data
-	orph_data = pd.read_csv("./orphanidou_quality.csv")
+	orph_data = pd.read_csv("./orph_q_but.csv")
 
 	# Extract values
-	signal_id = orph_data['ID'].values
+	signal_ids = orph_data["ID"].astype(str).values
+	x_idx = np.arange(len(signal_ids))
 	orph_quality = orph_data['Orphanidou_Quality'].values
 	ref_quality = orph_data['Ref_Quality'].values
 
 	# Determine colors based on equality
 	colors = [G.CESA_BLUE if oq >= threshold and rq == 1 else G.BUT_RED for oq, rq in zip(orph_quality, ref_quality)]
 
-	# Plotting
-	plt.figure(figsize=(10, 6))
-	plt.scatter(signal_id, orph_quality, c=colors, alpha=0.7, edgecolors='k')
-	plt.axhline(y=threshold, color='gray', linestyle='--', linewidth=0.8)
-	plt.title("Orphanidou Quality vs Signal ID")
-	plt.xlabel("Signal ID")
-	plt.ylabel("Orphanidou Quality")
-	plt.grid(alpha=0.3)
-	plt.xticks(
-		ticks=np.arange(0, len(signal_id), chunked_pieces),
-		rotation=90
-	)
+	plt.figure(figsize=(13, 6))
+	plt.scatter(x_idx, orph_quality, c=colors, alpha=0.7, edgecolors='k')
+	# plt.axhline(y=threshold, color="grey", linestyle="--", linewidth=1)
+	plt.title("Orphanidou vs Referenční kvalita BUT PPG", fontsize=14)
+	plt.ylabel("Orphanidou kvalita", fontsize=12)
+	plt.xlabel("ID signálu", fontsize=12)
+	tick_positions = x_idx[::chunked_pieces]
+	tick_labels = signal_ids[::chunked_pieces]
+	plt.xticks(tick_positions, tick_labels, rotation=90)
+	plt.grid(axis="y", alpha=0.3)
 	plt.tight_layout()
+	plt.legend(
+		handles=[
+			plt.Line2D([0], [0], marker='o', color='w', label='Kvalitní dle databáze', markerfacecolor=G.CESA_BLUE, markersize=10),
+			plt.Line2D([0], [0], marker='o', color='w', label='Negativní dle databáze', markerfacecolor=G.BUT_RED, markersize=10),
+			# plt.Line2D([0], [0], color='grey', linestyle="--", linewidth=1, label=f'Threshold: {threshold}'),
+		],
+		loc='upper right',
+	)
 	plt.show()
 
 def orphanidou_quality_evaluation(threshold, print_out=False):
