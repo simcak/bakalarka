@@ -1,3 +1,10 @@
+% todo:
+% - přidat obrázek vykreslující autokorelace + popis proč máme 5 iterací
+% - odkaz na podkapitoly ve výsledcích (konec kapitoly 6.1)
+% - KAPITOLA 6.2 - KVALITA obecně
+% - najít zdroj mluvící o využití Hjorthových deskriptorů pro kvalitu signálu
+% - aktualizovat obrázek 6.1
+
 \chapter{Využití Hjorthových deskriptorů na odhad TF a kvality signálů}
 \label{ch:hjorth}
 % Důvody použití Hjorthových deskriptorů pro odhad TF.
@@ -55,7 +62,8 @@ Pokud na konci po rozdělení signálu zůstane jeho část, pak je tato část 
 % KEEP IN MIND: Nepotlačují se frekvence, ale složky o vyšších/nižších frekvencích.
 Nejprve jsme odstranili stejnosměrnou (\acs{DC}) složku signálu, tedy jeho střední hodnotu \(\mu\).
 To jsme učinili proto, aby neovlivňovala výpočet rozptylu signálu a tudíž ani nesnižovala výslednou hodnotu mobility.
-Abychom zabránili přetečení data u (\ref{eq:hjorth_var_signal}) a (\ref{eq:hjorth_var_signal_diff}), a zároveň zachovali tvar signálu, vydělili jsme signál bez \( \mu \) jeho směrodatnou odchylkou \( \sigma \). Rovnice pro standardizaci signálu je následující:
+Abychom zabránili přetečení data u (\ref{eq:hjorth_var_signal}) a (\ref{eq:hjorth_var_signal_diff}), a zároveň zachovali tvar signálu, vydělili jsme signál bez \( \mu \) jeho směrodatnou odchylkou \( \sigma \).
+Rovnice pro standardizaci signálu je následující:
 \begin{equation}
 	x[n] = \frac{x[n] - \mu}{\sigma}.
 \end{equation}
