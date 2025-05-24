@@ -51,7 +51,7 @@ def detect_peaks(ppg_signal, fs):
 		window = ppg_signal[start:end]
 
 		# 1) Rescale/restandardize the window
-		standardized_window = preprocess.standardize_signal(window)
+		standardized_window = preprocess.standardize_normalize_signal(window)
 
 		# 2) Detect peaks in the standardized window
 		peaks = local_max_detector(standardized_window, min_peak_height, min_peak_distance)

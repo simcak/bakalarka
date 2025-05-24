@@ -209,99 +209,6 @@ def empty():
 import numpy as np
 import pandas as pd
 
-def ref_quality_orphanidou(database='BUT_PPG', chunked_pieces=1):
-	from bcpackage import globals as G, time_count
-	from bcpackage.butpackage import but_data, but_error
-	from bcpackage.capnopackage import cb_data
-	import neurokit2 as nk
-
-	def _chunking_signal(chunked_pieces, file_info, chunk_idx):
-		"""
-		Chunk the signal into smaller segments for processing them.
-		Last chunk may be longer than the others.
-		Chunking is only supported for CapnoBase database.
-		"""
-		if chunked_pieces == 1:
-			return file_info['Raw Signal'], file_info['Ref HR']
-
-		import numpy as np
-		from bcpackage import calcul
-		# Calculate the length of each chunk in samples
-		chunk_len = len(file_info['Raw Signal']) // chunked_pieces
-
-		start_idx = chunk_idx * chunk_len
-		if chunk_idx == chunked_pieces - 1:
-			end_idx = len(file_info['Raw Signal'])
-		else:
-			end_idx = start_idx + chunk_len
-
-		ppg_chunk = file_info['Raw Signal'][start_idx:end_idx]
-
-		chunk_ref_peaks = np.array(file_info['Ref Peaks'])
-		mask = (chunk_ref_peaks >= start_idx) & (chunk_ref_peaks < end_idx)
-		chunk_ref_peaks = chunk_ref_peaks[mask] - start_idx
-
-		hr_info = calcul.heart_rate(chunk_ref_peaks, None, file_info['fs'], init=True)
-		chunk_ref_hr = hr_info['Ref HR']
-
-		return ppg_chunk, chunk_ref_hr
-
-	def _export_to_csv(_orphanidou_info):
-		output_file = "./orphanidou_quality.csv"
-		try:
-			orphanidou_df = pd.read_csv(output_file)
-		except FileNotFoundError:
-			orphanidou_df = pd.DataFrame()
-		orphanidou_df = pd.concat([orphanidou_df, pd.DataFrame([_orphanidou_info])], ignore_index=True)
-		orphanidou_df.to_csv(output_file, header=True, index=False)
-
-	start_time, stop_event = time_count.terminal_time()
-
-	if database == 'CapnoBase':
-		for i in range(G.CB_FILES_LEN):
-			file_info = cb_data.extract(G.CB_FILES[i])
-			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 10) # 10s long chunks
-			# Chunk the signal
-			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
-				for j in range(chunked_pieces):
-					signal, ref_hr = _chunking_signal(chunked_pieces, file_info, j)
-					fs, file_id, ref_quality = file_info['fs'], file_info['ID'], 1
-					nk_signals, info = nk.ppg_process(signal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
-					orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
-					file_id = file_id if j == 0 else f"{file_id}_{j+1}"
-
-					orphanidou_info = {
-						'ID': file_id,
-						'fs': fs,
-						'Ref_HR': ref_hr,
-						'Ref_Quality': ref_quality,
-						'Orphanidou_Quality': orphanidou_quality,
-					}
-					_export_to_csv(orphanidou_info)
-			else:
-				raise ValueError(f"Chunked pieces must be between 1 and {max_chunk_count}.")
-
-	elif database == 'BUT_PPG':
-		for i in range(G.BUT_DATA_LEN):
-			file_info = but_data.extract(i)
-			if but_error.police(file_info, i):
-				continue
-			signal, fs, file_id = file_info['PPG_Signal'], file_info['PPG_fs'], file_info['ID']
-			ref_hr, ref_quality = file_info['Ref_HR'], file_info['Ref_Quality']
-			nk_signals, info = nk.ppg_process(signal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
-			orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
-
-			orphanidou_info = {
-				'ID': file_id,
-				'fs': fs,
-				'Ref_HR': ref_hr,
-				'Ref_Quality': ref_quality,
-				'Orphanidou_Quality': orphanidou_quality,
-			}
-			_export_to_csv(orphanidou_info)
-
-	time_count.stop_terminal_time(start_time, stop_event, func_name=f'Orphanidou quality')
-
 def orphanidou_quality_plot(threshold, chunked_pieces):
 	import matplotlib.pyplot as plt
 	from bcpackage import globals as G
@@ -367,3 +274,97 @@ def orphanidou_quality_evaluation(threshold, print_out=False):
 		print(f"Se: {Se:.3f}, PPV: {PPV:.3f}, F1: {F1:.3f}")
 
 	return F1
+
+def ref_quality_orphanidou(database='BUT_PPG', chunked_pieces=1):
+	from bcpackage import globals as G, time_count
+	from bcpackage.butpackage import but_data, but_error
+	from bcpackage.capnopackage import cb_data
+	import neurokit2 as nk
+
+	def _chunking_signal(chunked_pieces, file_info, chunk_idx):
+		"""
+		Chunk the signal into smaller segments for processing them.
+		Last chunk may be longer than the others.
+		Chunking is only supported for CapnoBase database.
+		"""
+		if chunked_pieces == 1:
+			return file_info['Raw Signal'], file_info['Ref HR']
+
+		import numpy as np
+		from bcpackage import calcul
+		# Calculate the length of each chunk in samples
+		chunk_len = len(file_info['Raw Signal']) // chunked_pieces
+
+		start_idx = chunk_idx * chunk_len
+		if chunk_idx == chunked_pieces - 1:
+			end_idx = len(file_info['Raw Signal'])
+		else:
+			end_idx = start_idx + chunk_len
+
+		ppg_chunk = file_info['Raw Signal'][start_idx:end_idx]
+
+		chunk_ref_peaks = np.array(file_info['Ref Peaks'])
+		mask = (chunk_ref_peaks >= start_idx) & (chunk_ref_peaks < end_idx)
+		chunk_ref_peaks = chunk_ref_peaks[mask] - start_idx
+
+		hr_info = calcul.heart_rate(chunk_ref_peaks, None, file_info['fs'], init=True)
+		chunk_ref_hr = hr_info['Ref HR']
+
+		return ppg_chunk, chunk_ref_hr
+
+	def _export_to_csv(_orphanidou_info):
+		output_file = "./orphanidou_quality.csv"
+		try:
+			orphanidou_df = pd.read_csv(output_file)
+		except FileNotFoundError:
+			orphanidou_df = pd.DataFrame()
+		orphanidou_df = pd.concat([orphanidou_df, pd.DataFrame([_orphanidou_info])], ignore_index=True)
+		orphanidou_df.to_csv(output_file, header=True, index=False)
+
+	start_time, stop_event = time_count.terminal_time()
+
+	if database == 'CapnoBase':
+		for i in range(G.CB_FILES_LEN):
+			file_info = cb_data.extract(G.CB_FILES[i])
+			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 10) # 10s long chunks
+			# Chunk the signal
+			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
+				for j in range(chunked_pieces):
+					signal, ref_hr = _chunking_signal(chunked_pieces, file_info, j)
+					fs, file_id, ref_quality = file_info['fs'], file_info['ID'], None
+					nk_signals, info = nk.ppg_process(signal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
+					orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
+					file_id = file_id if j == 0 else f"{file_id}_{j+1}"
+
+					orphanidou_info = {
+						'ID': file_id,
+						'fs': fs,
+						'Ref_HR': ref_hr,
+						'Ref_Quality': ref_quality,
+						'Orphanidou_Quality': orphanidou_quality,
+					}
+					_export_to_csv(orphanidou_info)
+			else:
+				raise ValueError(f"Chunked pieces must be between 1 and {max_chunk_count}.")
+
+	elif database == 'BUT_PPG':
+		for i in range(G.BUT_DATA_LEN):
+			file_info = but_data.extract(i)
+			if but_error.police(file_info, i):
+				continue
+			signal, fs, file_id = file_info['PPG_Signal'], file_info['PPG_fs'], file_info['ID']
+			ref_hr, ref_quality = file_info['Ref_HR'], file_info['Ref_Quality']
+			nk_signals, info = nk.ppg_process(signal, sampling_rate=fs, method_quality="templatematch") # Orphanidou method
+			orphanidou_quality = np.mean(nk_signals['PPG_Quality'])
+
+			orphanidou_info = {
+				'ID': file_id,
+				'fs': fs,
+				'Ref_HR': ref_hr,
+				'Ref_Quality': ref_quality,
+				'Orphanidou_Quality': orphanidou_quality,
+			}
+			_export_to_csv(orphanidou_info)
+
+	time_count.stop_terminal_time(start_time, stop_event, func_name=f'Orphanidou quality')
+

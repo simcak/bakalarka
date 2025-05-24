@@ -1,5 +1,5 @@
 from bcpackage.capnopackage import cb_data, cb_show
-from bcpackage import preprocess, peaks, calcul, export, quality, globals as G, time_count, hjorth
+from bcpackage import preprocess, peaks, calcul, export, globals as G, time_count, hjorth
 
 import neurokit2 as nk
 import numpy as np
@@ -15,7 +15,6 @@ def _compute_global_results(name: str):
 	total_precision = np.sum(G.TP_LIST) / (np.sum(G.TP_LIST) + np.sum(G.FP_LIST))
 
 	export.to_csv_global(total_sensitivity, total_precision, type=name, database='CB')
-
 
 def _chunking_signal(file_info, chunk_idx):
 	"""
@@ -44,7 +43,6 @@ def _chunking_signal(file_info, chunk_idx):
 
 	return ppg_chunk, chunk_ref_peaks, chunk_ref_hr
 
-
 def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	"""
 	Process the signal according to the method.
@@ -70,9 +68,6 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 	if method == 'my':
 		filtered_ppg_signal = preprocess.filter_signal(ppg_signal, fs)
 		detected_peaks = peaks.detect_peaks(filtered_ppg_signal, fs)
-		quality_info = quality.evaluate(filtered_ppg_signal, detected_peaks, fs,
-								  None, None,
-								  method='my_morpho', database='CB')
 		name = 'My'
 
 	# Execute the NeuroKit package with:
@@ -83,9 +78,6 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 		nk_signals, nk_info = nk.ppg_process(ppg_signal, sampling_rate=fs,
 									   method="elgendi", method_quality="templatematch")
 		detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
-		quality_info = quality.evaluate(None, detected_peaks, fs,
-								  nk_signals['PPG_Quality'], None,
-								  method='orphanidou', database='CB')
 		name = 'NK'
 
 	else:
@@ -102,13 +94,12 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 
 	################################### For testing purposes ##################################
 	if method == 'my' and show:
-		cb_show.test_hub(preprocess.standardize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
+		cb_show.test_hub(preprocess.standardize_normalize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
 	elif method == 'neurokit' and show:
 		cb_show.neurokit_show(nk_signals, nk_info, i)
 	############################################################################################
 
-	return name, quality_info, local_hr_info, statistical_info
-
+	return name, local_hr_info, statistical_info
 
 def capnobase_main(method: str, chunk=False, show=False, first=False):
 	"""
@@ -123,7 +114,7 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 	Returns:
 		None (exports the results to a CSV file)
 	"""
-	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST, G.QUALITY_LIST = [], [], [], [], []
+	G.TP_LIST, G.FP_LIST, G.FN_LIST, G.DIFF_HR_LIST = [], [], [], []
 	start_time, stop_event = time_count.terminal_time()
 
 	for i in range(G.CB_FILES_LEN):
@@ -131,15 +122,15 @@ def capnobase_main(method: str, chunk=False, show=False, first=False):
 
 		if chunk:
 			for chunk_idx in range(8):
-				name, quality_info, local_hr_info, statistical_info = _process_signal(file_info, method, i, show,
+				name, local_hr_info, statistical_info = _process_signal(file_info, method, i, show,
 																			chunk=chunk, chunk_idx=chunk_idx)
 
-				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, quality_info, statistical_info,
+				export.to_csv_local(file_info['ID'], chunk_idx, i, local_hr_info, statistical_info,
 							  type=name, database='CB', first=first)
 		else:
-			name, quality_info, local_hr_info, statistical_info = _process_signal(file_info, method, i, show)
+			name, local_hr_info, statistical_info = _process_signal(file_info, method, i, show)
 
-			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, quality_info, statistical_info,
+			export.to_csv_local(file_info['ID'], 8, i, local_hr_info, statistical_info,
 						  type=name, database='CB', first=first)
 
 	_compute_global_results(name)

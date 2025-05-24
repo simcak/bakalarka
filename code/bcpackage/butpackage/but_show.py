@@ -47,11 +47,14 @@ def two_signals_peaks(signal1, signal2, peaks, but_id):
 	"""
 	Plot two signals with their peaks.
 	"""
+	time = [i / 30 for i in range(len(signal1))]
 	plt.figure(figsize=(14.4, 6))
-	plt.plot(signal1)
-	plt.plot(signal2)
-	plt.scatter(peaks, signal2[peaks], c='g')
-	plt.title(f'Two Signals with Peaks (id.: {but_id})')
-	plt.xlabel('Samples')
-	plt.ylabel('Signal')
+	plt.plot(time, signal1, label='původní signál')
+	plt.plot(time, signal2, label='filtrovaný signál')
+	plt.scatter([time[p] for p in peaks], signal2[peaks], c='g')
+	plt.title(f'BUT PPG (id.: {but_id}) Referenční kvalita: 1', fontsize=17)
+	plt.xlabel('Čas [s]', fontsize=14)
+	plt.ylabel('Relativní amplituda', fontsize=14)
+	plt.tight_layout()
+	plt.legend(fontsize=14, loc='upper right')
 	plt.show()

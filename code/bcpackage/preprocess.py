@@ -38,28 +38,28 @@ def plot_frequency_response(fs, lowcut=0.5, highcut=3.35, order=4):
 
 	plt.show()
 
-def standardize_signal(signal):
+def standardize_normalize_signal(signal):
 	"""
-	Standardizes a signal to the range [-1, 1].
+	Standardizes and normalizes the input signal.
+	Standardization centers the signal by subtracting the mean and dividing by the standard deviation.
+	Normalizes the signal to the range [-1, 1].
 
 	Parameters:
 		signal (array-like): The input signal.
 
 	Returns:
-		standardized_signal (array-like): The standardized signal with values between -1 and 1.
+		normalized_signal (array-like): The normalized signal with values between -1 and 1.
 	"""
-	# Center the signal by subtracting the mean
+	# Standardize the signal
 	centered_signal = signal - np.mean(signal)
+	signal_out = centered_signal / np.std(centered_signal)
 	
-	# Normalize by the standard deviation
-	standardized_signal = centered_signal / np.std(centered_signal)
+	# Normalize the signal to the range [-1, 1]
+	min_val = np.min(signal_out)
+	max_val = np.max(signal_out)
+	signal_out = 2 * (signal_out - min_val) / (max_val - min_val) - 1
 	
-	# Scale to the range [-1, 1]
-	min_val = np.min(standardized_signal)
-	max_val = np.max(standardized_signal)
-	standardized_signal = 2 * (standardized_signal - min_val) / (max_val - min_val) - 1
-	
-	return standardized_signal
+	return signal_out
 
 def remove_noise(input_signal, fs, lowcut=0.5, highcut=3.35, order=4):
 	"""
@@ -94,7 +94,7 @@ def filter_signal(ppg_signal, fs):
 	# plot_frequency_response(fs, lowcut=0.5, highcut=3.35, order=4)
 	denoised_signal = remove_noise(ppg_signal, fs, lowcut=0.5, highcut=3.35)
 	# no_BLD_signal = remove_baseline_drift(denoised_signal, fs, highcut=0.5)
-	standardized_signal = standardize_signal(denoised_signal)
+	standardized_signal = standardize_normalize_signal(denoised_signal)
 	# remove motion artifacts?
 	output_signal = standardized_signal
 

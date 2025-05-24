@@ -33,18 +33,23 @@ def main():
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=5)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=35, autocorr_iterations=5)
 
-	# our_quality = hjorth.quality_hjorth()
+	##### Quality Algorithm - HJORTH #####
+	# hjorth.quality_hjorth()
+	# our_quality = hjorth.quality_hjorth(find_best_parameters=True)
+	# file = pd.read_csv('hjorth.csv')
+	# file["ourQ_this_only"] = our_quality
+	# file.to_csv('hjorth.csv', index=False)
 
-	# hjorth.confusion_matrix()
-	# hjorth.hjorth_show_hr(48)
-	# hjorth.hjorth_show_only_quality_hr(48)
+	# hjorth.confusion_matrix(database='all')
+	# hjorth.hjorth_show_hr(48, database='CapnoBase300')
+	# hjorth.hjorth_show_only_quality_hr(48, database='CapnoBase300')
 	# hjorth.hjorth_show_spi()
 
-	############## Quality Algorithm #############
-	##############################################
+	############## Quality Algorithm - Orphanidou ##############
+	############################################################
 	from bcpackage import quality
 	chunked_pieces = 48
-	# quality.ref_quality_orphanidou(database='BUT_PPG', chunked_pieces=chunked_pieces)
+	# quality.ref_quality_orphanidou(database='CapnoBase', chunked_pieces=chunked_pieces)
 	# f1_arr = []
 	# for thr in [i * 0.01 for i in range(0, 101)]:
 	# 	f1_arr.append((thr, quality.orphanidou_quality_evaluation(thr)))
@@ -53,7 +58,7 @@ def main():
 	# threshold = max_f1[0]
 	# quality.orphanidou_quality_evaluation(threshold, print_out=True)
 	threshold = -0.1
-	quality.orphanidou_quality_plot(threshold, chunked_pieces)
+	# quality.orphanidou_quality_plot(threshold, chunked_pieces)
 
 	############## Show the results ##############
 	##############################################

@@ -5,7 +5,7 @@ import numpy as np
 import csv
 
 ###################################################################################
-def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
+def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 				 type='My', database='CB', first=False):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
@@ -23,7 +23,6 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
-				'Our Quality': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -32,7 +31,6 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -43,18 +41,12 @@ def to_csv_local(id_, chunk_idx, i, hr_info, quality_info, statistical_info,
 				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
-				'Ref. Quality': quality_info['Ref Q.'],
-				f'Our Q. (>={G.MORPHO_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
-				'Diff Quality': quality_info['Diff Q.']
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': f'{id_[:3]}-{id_[3:]}',
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
-				'Ref. Quality': quality_info['Ref Q.'],
-				f'Orph. Q. (>={G.CORRELATION_THRESHOLD * 100}%)': quality_info['Calc Q.'] * 100,
-				'Diff Quality': quality_info['Diff Q.']
 			})
 	else:
 		raise ValueError("Invalid type provided for local export.")
@@ -97,13 +89,13 @@ def to_csv_global(sensitivity, precision, type='My', database='CB'):
 		if (type == 'My'):
 			row.append({
 				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
-				'AVG Quality': np.average(G.QUALITY_LIST) * 100, 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
 				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
-				'AVG Quality': np.average(G.QUALITY_LIST) * 100, 'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		else:
@@ -111,15 +103,11 @@ def to_csv_global(sensitivity, precision, type='My', database='CB'):
 	elif (database == 'BUT'):
 		if (type == 'My'):
 			row.append({
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
-				'AVG Diff Q-HR': np.average(G.DIFF_HR_LIST_QUALITY),
-				'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)}%)'
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
-				'AVG Diff Q-HR': np.average(G.DIFF_HR_LIST_QUALITY),
-				'Diff Quality': f'{G.DIFF_QUALITY_SUM} ({np.round(G.DIFF_QUALITY_SUM/G.BUT_DATA_LEN * 100, 3)}%)'
+				'AVG Diff HR': np.average(G.DIFF_HR_LIST)
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")

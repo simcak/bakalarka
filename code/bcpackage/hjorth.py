@@ -7,20 +7,27 @@ import pandas as pd
 ##################### SHOWING && PLOTTING #####################
 ###############################################################
 
-
-
-def confusion_matrix():
+def confusion_matrix(database='all'):
 	import seaborn as sns
 	from sklearn.metrics import confusion_matrix
 
-	data_cb = pd.read_csv('./hjorth_CBq.csv')
-	data_but = pd.read_csv('./hjorth_butppg.csv')
-	data_all = pd.concat([data_cb, data_but], ignore_index=True)
+	if database == 'CapnoBase30':
+		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'CapnoBase300':
+		data = pd.read_csv('./hjorth_CBq_300.csv')
+	elif database == 'BUT_PPG':
+		data = pd.read_csv('./hjorth_butppg.csv')
+	elif database == 'all':
+		data_cb = pd.read_csv('./hjorth_CBq.csv')
+		data_but = pd.read_csv('./hjorth_butppg.csv')
+		data = pd.concat([data_cb, data_but], ignore_index=True)
+	else:
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
 
 	# Calculate confusion matrix
 	cm = confusion_matrix(
-		data_all['ourQ_this_only'],
-		(data_all['Orphanidou Quality'] >= 0.9).astype(int)
+		data['ourQ_this_only'],
+		(data['Orphanidou Quality'] >= 0.9).astype(int)
 	)
 
 	# Plot confusion matrix with colors
@@ -34,14 +41,16 @@ def confusion_matrix():
 	plt.tight_layout()
 	plt.show()
 
-def hjorth_show_hr(chunked_pieces, database='CapnoBase'):
+def hjorth_show_hr(chunked_pieces, database='CapnoBase300'):
 	# Load the data from the CSV file
-	if database == 'CapnoBase':
+	if database == 'CapnoBase30':
 		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'CapnoBase300':
+		data = pd.read_csv('./hjorth_CBq_300.csv')
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
 	else:
-		data = pd.read_csv('./hjorth.csv')
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG'.")
 
 	# Extract relevant columns
 	file_names = data['File name']
@@ -90,18 +99,22 @@ def hjorth_show_hr(chunked_pieces, database='CapnoBase'):
 	plt.show()
 	################################################################
 
-def hjorth_show_only_quality_hr(chunked_pieces, database='CapnoBase'):
-	# Load the data from the CSV file
-	if database == 'CapnoBase':
-		data = pd.read_csv('./hjorth_CBq.csv')
-	elif database == 'BUT_PPG':
-		data = pd.read_csv('./hjorth_butppg.csv')
-	else:
-		data = pd.read_csv('./hjorth.csv')
-
+def hjorth_show_only_quality_hr(chunked_pieces, database='CapnoBase300'):
 	# data = data[data['Orphanidou Quality'] >= 0.9]
 	# data = data[data['HR diff'] <= 100]
-	data = data[data['Our Quality'] == 1]
+
+	# Load the data from the CSV file
+	if database == 'CapnoBase30':
+		data = pd.read_csv('./hjorth_CBq.csv')
+		data = data[data['Our Quality'] == 1]
+	elif database == 'CapnoBase300':
+		data = pd.read_csv('./hjorth_CBq_300.csv')
+		data = data[data['ourQ_this_only'] == 1]
+	elif database == 'BUT_PPG':
+		data = pd.read_csv('./hjorth_butppg.csv')
+		data = data[data['Our Quality'] == 1]
+	else:
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG'.")
 
 	# Extract relevant columns
 	file_names = data['File name']
@@ -150,14 +163,16 @@ def hjorth_show_only_quality_hr(chunked_pieces, database='CapnoBase'):
 	plt.show()
 	################################################################
 
-def hjorth_show_spi(database='CapnoBase'):
+def hjorth_show_spi(database='CapnoBase300'):
 	# Plot the relationship between SPI and HR difference
-	if database == 'CapnoBase':
+	if database == 'CapnoBase30':
 		data = pd.read_csv('./hjorth_CBq.csv')
+	elif database == 'CapnoBase300':
+		data = pd.read_csv('./hjorth_CBq_300.csv')
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
 	else:
-		data = pd.read_csv('./hjorth.csv')
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG'.")
 
 	plt.figure(figsize=(8, 6))
 	plt.scatter(data["SPI Filtered"], data["HR diff"], alpha=0.7, c=G.CESA_BLUE, edgecolors='k')
@@ -176,7 +191,7 @@ def hjorth_show_spi(database='CapnoBase'):
 ######################### ML QUALITY ##########################
 ###############################################################
 
-def quality_hjorth(find_best_parameters=False):
+def quality_hjorth(find_best_parameters=False, database='all'):
 	from bcpackage import time_count
 	import seaborn as sns
 	from sklearn.ensemble import RandomForestClassifier
@@ -246,14 +261,27 @@ def quality_hjorth(find_best_parameters=False):
 	start_time, stop_event = time_count.terminal_time()
 
 	### Load the data from the CSV files
-	df_capno = pd.read_csv("./hjorth_CBq.csv")
-	df_capno["source"] = "capno"
-	df_butppg = pd.read_csv("./hjorth_butppg.csv")
-	df_butppg["source"] = "but"
-	df = pd.concat([df_capno, df_butppg], ignore_index=True)
+	if database == 'CapnoBase30':
+		df = pd.read_csv("./hjorth_CBq.csv")
+		df["source"] = "capno"
+	elif database == 'CapnoBase300':
+		df = pd.read_csv("./hjorth_CBq_300.csv")
+		df["source"] = "capno"
+	elif database == 'BUT_PPG':
+		df = pd.read_csv("./hjorth_butppg.csv")
+		df["source"] = "but"
+	elif database == 'all':
+		df_capno = pd.read_csv("./hjorth_CBq.csv")
+		df_capno["source"] = "capno"
+		df_butppg = pd.read_csv("./hjorth_butppg.csv")
+		df_butppg["source"] = "but"
+		df = pd.concat([df_capno, df_butppg], ignore_index=True)
+	else:
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
 
 	### Define what will we use for classification
 	features = ["Mobility Filtered", "Complexity Filtered", "SPI Filtered"]
+	# features = ["SPI Filtered"]
 	X_df = df[features]
 
 	### Define the target variable
@@ -269,7 +297,7 @@ def quality_hjorth(find_best_parameters=False):
 	if find_best_parameters:
 		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train)
 	else:
-		_max_depth, _max_features, _n_estimators = 5, "sqrt", 50
+		_max_depth, _max_features, _n_estimators = 5, None, 50
 
 	### Model training
 	trained_model = RandomForestClassifier(
@@ -287,11 +315,31 @@ def quality_hjorth(find_best_parameters=False):
 
 	### Print && show
 	# _plot_feature_importance(X_df, trained_model)
-	print("Klasifikační zpráva:")
+	print(f"Klasifikační zpráva ({database}):")
 	print(classification_report(y_test, y_pred, digits=3))
-	print("Matice záměn:")
+	print(f"Matice záměn ({database}):")
 	print("TN   FP\nFN   TP")
 	print(confusion_matrix(y_test, y_pred))
+
+	# Vyhodnocení zvlášť pro CapnoBase a BUT_PPG podle 'source'
+	if database == 'all':
+		for src in ["capno", "but"]:
+			mask = X_test[:, 0] == X_test[:, 0]  # dummy mask, will be replaced
+			if "source" in df.columns:
+				test_indices = X_test.shape[0]
+				# Najdi indexy v původním dataframe, které odpovídají X_test
+				# Protože jsme použili train_test_split na X_scaled, musíme najít odpovídající řádky v df
+				# Uděláme to přes indexy
+				_, X_test_idx = train_test_split(
+					df.index, stratify=target, test_size=0.4, random_state=42
+				)
+				source_mask = df.iloc[X_test_idx]["source"] == src
+				y_test_src = y_test[source_mask.values]
+				y_pred_src = y_pred[source_mask.values]
+				print(f"\nKlasifikační zpráva ({src}):")
+				print(classification_report(y_test_src, y_pred_src, digits=3))
+				print(f"Matice záměn ({src}):")
+				print(confusion_matrix(y_test_src, y_pred_src))
 
 	# Stop the timer and print the elapsed time
 	time_count.stop_terminal_time(start_time, stop_event, func_name='Random Forest Classifier')
@@ -572,7 +620,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		div_2 = mean_square_second_derivative_q / mean_square_derivative_q if mean_square_derivative_q > 0 else 0
 
 		mobility_q = np.sqrt(div_1) if div_1 > 0 else 0
-		complexity_q = np.sqrt(div_2 - div_1) if div_2 > div_1 else 0
+		complexity_q = np.sqrt(div_2 / div_1) if div_1 > 0 and div_2 > 0 else 0
 		spi_q = np.sqrt(div_1 / div_2) if div_1 > 0 and div_2 > 0 else 0
 
 		return mobility_q, complexity_q, spi_q
@@ -629,7 +677,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		plt.subplot(2, 1, 1)
 		plt.title("Přeškálovaný filtrovaný a autokorelovaný signál")
 		plt.xlabel("Čas [s]")
-		plt.ylabel("Relativní amplituda")
+		plt.ylabel("Relativní amplituda") # je amplituda správně použité slovo?
 		time_axis = np.arange(len(filtered_signal)) / sampling_frequency
 		plt.plot(time_axis, _normalize_signal(filtered_signal), label="Filtrovaný signál")
 		plt.plot(time_axis, _normalize_signal(autocorrelated_signal), label="Autokorelovaný signál")
@@ -642,7 +690,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Frekvenční charakteristika filtrovaného signálu")
 		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Frekvenční charakteristika autokorelovaného signálu")
 		plt.plot(freqs_raw[freqs_raw <= freq_max], fft_magnitude_raw_rescaled[freqs_raw <= freq_max], label="Frekvenční charakteristika původního signálu", color='grey', alpha=0.5)
-		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color='green', linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz")
+		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color=G.CESA_BLUE, linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz")
 		plt.title("Přeškálovaná frekvenční charakteristika signálů")
 		plt.ylabel("Relativní amplituda")
 		plt.xlabel("Frekvence [Hz]")
@@ -662,6 +710,25 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 	from bcpackage.capnopackage import cb_data
 	from bcpackage.butpackage import but_data, but_error
 	import neurokit2 as nk
+
+	def _downsample_signal(file_info, target_fs):
+		"""
+		Downsample the signal to the target sampling frequency.
+		"""
+		from scipy.signal import resample
+
+		if file_info['fs'] == target_fs:
+			return file_info
+
+		num_samples = int(len(file_info['Raw Signal']) * target_fs / file_info['fs'])
+		resampled_signal = resample(file_info['Raw Signal'], num_samples)
+		resampled_ref_peaks = np.array(file_info['Ref Peaks']) * target_fs / file_info['fs']
+
+		file_info['Raw Signal'] = resampled_signal
+		file_info['fs'] = target_fs
+		file_info['Ref Peaks'] = resampled_ref_peaks
+
+		return file_info
 
 	def _chunking_signal(chunked_pieces, file_info, chunk_idx):
 		"""
@@ -721,7 +788,8 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 
 	if database == "CapnoBase":
 		for i in range(G.CB_FILES_LEN):
-			file_info = cb_data.extract(G.CB_FILES[i])
+			file_info_original = cb_data.extract(G.CB_FILES[i])
+			file_info = _downsample_signal(file_info_original, 30) 	# downsample to 30Hz = same as BUT PPG
 			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 10) # 10s long chunks
 			# Chunk the signal
 			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
