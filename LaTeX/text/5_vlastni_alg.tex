@@ -44,7 +44,7 @@ Výsledné, 63 sekund dlouhé úseky byly dále považovány za samostatné sign
 \subsection*{Filtrace}
 \label{sec:alg_filter}
 % - Bandpass filter - Butterworthův filtr - vlastní nastavení.
-% - Na konec signál standardizujeme od -1 do 1.
+% - Na konec signál standardizujeme && normalizujeme od -1 do 1.
 Po načtení a případném rozdělení záznamů následovalo filtrování signálu.
 Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti \acs{PPG} signálu.
 Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za minutu).
@@ -55,7 +55,7 @@ V nastavení prahů vycházíme z obecných hraničních hodnot lidské tepové 
 
 Samotný Butterworthův filtr byl zvolen pro jeho rovnost v propustném pásmu, takže amplitudová charakteristika filtru je hladká a nevykazuje vlnění, které je typické pro některé jiné typy filtrů.
 Čtvrtý řád zajišťuje dostatečný kompromis mezi strmostí přechodu a numerickou stabilitou filtru.
-Pro odstranění fázového posunu, který je charakteristický pro použitý filtr, jsme použili nulofázový filtr, jenž provádí filtraci v obou směrech.
+Pro odstranění fázového posunu, který je charakteristický pro použitý filtr, jsme použili filtr s nulovou fází, jenž provádí filtraci v obou směrech.
 
 \begin{figure}[h]
 	\centering
@@ -65,9 +65,6 @@ Pro odstranění fázového posunu, který je charakteristický pro použitý fi
 	\vspace{-5mm}
 	\label{fig:my_AFC}
 \end{figure}
-
-Po filtraci jsme signál standardizovali do rozsahu od \(-1\) do \(1\).
-Tato normalizace zajišťuje jednotné měřítko napříč všemi záznamy, což je důležité pro následné kroky detekce, kde algoritmus pracuje s relativními prahy.
 
 Výsledky filtrace a standardizace jsou zřetelné z Obr.~\ref{fig:filter-peaks}.
 Po těchto krocích jsme získali očištěný a normalizovaný signál, připravený pro detekci systolických vrcholů.
@@ -85,14 +82,14 @@ Po těchto krocích jsme získali očištěný a normalizovaný signál, připra
 Hledání vrcholů probíhá v pětisekundových oknech, která se překrývají o 50\%.
 Funguje to tak, že nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
 Tímto způsobem pokryjeme celý signál a zajistíme, že žádný vrchol nebude vynechán.
-Na jeden minutový úsek obvykle připadá 23 oken, ale protože máme 5\% překryv celého minutového záznamu, délka výsledného signálu je 63 sekund, a proto analyzujeme o jedno okno navíc.
+Na jeden minutový signál obvykle připadá 23 oken, ale protože máme 5\% překryv celého minutového záznamu, délka výsledného signálu je 63 sekund, a proto analyzujeme o jedno okno navíc.
 Vizuálně je to znázorněno na Obr.~\ref{fig:my-detection}.
 
 Pro celý signál jsme nastavili dva prahy.
 První prahová hodnota odpovídala minimální výšce vrcholu, který považujeme za platný.
-Tato hodnota byla nastavena na 0,3 a měla za cíl odlišit skutečné vrcholy od diastolických zářezů a šumu.
+Tato hodnota byla empiricky nastavena na 0,3 a měla za cíl odlišit skutečné vrcholy od diastolických zářezů a šumu.
 Druhá prahová hodnota odpovídala minimálnímu časovému intervalu mezi dvěma po sobě jdoucími vrcholy.
-To bylo nastaveno na počet vzorků odpovídající 200 tepů za minutu.
+Byla nastavena na počet vzorků odpovídající dvěma stům tepům za minutu.
 
 \begin{figure} [h]
 	\centering
@@ -101,8 +98,8 @@ To bylo nastaveno na počet vzorků odpovídající 200 tepů za minutu.
 	\label{fig:my-detection}
 \end{figure}
 
-V každém okně jsme provedli standardizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným morfologickým vlastnostem \acs{PPG} signálu.
-U signálů jako je zobrazený na Obr.~\ref{fig:my-detection} je opětovná standardizace potřebná, protože se amplituda systolické vlny může snižovat a nastavený prah na minimální výšku vrcholu by mohl být příliš nízký, což by vedlo k falešně negativním výsledkům.
+V každém okně jsme provedli standardizaci a normalizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným systolickým a diastolickým fázím \acs{PPG} křivky.
+Tyto kroky jsou důležité, protože maximální hodnoty systolické vlny se mohou v průběhu času měnit, jak je patrné z Obr.~\ref{fig:my-detection}, což by vedlo k falešně negativním výsledkům.
 
 Samotná detekce vrcholů je realizována jednoduchým algoritmem hledající lokální maxima.
 Funguje tak, že každý vzorek v okně je porovnán se svým předchozím a následujícím sousedem.
@@ -114,7 +111,7 @@ Tento krok je důležitý zejména pro budoucí hodnocení algoritmu, kde pracuj
 Duplicitní detekce by vedly ke zkreslení metrik a nesprávné interpretaci výsledků.
 
 Posledním krokem je zpětná kontrola minimální vzdálenosti mezi detekovanými vrcholy.
-Bez této kontroly by se mohlo stát, že bychom detekovali vrchol na konci prvního okna a u dalšího okna bychom detekovali nový vrchol příliš blízko, protože si nové okno nepamatuje pozici předchozího vrcholu.
+Bez této kontroly by se mohlo stát, že bychom detekovali vrchol na konci prvního okna a u dalšího okna bychom detekovali nový vrchol příliš blízko, protože si nové okno nepamatuje pozici posledního, předchozího vrcholu.
 Příklad takové chyby je zobrazen na Obr.~\ref{fig:filter-peaks}, ve druhém okně.
 
 \section{Výpočet tepové frekvence}
@@ -138,8 +135,8 @@ Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném ro
 \end{equation}
 
 Po volbě mezi průměrem, mediánem a modusem jsme se rozhodli pro medián.
-Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty, které by mohly zkreslit výpočet průměru.
-Na příklad na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
+Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty.
+Na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
 
 \begin{figure}[b]
 	\centering

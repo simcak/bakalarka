@@ -17,12 +17,12 @@ To je výhodou v případech, kdy je signál poškozen šumem, artefakty, nebo k
 
 V podkapitole~\ref{sec:hjorth_kvalita} je popsán způsob využití Hjorthových deskriptorů pro hodnocení kvality signálu. % extend
 
-Hjorthovy deskriptory představují trojici časových charakteristik, původně zavedených Hjorthem v~roce 1970 pro kvantitativní popis elektroencefalografických (\acs{EEG}) signálů~\cite{Hjorth1973}.
+Hjorthovy deskriptory představují trojici příznaků určených z časového průběhu signálu, původně zavedených Hjorthem v~roce 1970 pro kvantitativní popis elektroencefalografických (\acs{EEG}) signálů~\cite{Hjorth1970,Hjorth1973}.
 Jedná se o parametry \textit{aktivita} (\(H_0\)), \textit{mobilita} (\(H_1\)) a \textit{komplexita} (\(H_2\)), které odrážejí střední výkon, střední úhlovou frekvenci a šířku pásma.
-Jejich výpočet vychází čistě z časové domény a nevyžaduje transformaci do frekvenční oblasti.
+Jejich výpočet vychází čistě z časové domény a nevyžaduje Fourierovu transformaci.
 
-V oblasti zpracování \acs{PPG} signálů byly Hjorthovy parametry doposud využívány převážně pro hodnocení kvality signálu a detekci artefaktů~\cite{Peralta2017}. % some more references for quality!
-Právě proto je v naší práci navržen a realizován nový způsob odhadu \acs{TF} na základě Hjorthovy \textit{mobility} (\(H_1\)).
+V dostupné literatuře jsme nenašli studie, které by Hjorthovy deskriptory využívaly k odhadu \acs{TF} z \acs{PPG} signálu.
+Proto v této práci navrhujeme a realizujeme nový přístup založený na Hjorthově \textit{mobilitě} (\(H_1\)).
 Tu počítáme na filtrovaných a několikanásobně autokorelovaných signálech.
 Struktura navrženého algoritmu je znázorněna na Obr.~\ref{fig:hjorth_schemata}.
 
@@ -33,98 +33,218 @@ Struktura navrženého algoritmu je znázorněna na Obr.~\ref{fig:hjorth_schemat
 	\label{fig:hjorth_schemata}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                      TEP                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Odhad TF pomocí Hjorthovy mobility}
 \label{sec:hjorth_mobilita_tf}
 % Načtení signálů z databází probíhá stejně jako u \ref{sec:alg_load}
 % Rozdělení signálů je více modulativní, než u \ref{sec:alg_split} pro CapnoBase můžeme použít celý signál nebo libovolný počet oken s maximální délkou odpovídající 10s signálu. Pro BUT PPG (10s signály) to není možné.
-Jak již bylo uvedeno, Hjorthova \textit{mobilita} (\( H_1 \)) představuje odhad střední (resp. dominantní) úhlové frekvence signálu v časové oblasti a to bez nutnosti výpočtu Fourierovy transformace.
-Tímto způsobem lze efektivně odhadnout frekvenční charakteristiku i v reálném čase, bez transformace do frekvenční oblasti.
+Jak již bylo uvedeno, Hjorthova \textit{mobilita} (\( H_1 \)) představuje odhad střední (resp. dominantní) frekvence signálu v časové oblasti a to bez nutnosti výpočtu Fourierovy transformace.
 
 Načtení signálů z databází probíhá stejným způsobem jako u našeho prvního algoritmu, popsaného v podkapitole~\ref{sec:alg_load}.
-Odlišně jsme však přistoupili k rozdělení signálů.
+Odlišný přístup jsme však zvolili při dělení signálů.
 Zatímco v předchozím algoritmu jsme signály z \textit{CapnoBase} databáze dělili na minutové úseky, zde si můžeme ve vstupu funkce zvolit libovolný počet úseků, na které signál rozdělíme.
 Maximální počet těchto úseků odpovídá situaci, kdy jeden úsek trvá 10~s.
-Pokud na konci po rozdělení signálu zůstane jeho část, pak je tato část ignorována.
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=1\textwidth]{./obrazky/hjorth_autocorr_freq.png}
-	\caption[Porovnání filtrovaného a autokorelovaného signálu]{Porovnání filtrovaného a autokorelovaného signálu.}
-	\label{fig:hjorth_autocorr}
-\end{figure}
+Pokud zbyde po rozdělení signálu část, která je kratší než délka jednoho úseku, tak ji dále nezpracováváme.
+Je proto důležité zvolit takové dělení, které minimalizuje délku zahozených úseků.
+Alternativou by bylo upravit algoritmus tak, aby zbylé části zpracoval samostatně nebo je přičlenil k předchozímu úseku.
+Tím bychom však porovnávali signály různých délek, což by mohlo výsledky zkreslit.
 
 \subsection*{Předzpracování}
 \label{sec:predzpracovani}
 % Odstranění stejnosměrné složky signálu -> standardizace signálu.
 % High-pass filtraci pro odstranění respirační složky.
-% Jak fungiuje vícenásobná autokorelace - cílem je zvýraznění periodické složky.
+% Jak fungiuje vícenásobná autokorelace -> cílem je zvýraznění nejdominantnější periodickou složku.
 % Grafy autokorelace, původní signál, frekvenční spektrum obou signálů.
 % KEEP IN MIND: Nepotlačují se frekvence, ale složky o vyšších/nižších frekvencích.
+U analyzovaných signálů jsme provedli standardizaci.
 Nejprve jsme odstranili stejnosměrnou (\acs{DC}) složku signálu, tedy jeho střední hodnotu \(\mu\).
-To jsme učinili proto, aby neovlivňovala výpočet rozptylu signálu a tudíž ani nesnižovala výslednou hodnotu mobility.
-Abychom zabránili přetečení data u (\ref{eq:hjorth_var_signal}) a (\ref{eq:hjorth_var_signal_diff}), a zároveň zachovali tvar signálu, vydělili jsme signál bez \( \mu \) jeho směrodatnou odchylkou \( \sigma \).
+Tento krok slouží k centrování signálu kolem nuly, čímž omezíme vliv \acs{DC} složky na výpočet rozptylu signálu.
+Druhý krok standardizace je dělení signálu zbaveného hodnoty \(\mu\) jeho směrodatnou odchylkou \(\sigma\).
 Rovnice pro standardizaci signálu je následující:
 \begin{equation}
+	\label{eq:standardizace}
 	x[n] = \frac{x[n] - \mu}{\sigma}.
 \end{equation}
 
-Následně byl signál filtrován hornopropustným filtrem s mezní frekvencí 0,5~Hz, který jsme navrhli k potlačení respirační složky signálu.
-Prahová frekvence byla zvolena na základě předpokládané minimální hodnoty \acs{TF}, zmíněné již v podkapitole~\ref{sec:STF}.
-Použit byl Butterworthův filtr čtvrtého řádu.
+Následně byl signál filtrován Butterworthovým hornopropustným filtrem čtvrtého řádu s mezní frekvencí 0,5~Hz v obou směrech.
+Cílem této filtrace bylo potlačení respirační složky, přičemž prahová frekvence byla zvolena na základě předpokládané minimální hodnoty \acs{TF}, jak je uvedeno v podkapitole~\ref{sec:STF}.
 
-Získaný signál byl dále pětkrát za sebou autokorelován. % 5x, protože to mělo nejlepší výsledky na 10s signálech - vhodné pro porovnání s BUT PPG, ale pro signály z CapnoBase (8min) byly vhodné 3 iterace. Pro 1min signály to bylo zase 4 iterace. Ale pro BUT databázi jsou nejlepší 3 iterace.
-Autokorelace je operace, při které se signál koreluje sám se sebou při v různých časových posunech.
-Pětinásobná autokorelace byla zvolena na základě \dots. % doplnit
-Cílem opakované autokorelace je zvýraznit periodickou strukturu signálu a potlačit nepravidelné nebo náhodné oscilace.
-U čistého \acs{PPG} signálů jsou periodické složky rovny systolickým fázím, diastolickým fázím a respiračním složkám.
+Získaný signál byl dále sedmkrát za sebou autokorelován.
+Autokorelace je operace, při které se signál koreluje sám se sebou při různých časových posunech.
+Sedminásobná iterace byla zvolena na základě empirického pozorování výsledků na desetisekundových signálech z databáze CapnoBase.
+Cílem opakované autokorelace je zvýraznění dominantní periodické složky signálu.
 Klasická autokorelační funkce diskrétního signálu \( x[n] \) je definovaná jako:
 \begin{equation}
-	r_x[n] = \sum_{k=0}^{N-n-1} x[k] \cdot x[k+n],
+	r_x[m] = \sum_{n=0}^{N-m-1} x[n] \cdot x[n+m],
 \end{equation}
-kde \( N \) je délka signálu a \( n \) je zpoždění.
-Výpočet v~praxi probíhal ve frekvenčním spektru pomocí rychlé Fourierově transformaci, což snižuje výpočetní náročnost na \( O(i \cdot N \log N) \), kdy \( i \) je počet iterací autokorelace.
+kde \( N \) je délka signálu a \( m \) je zpoždění.
+Výpočet probíhal ve frekvenční oblasti pomocí rychlé Fourierovy transformace, čímž se snížila výpočetní náročnost na~\(O(i \cdot N \log N)\), kde~\(i\) je počet iterací autokorelace.
+Bez použití \acs{FFT} by byla složitost \(O(N^2)\).
 
-Porovnání filtrovaného a autokorelovaného signálu je znázorněno na Obr.~\ref{fig:hjorth_autocorr} společně s jejich frekvenčními charakteristikami a navíc i frekvenční charakteristikou původního signálu.
+Po každé iteraci autokorelace byl signál převeden do rozsahu~\([-1, 1]\) pomocí normalizace podle maximální absolutní hodnoty:
+\begin{equation}
+	\hat{x}[n] = \frac{x[n]}{\max |x[n]|}.
+\end{equation}
+Tato normalizace byla nezbytná, protože iterovaná autokorelace způsobuje exponenciální nárůst hodnot, což by vedlo k numerické nestabilitě a zkreslení výpočtu Hjorthových parametrů.
+
+Opakovanou autokorelací dochází ke zvýšení spektrální ostrosti pro dominantní frekvenční složku, což jsme vyhodnotili jako žádoucí pro náš účel.
+
+Porovnání spektra signálu před a po iterované autokorelaci je znázorněno na Obr.~\ref{fig:hjorth_predzpracovani}.
+Horní část grafu zobrazuje časové průběhy původního, filtrovaného a autokorelovaného signálu, spodní část pak odpovídající spektra získaná pomocí rychlé Fourierovy transformace.
+Amplitudové spektrum bylo vypočteno výhradně pro účely vizualizace a nefiguruje v samotném výpočtu Hjorthových parametrů.
+Pro účely porovnání byla všechna spektra převedena na relativní jednotky pomocí normalizace vůči maximální hodnotě amplitudy daného signálu.
+
+\paragraph{}
+U běžných \acs{PPG} signálu odpovídají periodické složky systolickým fázím, diastolickým fázím a respiračním složkám.
+Pro potlačení respiračních složek jsme použili hornopropustný filtr a pro potlačení složek diastolických fází jsme použili sedm iterací autokorelace.
+
+\begin{figure}[!th]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/hjorth_preprocess.png}
+	\caption[Porovnání původního, filtrovaného a autokorelovaného signálu]{Porovnání původního, filtrovaného a autokorelovaného signálu.}
+	\label{fig:hjorth_predzpracovani}
+\end{figure}
 
 \subsection*{Výpočet TF z mobility}
 \label{sec:TF_mobilita}
 % Vysvětlení co znamenajá mobilita a jak se počítá -> vzorec.
 % Jak se počítá TF z mobility - vzorec.
 % první diference = aproximujeme dva body vedle sebe
-Z výsledného signálu po čtvrté iteraci autokorelace jsme vypočítali Hjorthovu mobilitu~\cite{Hjorth1973,Geetika2022}.
-Ta je definována jako druhá odmocnina poměru rozptylu první derivace signálu ku rozptylu signálu samotného:
+Po předzpracování signálu jsme vypočítali Hjorthovu mobilitu.
+Ta je definována~\cite{Hjorth1970,Geetika2022} jako druhá odmocnina poměru rozptylu první derivace signálu ku rozptylu signálu samotného:
 \begin{equation}
 	\label{eq:hjorth_mobility}
-	H_1 = \sqrt{ \frac{ \mathrm{var}(x[n] - x[n-1]) }{ \mathrm{var}(x[n]) } } = \sqrt{ \frac{ \mathrm{var}(x') }{ \mathrm{var}(x) } } \; [\mathrm{rad/s}].
+	H_1 = \sqrt{ \frac{ \mathrm{var}(x[n] - x[n-1]) }{ \mathrm{var}(x[n]) } }
+	= \sqrt{ \frac{ \mathrm{var}(x') }{ \mathrm{var}(x) } }
+	= \frac{ \sigma_{x'} }{ \sigma_{x} }.
 \end{equation}
+Jelikož pracujeme v diskrétním prostředí, je derivace aproximována první diferencí.
 
-Jelikož pracujeme v diskrétním prostředí, derivaci jsme aproximovali pomocí první diference.
-Rozptyl signálu \( x \) je definován jako průměr hodnot signálu umocněných na druhou:
+Rozptyl signálu \( x \) je dán vztahem:
 \begin{equation}
 	\label{eq:hjorth_var_signal}
-	\mathrm{var}(x) = \frac{1}{N} \sum_{n=0}^{N-1} (x[n])^2,
+	\mathrm{var}(x) = \frac{1}{N} \sum_{n=0}^{N-1} (x[n] - \mu)^2,
 \end{equation}
-kde \( N \) je délka okna a střední odchylka \( \mu \) je již odečtena v rámci předzpracování, tudíž je rovna nule.
-Podobně je definován i rozptyl první derivace signálu \( x' \):
+kde \( N \) je délka okna a \( \mu \) je střední hodnota signálu.
+
+Podobně je definován i rozptyl první derivace signálu \( x' \), přičemž první diferenci nelze definovat pro vzorek \( n = 0 \), takže součet začíná až od \( n = 1 \):
 \begin{equation}
 	\label{eq:hjorth_var_signal_diff}
-	\mathrm{var}(x') = \frac{1}{N} \sum_{n=0}^{N-1} (x[n] - x[n-1])^2.
+	\mathrm{var}(x') = \frac{1}{N - 1} \sum_{n=1}^{N-1} (x'[n] - \mu')^2.
 \end{equation}
 
-Z hodnoty \( H_1 \)~[rad/s] jsme následně odvodili dominantní frekvenci \( f_{dom} \)~[Hz], kterou jsme vynásobili šedesáti, abychom dostali odpovídající hodnotu \acs{TF} v tepech za minutu:
-
+Z hodnoty \( H_1 \) jsme následně odvodili dominantní frekvenci \( f_{dom} \)~[Hz], kterou jsme vynásobili šedesáti, abychom dostali odpovídající hodnotu \acs{TF} v tepech za minutu:
 \begin{equation}
 	\const{TF}_{\textind{Hjorth}} = 60 \cdot f_{\textind{dom}} = \frac{60 \cdot H_{\textind{1}}}{2\pi}.
 \end{equation}
+Hodnota dominantní frekvence je graficky znázorněna i písemně zmíněna na Obr.~\ref{fig:hjorth_predzpracovani} společně s odpovídající tepovou frekvencí a referenční hodnotou \acs{TF} z databáze.
 
-Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem se asymptotickou složitostí \( O(N) \), jejich praktická výpočetní náročnost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavování bloků zájmu, jak je uvedeno v podkapitole~\ref{sec:blocks}.
-Naopak výpočet Hjorthovy mobility po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) má složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
+\paragraph{}
+Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem s asymptotickou složitostí \( O(N) \), jejich praktická složitost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavování bloků zájmu (popsané v podkapitole~\ref{sec:blocks}).
 
-Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v podkapitole XX. % rewrite for specific subsection
+Naopak výpočet Hjorthovy mobility má sice po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
 
-\section{Využití mobility a komplexity pro hodnocení kvality signálu}
+Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v Tab.~\ref{tab:capnobase_comparison}. % add BUT PPG
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                    KVALITA                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hodnocení kvality PPG signálů pomocí Hjorthových parametrů}
 \label{sec:hjorth_kvalita}
 % Vysvětlení co znamenajá mobilita a komplexita a jak se počítají -> vzorec.
 % - Mobilita_filtr a Komplexita_filtr
 % Vysvětlit jak se počítá SPI
 % Jaké prahy jsme nastavili pro hodnocení kvality signálu.
+Tato podkapitola popisuje metodu automatického hodnocení kvality \acs{PPG} signálů pouze s pomocí Hjorthových deskriptorů.
+Jejím cílem je ověřit, zda trojice vybraných příznaků — mobilita, komplexita a index spektrální čistoty (\acs{SPI}) — obsahuje dostatek informací pro rozeznání kvalitních a nekvalitních signálů.
+Příznaky jsme použili jako vstupní parametry při hodnocení kvality pomocí klasifikátoru typu \uv{náhodný les} (\acs{RF}).
+
+\subsection*{Rozdělení a předzpracování signálů}
+% KEEP IN MIND: Nepotlačují se frekvence, ale složky o vyšších/nižších frekvencích.
+Klasifikátor se trénuje na databázích CapnoBase a \acs{BUT PPG}, které mají odlišnou délku \acs{PPG} signálů, jak popisujeme v kapitole~\ref{chap:databaze}.
+Abychom získali porovnatelné hodnoty z Hjorthových deskriptorů pro obě databáze, a tudíž se jednotlivé stromy v klasifikátoru rozhodovali přesněji, rozdělili jsme CapnoBase signály do desetisekundových oken, které se nepřekrývají a tak odpovídali stejné délce, jako signály z databáze \acs{BUT PPG}.
+Ze stejného důvodu jsme signály z CapnoBase podvzorkovali na vzorkovací frekvenci 30~Hz, což je vzorkovací frekvence signálů z \acs{BUT PPG}.
+
+Po zajištění jednotné délky a jednoté vzorkovací frekvence signálů jsme u všech shodně odstranili stejnosměrnou složku viz.~(\ref{eq:standardizace}).
+Stejně jako v podkapitole~\ref{sec:hjorth_mobilita_tf} jsme potlačili složky o frekvencích nižších jak 0,5~Hz.
+Zde jsme navíc potlačili i složky vyšší jak 3,35~Hz (201 tepů za minutu).
+Tyto kroky jsme provedli, abychom klasifikátor neovlivňovali složkami o jiných frekvencích, než v jakých se pohybuje lidská srdeční tepová frekvence.
+
+\subsection*{Výpočet příznaků}
+% mobilitu jsme už popsali = eq:hjorth_mobility
+% navíc popsat komplexitu a SPI
+% komplexita definovaná v Hjorth1970 je ve VUT pojmenována jako "Relativní složitost"
+První dva příznaky vycházejí z Hjorthových parametrů, přičemž mobilita (\acs{H_1}) již byla popsána v předchozí podkapitole rovnicí~(\ref{eq:hjorth_mobility}).
+
+Druhý příznak, Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se v čase mění rychlost změn signálu, tedy jak \uv{komplikovaný} je jeho průběh z hlediska tvaru~\cite{Hjorth1970}.
+Je definována jako poměr mobility první derivace signálu ku mobilitě samotného signálu~\cite{Geetika2022}:
+\begin{equation}
+	\label{eq:hjorth_complexity}
+	H_{2} = \sqrt{ \frac{H_1(x')}{H_1(x)} }
+	= \sqrt{ \frac{ \text{var}(x'') / \text{var}(x') }{ \text{var}(x') / \text{var}(x) } }
+	= \frac{ \sigma_{x''} \cdot \sigma_{x} }{ \sigma_{x'}^2 } \; [-],
+\end{equation}
+kde $x$, $x'$, $x''$ jsou signál, jeho první derivace a jeho druhá derivace.
+$\sigma_x$ označuje směrodatnou odchylku.
+Pro čistě harmonický signál by vycházelo $H_2 = 1$, což odpovídá ideálně hladkému a pravidelnému signálu (sinusoidě).
+Ale čím více vyšších frekvenčních složek signál obsahuje, tím rychleji se v čase mění jeho tvar, a tím vyšší je hodnota \( H_2 \). % není to tvar druhé derivace? nebo co je "jeho tvar"?
+
+Hjorthova komplexita tak slouží jako bezrozměrný ukazatel např. při automatickém hodnocení kvality EEG signálů~\cite{Geetika2022}.
+
+Třetím příznakem je index spektrální čistoty (\acs{SPI}), který je definován jako převrácená hodnota komplexity:
+\begin{equation}
+	\label{eq:hjorth_SPI}
+	SPI = \frac{1}{H_2} = \frac{\sigma_{x'}^2}{\sigma_{x''} \cdot \sigma_{x}} \; [-].
+\end{equation}
+
+Všechny tři příznaky jsou standardizovány pomocí funkce \texttt{StandardScaler}, aby byl zajištěn jejich jednotný váhový vliv při klasifikaci.
+
+\subsection*{Referenční hodnota kvality}
+% Referenčním hodnotám uvedených v BUT PPG nevěříme, proto musíme implementovat Orphanidou výpočet kvality z NeuroKit2 = sami si nastavíme referenční kvalitu signálů
+
+% Po vizuální analýze anotací kvality signálů v databázi BUT PPG bylo zjištěno, že tyto anotace nejsou dostatečně konzistentní (obr.~\ref{fig:orphanidou_vs_db}).
+% Z tohoto důvodu jsme jako referenční hodnotu zvolili tzv. Orphanidou index kvality, který je implementován v knihovně NeuroKit2.
+
+% Tento index funguje následovně: z každého 10sekundového signálu jsou nejprve detekovány pulzní vrcholy.
+% Poté se z těchto pulzů vytvoří průměrná šablona. Každý jednotlivý puls je následně porovnán s touto šablonou pomocí Pearsonova korelačního koeficientu:
+
+% \begin{equation}
+% 	r_i = \frac{\sum_{n=1}^N (x_n - \bar{x})(y_n - \bar{y})}{\sqrt{\sum_{n=1}^N (x_n - \bar{x})^2} \cdot \sqrt{\sum_{n=1}^N (y_n - \bar{y})^2}},
+% \end{equation}
+
+% kde $x$ je šablona a $y$ aktuální pulzní vlna.
+% Výsledný index kvality $QI$ je pak dán průměrem těchto korelací v rámci jednoho signálu:
+
+% \begin{equation}
+% 	QI = \frac{1}{m} \sum_{i=1}^m r_i,
+% \end{equation}
+
+% kde $m$ je počet detekovaných pulzů.
+% Segment je považován za kvalitní, pokud $QI \ge 0{,}9$.
+
+\subsection*{Náhodný les}
+% Klasifikátor je Random Forest, který je vhodný pro zpracování malého počtu příznaků.
+% Vysvětlit jak funguje Random Forest
+% Stratifikace = zajištění stejného poměru tříd v trénovací a testovací sadě
+Pro predikci kvality signálů používáme již zmíněný \acs{RF} klasifikátor.
+Jako výchozí parametry jsme zvolili 50 rozhodovacích stromů, maximální hloubku stromu 5 a strategii výběru příznaků typu \uv{odmocnina z počtu příznaků}.
+Pro větší robustnost jsme provedli optimalizaci parametrů pomocí metody \uv{GridSearchCV} z knihovny \texttt{sklearn}, kde vracíme nejlepší parametry pro daný model.
+Random state byl u rozdělení i u modelu nastaven na hodnotu 42, aby bylo zajištěno opakovatelné chování algoritmu. % přepsat random state do češtiny
+
+Poměr tříd (kvalitní vs. nekvalitní) jsme při učení automaticky vyvažovli.
+Klasifikátor je trénován na 60~\% signálů a testován na zbývajících 40~\%, přičemž zachováváme poměr tříd pomocí stratifikace. % co je stratifikace?
+
+\acs{RF} je vhodnou volbou, protože umožňuje zpracování i malého počtu vstupních příznaků bez předpokladu o jejich rozdělení. % je to pravda? dovysvětlit
+Navíc umožňuje zpětně analyzovat důležitost jednotlivých příznaků a tím přispívá k interpretovatelnosti i reprodukovatelnosti výsledků.
+
+% Cross-validation: evaluating estimator performance
+K posouzení výkonnosti klasifikátoru používáme pětinásobné křížové ověření.
+Jako hlavní metrika byla zvolena hodnota $F_1$ skóre, která zohledňuje jak přesnost (poměr správně klasifikovaných pozitivních případů), tak citlivost (schopnost odhalit všechny kvalitní segmenty).
+Výsledky klasifikace jsou podrobně analyzovány v následující kapitole.
+
+\paragraph{}
+Navržený přístup ověřuje, zda mobilita, komplexita a SPI, mohou postačovat pro základní hodnocení kvality signálu.
+Referenční klasifikace kvality vychází z korelačního porovnání pulzních vln se šablonou (index podle Orphanidou).
+Výsledky klasifikace pomocí náhodného lesa poskytují rámec pro porovnání s ostatními metodami, které využívají složitější sady příznaků.
