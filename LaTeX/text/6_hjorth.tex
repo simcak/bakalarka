@@ -151,35 +151,43 @@ Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v ka
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                    KVALITA                                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Hodnocení kvality PPG signálů pomocí Hjorthových parametrů}
+\section{Hodnocení kvality PPG signálů}
 \label{sec:hjorth_kvalita}
 % Vysvětlení co znamenajá mobilita a komplexita a jak se počítají -> vzorec.
 % - Mobilita_filtr a Komplexita_filtr
 % Vysvětlit jak se počítá SPI
 % Jaké prahy jsme nastavili pro hodnocení kvality signálu.
-Tato podkapitola popisuje metodu automatického hodnocení kvality \acs{PPG} signálů pouze s pomocí Hjorthových deskriptorů.
-Jejím cílem je ověřit, zda trojice vybraných příznaků — mobilita, komplexita a index spektrální čistoty (\acs{SPI}) — obsahuje dostatek informací pro rozeznání kvalitních a nekvalitních signálů.
-Příznaky jsme použili jako vstupní parametry při hodnocení kvality pomocí klasifikátoru typu \uv{náhodný les} (\acs{RF}).
+Tato podkapitola popisuje metodu automatického hodnocení kvality \acs{PPG} signálů pomocí Hjorthových parametrů s využitím klasifikátoru typu \uv{náhodný les} (\acs{RF}).
+Cílem této analýzy je ověřit, zda kombinace tří Hjorthových parametrů — mobility, komplexity a indexu spektrální čistoty (\acs{SPI}) — postačuje k automatické binární klasifikaci \acs{PPG} signálů na základě jejich kvality definované referenčním algoritmem od Orphanidou z knihovny NeuroKit2~\cite{NeuroKit2}.
 
-\subsection*{Rozdělení a předzpracování signálů}
+\subsection*{Segmentace a předzpracování signálů}
+\label{subsec:segmentace_predzpracovani}
 % KEEP IN MIND: Nepotlačují se frekvence, ale složky o vyšších/nižších frekvencích.
-Klasifikátor se trénuje na databázích CapnoBase a \acs{BUT PPG}, které mají odlišnou délku \acs{PPG} signálů, jak popisujeme v kapitole~\ref{chap:databaze}.
-Abychom získali porovnatelné hodnoty z Hjorthových deskriptorů pro obě databáze, a tudíž se jednotlivé stromy v klasifikátoru rozhodovali přesněji, rozdělili jsme CapnoBase signály do desetisekundových oken, které se nepřekrývají a tak odpovídali stejné délce, jako signály z databáze \acs{BUT PPG}.
-Ze stejného důvodu jsme signály z CapnoBase podvzorkovali na vzorkovací frekvenci 30~Hz, což je vzorkovací frekvence signálů z \acs{BUT PPG}.
+Klasifikátor byl trénován na signálech ze dvou databází: CapnoBase a \acs{BUT PPG}, jejichž záznamy se liší délkou, jak podrobněji popisujeme v kapitole~\ref{chap:databaze}.
 
-Po zajištění jednotné délky a jednoté vzorkovací frekvence signálů jsme u všech shodně odstranili stejnosměrnou složku viz.~(\ref{eq:standardizace}).
-Stejně jako v podkapitole~\ref{sec:hjorth_mobilita_tf} jsme potlačili složky o frekvencích nižších jak 0,5~Hz.
-Zde jsme navíc potlačili i složky vyšší jak 3,35~Hz (201 tepů za minutu).
-Tyto kroky jsme provedli, abychom klasifikátor neovlivňovali složkami o jiných frekvencích, než v jakých se pohybuje lidská srdeční tepová frekvence.
+Pro zajištění srovnatelnosti Hjorthových deskriptorů mezi oběma databázemi byly signály z CapnoBase rozděleny na nepřekrývající se segmenty o délce 10~s, což odpovídá délce jednotlivých záznamů v databázi \acs{BUT PPG}.
+Tato segmentace zároveň přispívá ke konzistenci vstupních dat a zvyšuje přesnost rozhodování jednotlivých stromů klasifikátoru.
 
-\subsection*{Výpočet příznaků}
+Následně byly signály z CapnoBase převzorkovány na vzorkovací frekvenci 30~Hz, aby odpovídaly frekvenci signálů z databáze \acs{BUT PPG}.
+Převzorkování bylo realizováno pomocí funkce \texttt{resample} z knihovny \texttt{scipy}, která implementuje Fourierovu interpolaci.
+Jelikož tato metoda neobsahuje předběžnou dolnofrekvenční filtraci, mohlo by při přítomnosti vyšších frekvenčních složek dojít k aliasingu.
+
+Abychom tomuto jevu předešli, aplikovali jsme před převzorkováním dolnopropustný filtr typu Butterworth čtvrtého řádu s mezní frekvencí 14~Hz.
+Tím jsme potlačili složky nad polovinou cílové vzorkovací frekvence a zachovali pouze spektrum relevantní pro analýzu srdeční činnosti.
+
+Po sjednocení délky a vzorkovací frekvence byly všechny signály standardizovány viz~(\ref{eq:standardizace}).
+V souladu s postupem uvedeným v podkapitole~\ref{sec:hjorth_mobilita_tf} jsme dále odstranili nízkofrekvenční složky pod 0,5~Hz.
+Zde jsme navíc potlačili i složky nad 3,35~Hz (201 tepům za minutu), čímž jsme omezili spektrum pouze na fyziologicky očekávané rozsahy srdeční frekvence.
+
+\subsection*{Výpočet příznaků pro náhodný les}
+\label{subsec:rf_features}
 % mobilitu jsme už popsali = eq:hjorth_mobility
 % navíc popsat komplexitu a SPI
 % komplexita definovaná v Hjorth1970 je ve VUT pojmenována jako "Relativní složitost"
-První dva příznaky vycházejí z Hjorthových parametrů, přičemž mobilita (\acs{H_1}) již byla popsána v předchozí podkapitole rovnicí~(\ref{eq:hjorth_mobility}).
+První dva příznaky odpovídají Hjorthovým parametrům, přičemž mobilita (\acs{H_1}) již byla popsána v předchozí podkapitole rovnicí~(\ref{eq:hjorth_mobility}).
 
-Druhý příznak, Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se v čase mění rychlost změn signálu, tedy jak \uv{komplikovaný} je jeho průběh z hlediska tvaru~\cite{Hjorth1970}.
-Je definována jako poměr mobility první derivace signálu ku mobilitě samotného signálu~\cite{Geetika2022}:
+Druhý příznak, Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se signál v čase odchyluje od harmonického průběhu.
+Je definována jako poměr mobility první derivace signálu ku mobilitě samotného signálu~\cite{Hjorth1970,Geetika2022}:
 \begin{equation}
 	\label{eq:hjorth_complexity}
 	H_{2} = \sqrt{ \frac{H_1(x')}{H_1(x)} }
@@ -188,10 +196,10 @@ Je definována jako poměr mobility první derivace signálu ku mobilitě samotn
 \end{equation}
 kde $x$, $x'$, $x''$ jsou signál, jeho první derivace a jeho druhá derivace.
 $\sigma_x$ označuje směrodatnou odchylku.
-Pro čistě harmonický signál by vycházelo $H_2 = 1$, což odpovídá ideálně hladkému a pravidelnému signálu (sinusoidě).
-Ale čím více vyšších frekvenčních složek signál obsahuje, tím rychleji se v čase mění jeho tvar, a tím vyšší je hodnota \( H_2 \). % není to tvar druhé derivace? nebo co je "jeho tvar"?
+Pro čistě harmonický signál, jako je sinusoida, by vycházelo $H_2 = 1$.
+S rostoucím podílem vyšších frekvenčních složek se však signál stává proměnlivějším, a tím vyšší je hodnota \( H_2 \).
 
-Hjorthova komplexita tak slouží jako bezrozměrný ukazatel např. při automatickém hodnocení kvality EEG signálů~\cite{Geetika2022}.
+Hjorthova komplexita tak slouží jako bezrozměrný ukazatel nepravidelnosti signálu např. při automatickém hodnocení kvality EEG signálů~\cite{Geetika2022}.
 
 Třetím příznakem je index spektrální čistoty (\acs{SPI}), který je definován jako převrácená hodnota komplexity:
 \begin{equation}
@@ -202,6 +210,7 @@ Třetím příznakem je index spektrální čistoty (\acs{SPI}), který je defin
 Všechny tři příznaky jsou standardizovány pomocí funkce \texttt{StandardScaler}, aby byl zajištěn jejich jednotný váhový vliv při klasifikaci.
 
 \subsection*{Referenční hodnota kvality}
+\label{subsec:referencni_hodnota_kvality}
 % Referenčním hodnotám uvedených v BUT PPG nevěříme, proto musíme implementovat Orphanidou výpočet kvality z NeuroKit2 = sami si nastavíme referenční kvalitu signálů
 
 % Po vizuální analýze anotací kvality signálů v databázi BUT PPG bylo zjištěno, že tyto anotace nejsou dostatečně konzistentní (obr.~\ref{fig:orphanidou_vs_db}).
@@ -225,26 +234,26 @@ Všechny tři příznaky jsou standardizovány pomocí funkce \texttt{StandardSc
 % Segment je považován za kvalitní, pokud $QI \ge 0{,}9$.
 
 \subsection*{Náhodný les}
+\label{subsec:random_forest}
 % Klasifikátor je Random Forest, který je vhodný pro zpracování malého počtu příznaků.
 % Vysvětlit jak funguje Random Forest
 % Stratifikace = zajištění stejného poměru tříd v trénovací a testovací sadě
-Pro predikci kvality signálů používáme již zmíněný \acs{RF} klasifikátor.
-Jako výchozí parametry jsme zvolili 50 rozhodovacích stromů, maximální hloubku stromu 5 a strategii výběru příznaků typu \uv{odmocnina z počtu příznaků}.
-Pro větší robustnost jsme provedli optimalizaci parametrů pomocí metody \uv{GridSearchCV} z knihovny \texttt{sklearn}, kde vracíme nejlepší parametry pro daný model.
-Random state byl u rozdělení i u modelu nastaven na hodnotu 42, aby bylo zajištěno opakovatelné chování algoritmu. % přepsat random state do češtiny
+Pro odhad kvality signálů byl použit již zmíněný klasifikátor \emph{náhodný les} (\acs{RF}), který tvoří sadu rozhodovacích stromů a kombinuje jejich výstupy hlasováním.
+Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn}.
+Tento algoritmus je vhodný pro úlohy s omezeným počtem příznaků.
+Oproti lineárním modelům dokáže zachytit i nelineární vztahy mezi příznaky a je robustní vůči nadměrnému přizpůsobení.
 
-Poměr tříd (kvalitní vs. nekvalitní) jsme při učení automaticky vyvažovli.
-Klasifikátor je trénován na 60~\% signálů a testován na zbývajících 40~\%, přičemž zachováváme poměr tříd pomocí stratifikace. % co je stratifikace?
+Model byl trénován se základními vstupy: 50 rozhodovacích stromů, maximální hloubka stromu 5 a výběr příznaků pro jednotlivé uzly dle odmocniny z celkového počtu příznaků. % je slovo vstup správně? pro celý text?
+Pro zajištění deterministického chování byl vstup náhodné inicializace nastaven na hodnotu \texttt{random\_state = 42}.
+Optimalizace všech vstupů byla provedena pomocí metody \texttt{GridSearchCV} z knihovny \texttt{scikit-learn}, která systematicky vybírá nejlepší kombinace z námi předdefinovaných hodnot.
 
-\acs{RF} je vhodnou volbou, protože umožňuje zpracování i malého počtu vstupních příznaků bez předpokladu o jejich rozdělení. % je to pravda? dovysvětlit
-Navíc umožňuje zpětně analyzovat důležitost jednotlivých příznaků a tím přispívá k interpretovatelnosti i reprodukovatelnosti výsledků.
+Datová sada byla rozdělena v poměru 60~\% pro trénování a 40~\% pro testování.
+Pomocí vstupu \texttt{class\_weight='balanced'} jsme zajistili, že model bude trénován s ohledem na nevyváženost tříd, tedy poměr kvalitních a nekvalitních signálů.
 
-% Cross-validation: evaluating estimator performance
-K posouzení výkonnosti klasifikátoru používáme pětinásobné křížové ověření.
-Jako hlavní metrika byla zvolena hodnota $F_1$ skóre, která zohledňuje jak přesnost (poměr správně klasifikovaných pozitivních případů), tak citlivost (schopnost odhalit všechny kvalitní segmenty).
-Výsledky klasifikace jsou podrobně analyzovány v následující kapitole.
+Výhodou \acs{RF} je rovněž možnost stanovit relativní důležitost jednotlivých příznaků na základě jejich vlivu na rozhodování stromů, což přispívá k interpretovatelnosti modelu a transparentnosti výsledků. % fakt?
 
-\paragraph{}
-Navržený přístup ověřuje, zda mobilita, komplexita a SPI, mohou postačovat pro základní hodnocení kvality signálu.
-Referenční klasifikace kvality vychází z korelačního porovnání pulzních vln se šablonou (index podle Orphanidou).
-Výsledky klasifikace pomocí náhodného lesa poskytují rámec pro porovnání s ostatními metodami, které využívají složitější sady příznaků.
+Pro hodnocení výkonnosti modelu bylo použito pětinásobné křížové ověření.
+Hlavní metrikou bylo $F_1$ skóre, které je vhodné zejména pro nevyvážené datové sady, protože zohledňuje jak \acs{PPV}, tak citlivost (\acs{Se}).
+
+Při hodnocení výsledků algoritmů detekující \acs{TF} kde jsme porovnávali odchylky od referenční hodnoty \acs{TF} pro kvalitní a nekvalitní signály.
+Hodnoty kvality signálů jsou odvozeny z \dots % buď Orphanidou nebo výsledky náhodného lesa

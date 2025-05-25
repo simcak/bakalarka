@@ -12,8 +12,8 @@ Výsledky jsou vyhodnoceny samostatně pro obě použité databáze: CapnoBase a
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Vyhodnocení na databázi CapnoBase}
 \label{sec:vysledky_capnobase}
-U této databáze máme k dispozici referenční hodnoty systolických vrcholů, a proto můžeme použít statistické metody pro vyhodnocení kvality detekce, jako je senzitivita (\acs{Se}), pozitivní prediktivní hodnota (\acs{PPV}) a F1 skóre.
-Senzitivita vyjadřuje procento vrcholů, které použitý algoritmus správně rozpoznal z celkového počtu \textit{referenčních} vrcholů:
+U této databáze máme k dispozici referenční hodnoty systolických vrcholů, a proto můžeme použít statistické metody pro vyhodnocení kvality detekce, jako je citlivost (\acs{Se}), pozitivní prediktivní hodnota (\acs{PPV}) a F1 skóre.
+Citlivost vyjadřuje procento vrcholů, které použitý algoritmus správně rozpoznal z celkového počtu \textit{referenčních} vrcholů:
 \begin{equation}
 	\label{eq:se}
 	\acs{Se} = \frac{\acs{TP}}{\acs{TP} + \acs{FN}} \cdot 100\%.
@@ -25,7 +25,7 @@ Pozitivní prediktivní hodnota vyjadřuje procento vrcholů, které vybraný al
 	\acs{PPV} = \frac{\acs{TP}}{\acs{TP} + \acs{FP}} \cdot 100\%.
 \end{equation}
 
-\acs{F1} skóre je harmonický průměr senzitivity a \acs{PPV} vyjádřen v procentech:
+\acs{F1} skóre je harmonický průměr citlivosti a \acs{PPV} vyjádřen v procentech:
 \begin{equation}
 	\label{eq:f1}
 	\acs{F1} = \frac{2 \cdot Se \cdot PPV}{Se + PPV} \cdot 100\%.
