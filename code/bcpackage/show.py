@@ -34,7 +34,6 @@ def plotting_SDNR(table1, table2):
 	plt.title('Rozložení chyb (CapnoBase)')
 	plt.show()
 
-
 def plotting_SePPV(table1, table2, chunked=False):
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 7))
 
@@ -105,7 +104,6 @@ def plotting_SePPV(table1, table2, chunked=False):
 
 	plt.tight_layout()
 	plt.show()
-
 
 def plotting_hr_diffs(table1, table2):
 	fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(13, 9))
@@ -185,7 +183,6 @@ def plotting_hr_diffs(table1, table2):
 
 	plt.tight_layout()
 	plt.show()
-
 
 def full_results(print_head=True):
 	"""

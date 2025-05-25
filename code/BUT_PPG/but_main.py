@@ -13,6 +13,7 @@ def but_ppg_main(method: str, show=False, first=False):
 
 	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
+		# print(f"{i}: \033[92mProcessing file {i} with ID: {but_signal_info['ID']} with Ref Quality: {but_signal_info['Ref_Quality']}\033[0m")
 		if but_error.police(but_signal_info, i):
 			if show:
 				print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
@@ -29,8 +30,7 @@ def but_ppg_main(method: str, show=False, first=False):
 		# 	Orphanidou method for quality estimation == templatematch
 		elif method == 'neurokit':
 			nk_signals, info = nk.ppg_process(
-				preprocess.standardize_normalize_signal(but_signal_info['PPG_Signal']),
-				sampling_rate=but_signal_info['PPG_fs'], method="elgendi"
+				but_signal_info['PPG_Signal'], sampling_rate=but_signal_info['PPG_fs'], method="elgendi"
 				)
 			detected_peaks = np.where(nk_signals['PPG_Peaks'] == 1)[0]
 			name = 'NK'

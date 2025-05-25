@@ -49,8 +49,10 @@ def hjorth_show_hr(chunked_pieces, database='CapnoBase300'):
 		data = pd.read_csv('./hjorth_CBq_300.csv')
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
+	elif database == 'current':
+		data = pd.read_csv('./hjorth.csv')
 	else:
-		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG'.")
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'current'.")
 
 	# Extract relevant columns
 	file_names = data['File name']
@@ -80,7 +82,8 @@ def hjorth_show_hr(chunked_pieces, database='CapnoBase300'):
 
 	# Add vertical labels for selected file names
 	for idx in selected_indices:
-		plt.text(idx, hjorth_hr.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+		offset = 10
+		plt.text(idx, hjorth_hr.iloc[idx] + offset, file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
 
 	# Plot HR difference
 	plt.subplot(2, 1, 2)
@@ -93,7 +96,8 @@ def hjorth_show_hr(chunked_pieces, database='CapnoBase300'):
 
 	# Add vertical labels for selected file names
 	for idx in selected_indices:
-		plt.text(idx, hr_diff.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+		offset = 3
+		plt.text(idx, hr_diff.iloc[idx] + offset, file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
 
 	plt.tight_layout()
 	plt.show()
@@ -508,6 +512,7 @@ def _autocorrelate_signal(signal, num_iterations=1):
 	result = signal.copy()
 	for _ in range(num_iterations):
 		result = correlate(result, result, mode='same', method='fft')	# O(N log N)
+		result = _normalize_signal(result)
 		# result = np.correlate(result, result, mode='same')			# O(i * N^2)
 	return result
 
@@ -657,8 +662,8 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		hjorth_df.to_csv(output_file, header=True, index=False)
 
 	_show = False
-	if _show and hjorth_info["HR diff"] > 5:
-		# Frekvenční charakteristika (FFT)
+	if _show and hjorth_info["HR diff"] < 0.2:
+		# frekvenční spektrum (pomocí FFT)
 		freqs = np.fft.rfftfreq(len(filtered_signal), d=1/sampling_frequency)
 		fft_magnitude = np.abs(np.fft.rfft(filtered_signal))
 		freqs_autocorr = np.fft.rfftfreq(len(autocorrelated_signal), d=1/sampling_frequency)
@@ -671,30 +676,31 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		fft_magnitude_autocorr_rescaled = fft_magnitude_autocorr / np.max(fft_magnitude_autocorr)
 		fft_magnitude_raw_rescaled = fft_magnitude_raw / np.max(fft_magnitude_raw)
 
-		# Vykreslení autokorelovaného signálu a derivace
-		plt.figure(figsize=(12, 6))
+		# Vykreslení filtrovaného a autokorelovaného signálu
+		plt.figure(figsize=(12, 8))
 
 		plt.subplot(2, 1, 1)
-		plt.title("Přeškálovaný filtrovaný a autokorelovaný signál")
-		plt.xlabel("Čas [s]")
-		plt.ylabel("Relativní amplituda") # je amplituda správně použité slovo?
+		plt.title("Porovnání fází předzpracování signálu", fontsize=16)
+		plt.xlabel("Čas [s]", fontsize=14)
+		plt.ylabel("Relativní amplituda", fontsize=14)
 		time_axis = np.arange(len(filtered_signal)) / sampling_frequency
-		plt.plot(time_axis, _normalize_signal(filtered_signal), label="Filtrovaný signál")
-		plt.plot(time_axis, _normalize_signal(autocorrelated_signal), label="Autokorelovaný signál")
-		plt.legend()
+		plt.plot(time_axis, (signal), label="Původní signál", color='grey', alpha=0.5)
+		plt.plot(time_axis, (filtered_signal), label="Filtrovaný signál")
+		plt.plot(time_axis, (autocorrelated_signal), label="Autokorelovaný signál", color=G.BUT_RED)
+		plt.legend(fontsize=12)
 		plt.grid()
 
-		# Vykreslení frekvenční charakteristiky
+		# Vykreslení frekvenčního spektra
 		plt.subplot(2, 1, 2)
 		freq_max = 15
-		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Frekvenční charakteristika filtrovaného signálu")
-		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Frekvenční charakteristika autokorelovaného signálu")
-		plt.plot(freqs_raw[freqs_raw <= freq_max], fft_magnitude_raw_rescaled[freqs_raw <= freq_max], label="Frekvenční charakteristika původního signálu", color='grey', alpha=0.5)
-		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color=G.CESA_BLUE, linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz")
-		plt.title("Přeškálovaná frekvenční charakteristika signálů")
-		plt.ylabel("Relativní amplituda")
-		plt.xlabel("Frekvence [Hz]")
-		plt.legend()
+		plt.title("Frekvenční spektra před a po autokorelaci", fontsize=16)
+		plt.ylabel("Relativní amplituda", fontsize=14)
+		plt.xlabel("Frekvence [Hz]", fontsize=14)
+		plt.plot(freqs_raw[freqs_raw <= freq_max], fft_magnitude_raw_rescaled[freqs_raw <= freq_max], label="Spektrum původního signálu", color='grey', alpha=0.5)
+		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Spektrum filtrovaného signálu")
+		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Spektrum signálu po autokorelacích", color=G.BUT_RED)
+		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color=G.CESA_BLUE, linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz ({hjorth_info['Hjorth HR']:.2f} tepů/min), ref. TF: {hjorth_info['Ref HR']:.2f} tepů/min")
+		plt.legend(fontsize=12)
 		plt.grid()
 
 		plt.tight_layout()
@@ -819,7 +825,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 				)
 				_data["Our Quality"] = our_quality[j + 2016]
 				j += 1
-				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=False)
+				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=True)
 			else:
 				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10

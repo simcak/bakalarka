@@ -18,6 +18,7 @@ def police(but_signal_info: dict, i: int, print_err=False) -> bool:
 	corrupted_signals_3 = [81, 248, 278, 295, 306, 345, 362, 373, 488, 507, 510, 546, 590, 688, 779, 806, 854, 906,
 						1064, 1118, 1126, 1137, 1172, 1179, 1226, 1294, 1502, 1513, 1601, 1637, 1644, 1746, 1808, 1912, 1972,
 						2019, 2083, 2102, 2265, 2271, 2339, 2424, 2426, 2587, 3309, 3430, 3887]
+	corrupted_signals_4 = [186, 277, 311, 313, 460, 471, 494, 498, 677, 846, 1088, 1215, 1289, 1349, 1546, 1696, 1755, 3701] # 313 is quality 1
 
 	if but_signal_info['PPG_Signal'] is None:
 		if print_err:
@@ -52,6 +53,12 @@ def police(but_signal_info: dict, i: int, print_err=False) -> bool:
 			print('/Users/peta/.pyenv/versions/3.10.0/lib/python3.10/site-packages/numpy/core/_methods.py:190: RuntimeWarning: invalid value encountered in double_scalars')
 			print('ret = ret.dtype.type(ret / rcount)')
 			print(f'RuntimeWarning:\033[91m invalid value encountered in double_scalars \nFile {but_signal_info["ID"]} skipped.\033[0m')
+		return True
+	
+	if (i in corrupted_signals_4):
+		if print_err:
+			print('\nProblem with 2 order filtering in epochs_create.py')
+			print(f'\033[91m File {but_signal_info["ID"]} skipped.\033[0m')
 		return True
 
 	return False

@@ -94,8 +94,8 @@ def filter_signal(ppg_signal, fs):
 	# plot_frequency_response(fs, lowcut=0.5, highcut=3.35, order=4)
 	denoised_signal = remove_noise(ppg_signal, fs, lowcut=0.5, highcut=3.35)
 	# no_BLD_signal = remove_baseline_drift(denoised_signal, fs, highcut=0.5)
-	standardized_signal = standardize_normalize_signal(denoised_signal)
+	# standardized_signal = standardize_normalize_signal(denoised_signal) % nepotřebujeme, protože to děláme pro každé okno
 	# remove motion artifacts?
-	output_signal = standardized_signal
+	output_signal = denoised_signal
 
 	return output_signal
