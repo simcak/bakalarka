@@ -795,7 +795,14 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 	if database == "CapnoBase":
 		for i in range(G.CB_FILES_LEN):
 			file_info_original = cb_data.extract(G.CB_FILES[i])
-			file_info = _downsample_signal(file_info_original, 30) 	# downsample to 30Hz = same as BUT PPG
+			if compute_quality:
+				from scipy.signal import butter, filtfilt
+				_nyquist, _order, _cutoff = file_info_original['fs'] / 2, 4, 14
+				b, a = butter(_order, _cutoff / _nyquist, btype='low', analog=False)
+				file_info_original['Raw Signal'] = filtfilt(b, a, file_info_original['Raw Signal'])
+				file_info = _downsample_signal(file_info_original, 30) 	# downsample to 30Hz = same as BUT PPG
+			else:
+				file_info = file_info_original.copy()
 			max_chunk_count = len(file_info['Raw Signal']) // (file_info['fs'] * 10) # 10s long chunks
 			# Chunk the signal
 			if chunked_pieces >= 1 and chunked_pieces <= max_chunk_count:
