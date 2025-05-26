@@ -1,16 +1,22 @@
-\chapter{Výsledky a vyhodnocení}
+\chapter{Výsledky}
 \label{ch:vysledky}
 % Jen rychlé shrnutí před vyhodnocením - co se bude hodnotit, jaké metody, jaké databáze.
-Tato kapitola prezentuje výsledky odhadu tepové frekvence a hodnocení kvality PPG signálů pomocí tří různých metod:
+Tato kapitola prezentuje výsledky odhadu tepové frekvence z fotopletysmografických signálů pomocí tří různých metod:
 referenčního Elgendiho algoritmu, vlastního algoritmu založeného na detekci systolických vrcholů a nově navržené metody využívající Hjorthovy deskriptory.
 
 Výsledky jsou vyhodnoceny samostatně pro obě použité databáze: CapnoBase a \acl{BUT PPG}.
 % Pro každou metodu uvádíme odhad TF, metriky detekce (Se, PPV, F1), případně confusion matrix a rozdíly mezi kvalitními a nekvalitními signály (podle Orphanidou).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% CapnoBase %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                             Kvalita                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Vyhodnocení na databázi CapnoBase}
+\section{Výsledky automatického posouzení kvality}
+\label{sec:vysledky_kvalita}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                            CapnoBase                            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Výsledky pro databázi CapnoBase}
 \label{sec:vysledky_capnobase}
 U této databáze máme k dispozici referenční hodnoty systolických vrcholů, a proto můžeme použít statistické metody pro vyhodnocení kvality detekce, jako je citlivost (\acs{Se}), pozitivní prediktivní hodnota (\acs{PPV}) a F1 skóre.
 Citlivost vyjadřuje procento vrcholů, které použitý algoritmus správně rozpoznal z celkového počtu \textit{referenčních} vrcholů:
@@ -28,7 +34,7 @@ Pozitivní prediktivní hodnota vyjadřuje procento vrcholů, které vybraný al
 \acs{F1} skóre je harmonický průměr citlivosti a \acs{PPV} vyjádřen v procentech:
 \begin{equation}
 	\label{eq:f1}
-	\acs{F1} = \frac{2 \cdot Se \cdot PPV}{Se + PPV} \cdot 100\%.
+	\acs{F1} = 2 \cdot \frac{Se \cdot PPV}{Se + PPV} \cdot 100\%.
 \end{equation}
 
 Tyto metriky počítáme pouze pro Elgendiho algoritmus a vlastní algoritmus detekce vrcholů, kvůli povaze algoritmu využívajícího Hjorthovu mobilitu, který neprovádí detekci vrcholů, ale přímo odhaduje tepovou frekvenci.
@@ -91,9 +97,9 @@ Jednotlivé metody jsou podrobně rozebrány v následujících podkapitolách.
 % TODO: doplnit výsledky, tabulky, grafy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BUT PPG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                             BUT PPG                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Vyhodnocení na databázi BUT PPG}
+\section{Výsledky pro databázi BUT PPG}
 \label{sec:vysledky_butppg}
 
 \subsection*{Referenční algoritmus - Elgendi}

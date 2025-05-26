@@ -26,15 +26,15 @@ Díky svým vlastnostem je CapnoBase vhodná k~posouzení robustnosti a přesnos
 Databáze \acs{BUT PPG} vznikla na Fakultě elektrotechniky a komunikačních technologií \acs{VUT} za účelem zkoumání kvality \acs{PPG} záznamů a odhadu \acs{TF}.
 V nové rozšířené verzi obsahuje 3,888 desetisekundových měření od 50 dobrovolníků (25 žen a 25 mužů) ve věku 19 až 76~let, a to v klidu i při různých typech pohybových aktivit.
 Fotopletysmografické záznamy byly pořízeny chytrými telefony \textit{Xiaomi~Mi9} a \textit{Huawei~P20~Pro} se vzorkovací frekvencí 30~Hz.
-Pro referenční \acs{EKG} a akcelerometrická (\acs{ACC}) data byl použit mobilní senzor \textit{Bittium Faros~360 (nebo 180)} se vzorkovacími frekvencemi 1,000~Hz pro \acs{EKG} a 100~Hz pro \acs{ACC}~\cite{BUT_PPG}.
+Pro referenční \acs{EKG} a akcelerometrická (\acs{ACC}) data byl použit mobilní senzor \textit{Bittium Faros~360 (nebo 180)} se vzorkovacími frekvencemi 1,000~Hz pro \acs{EKG} a 100~Hz pro \acs{ACC}~\cite{BUT_PPG,BUT_PPG_database}.
 Surový \acs{PPG} signál byl extrahován z červené složky nahraného videa (viz. Obr.~\ref{fig:videoZaznamPPG}).
 
-Každý \acs{PPG} záznam byl synchronizován s \acs{EKG} a rozdělen do desetisekundových segmentů, které následně hodnotilo tři až pět expertů.
+Každý \acs{PPG} záznam byl synchronizován s \acs{EKG} a rozdělen do desetisekundových segmentů, které následně hodnotilo tři až pět expertů~\cite{BUT_PPG_database}.
 Pro označení kvality vycházeli výhradně z rozdílu mezi \acs{TF} odhadnutou z \acs{PPG} a referenční tepovou frekvencí z \acs{EKG}.
 Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako „dobré“ (1), jinak jako „špatné“ (0).
 Tato hranice vychází z mezinárodní normy IEC 60601-2-27 a v databázi \acs{BUT PPG} je aplikována ještě přísněji~\cite{BUT_PPG}.
 
-Přibližně polovina záznamů vznikla přiložením prstu na zadní kameru a LED, druhá pak snímáním ucha v poloze připomínající telefonování.
+Přibližně polovina záznamů vznikla přiložením prstu na zadní kameru a \acs{LED}, druhá pak snímáním ucha v poloze připomínající telefonování.
 V novější části databáze se rozšiřuje množství subjektů i situací, včetně manipulací s osvětlením, vyšším tlakem prstu na čočku, mluvením či chůzí, a nově se přidávají i údaje o krevním tlaku, glykémii a saturaci krve kyslíkem.
 
 Díky této variabilitě podmínek a bohatým anotacím je \acs{BUT PPG} unikátním zdrojem pro testování robustnosti algoritmů detekce \acs{TF} a pro posuzování použitelnosti krátkých \acs{PPG} signálů z mobilního telefonu v reálné praxi.
