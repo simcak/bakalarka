@@ -28,20 +28,20 @@ def main():
 		chunked_pieces 20 == 24s - best results = 0,66 avg HR diff
 		chunked_pieces 48 == 10s like in BUT PPG = 0,82 avg HR diff || 0,81 after eliminating by Orphanidu (22 samples removed)
 	"""
-	hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=True)
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=True)
 	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=True)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=7)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=30, autocorr_iterations=7)
 
 	##### Quality Algorithm - HJORTH #####
-	# hjorth.quality_hjorth()
+	# hjorth.quality_hjorth(database='all', find_best_parameters=True)
 	# our_quality = hjorth.quality_hjorth(find_best_parameters=True)
 	# file = pd.read_csv('hjorth.csv')
 	# file["ourQ_this_only"] = our_quality
 	# file.to_csv('hjorth.csv', index=False)
 
 	# hjorth.confusion_matrix(database='all')
-	hjorth.hjorth_show_hr(48, database='current')
+	# hjorth.hjorth_show_hr(48, database='current')
 	# hjorth.hjorth_show_only_quality_hr(48, database='CapnoBase300')
 	# hjorth.hjorth_show_spi()
 
@@ -58,7 +58,7 @@ def main():
 	# threshold = max_f1[0]
 	# quality.orphanidou_quality_evaluation(threshold, print_out=True)
 	threshold = -0.1
-	# quality.orphanidou_quality_plot(threshold, chunked_pieces)
+	quality.orphanidou_quality_plot(threshold, chunked_pieces)
 
 	############## Show the results ##############
 	##############################################

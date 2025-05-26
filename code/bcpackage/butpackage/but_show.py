@@ -7,9 +7,8 @@ def neurokit_show(signals, info, i):
 	"""
 	fancy plot
 	"""
-	if i == G.SAMPLE_NUMBER_BUT:
-		nk.ppg_plot(signals, info)
-		plt.show()
+	nk.ppg_plot(signals, info)
+	plt.show()
 
 def test_hub(ppg_signal, filtered_ppg_signal, our_peaks, hr_info, but_id, i):
 	"""
@@ -51,7 +50,7 @@ def two_signals_peaks(signal1, signal2, peaks, but_id):
 	plt.figure(figsize=(14.4, 6))
 	plt.plot(time, signal1, label='původní signál')
 	plt.plot(time, signal2, label='filtrovaný signál')
-	plt.scatter([time[p] for p in peaks], signal2[peaks], c='g')
+	plt.scatter([time[p] for p in peaks], signal2[peaks], c='g', label='detekované vrcholy')
 	plt.title(f'BUT PPG (id.: {but_id}) Referenční kvalita: 1', fontsize=17)
 	plt.xlabel('Čas [s]', fontsize=14)
 	plt.ylabel('Relativní amplituda', fontsize=14)

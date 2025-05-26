@@ -222,15 +222,21 @@ def orphanidou_quality_plot(threshold, chunked_pieces):
 	orph_quality = orph_data['Orphanidou_Quality'].values
 	ref_quality = orph_data['Ref_Quality'].values
 
+	# chunked_pieces = 1
+	# signal_ids = signal_ids[:48]
+	# x_idx = x_idx[:48]
+	# orph_quality = orph_quality[:48]
+	# ref_quality = ref_quality[:48]
+
 	# Determine colors based on equality
 	colors = [G.CESA_BLUE if oq >= threshold and rq == 1 else G.BUT_RED for oq, rq in zip(orph_quality, ref_quality)]
 
 	plt.figure(figsize=(13, 6))
 	plt.scatter(x_idx, orph_quality, c=colors, alpha=0.7, edgecolors='k')
 	# plt.axhline(y=threshold, color="grey", linestyle="--", linewidth=1)
-	plt.title("Orphanidou vs Referenční kvalita BUT PPG", fontsize=14)
-	plt.ylabel("Orphanidou kvalita", fontsize=12)
-	plt.xlabel("ID signálu", fontsize=12)
+	plt.title("Orphanidou vs Referenční kvalita BUT PPG", fontsize=16)
+	plt.ylabel("Orphanidou kvalita", fontsize=14)
+	plt.xlabel("ID signálu", fontsize=14)
 	tick_positions = x_idx[::chunked_pieces]
 	tick_labels = signal_ids[::chunked_pieces]
 	plt.xticks(tick_positions, tick_labels, rotation=90)
@@ -243,6 +249,7 @@ def orphanidou_quality_plot(threshold, chunked_pieces):
 			# plt.Line2D([0], [0], color='grey', linestyle="--", linewidth=1, label=f'Threshold: {threshold}'),
 		],
 		loc='upper right',
+		fontsize=13,
 	)
 	plt.show()
 

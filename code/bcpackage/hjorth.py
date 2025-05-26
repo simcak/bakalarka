@@ -203,7 +203,19 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 	from sklearn.preprocessing import StandardScaler
 	from sklearn.metrics import classification_report, confusion_matrix
 
-	def _plot_feature_importance(_X_df, _trained_model):
+	def _plot_feature_importance_1(clf, feature_names):
+		importances = clf.feature_importances_
+		indices = np.argsort(importances)[::-1]
+
+		plt.figure(figsize=(10, 6))
+		plt.title("Důležitost příznaků (Random Forest)")
+		plt.bar(range(len(importances)), importances[indices], align="center")
+		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=45, ha="right")
+		plt.tight_layout()
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.show()
+
+	def _plot_feature_importance_2(_X_df, _trained_model):
 		# Library of feature thresholds with keynames
 		feature_thresholds = {feature_name: [] for feature_name in _X_df.columns}
 
@@ -247,8 +259,8 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 		from sklearn.model_selection import GridSearchCV
 
 		param_grid = {
-			"n_estimators": [10, 25, 50, 100, 200],
-			"max_depth": [None, 2, 5, 10],
+			"n_estimators": [100, 150, 200],
+			"max_depth": [3, 5, 7],
 			"max_features": ["sqrt", "log2", None],
 		}
 
@@ -301,7 +313,7 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 	if find_best_parameters:
 		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train)
 	else:
-		_max_depth, _max_features, _n_estimators = 5, None, 50
+		_max_depth, _max_features, _n_estimators = 7, None, 150
 
 	### Model training
 	trained_model = RandomForestClassifier(
@@ -318,14 +330,13 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 	y_pred = trained_model.predict(X_test)
 
 	### Print && show
-	# _plot_feature_importance(X_df, trained_model)
 	print(f"Klasifikační zpráva ({database}):")
 	print(classification_report(y_test, y_pred, digits=3))
 	print(f"Matice záměn ({database}):")
-	print("TN   FP\nFN   TP")
+	print("TN       FP\nFN       TP")
 	print(confusion_matrix(y_test, y_pred))
 
-	# Vyhodnocení zvlášť pro CapnoBase a BUT_PPG podle 'source'
+	# Vyhodnocení zvlášť pro CapnoBase a BUT_PPG podle 'source'. musíme mít ale obě
 	if database == 'all':
 		for src in ["capno", "but"]:
 			mask = X_test[:, 0] == X_test[:, 0]  # dummy mask, will be replaced
@@ -348,138 +359,264 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 	# Stop the timer and print the elapsed time
 	time_count.stop_terminal_time(start_time, stop_event, func_name='Random Forest Classifier')
 
+	def _plot_2d_projection(X, y, source, method='pca', title='2D projekce dat'):
+		from sklearn.decomposition import PCA
+		from sklearn.manifold import TSNE
+		import seaborn as sns
+
+		# Dimenzionální redukce
+		if method == 'pca':
+			X_proj = PCA(n_components=2).fit_transform(X)
+		elif method == 'tsne':
+			X_proj = TSNE(n_components=2, perplexity=30, n_iter=1000).fit_transform(X)
+		else:
+			raise ValueError("Podporované metody: 'pca', 'tsne'")
+
+		# Příprava DataFrame pro seaborn
+		df_plot = pd.DataFrame({
+			"X1": X_proj[:, 0],
+			"X2": X_proj[:, 1],
+			"Třída": y,
+			"Databáze": source
+		})
+
+		plt.figure(figsize=(8, 6))
+		sns.scatterplot(
+			data=df_plot,
+			x="X1", y="X2",
+			hue="Třída",       # barva = kvalita
+			style="Databáze",  # tvar = zdroj dat
+			palette=["#d62728", "#1f77b4"],
+			alpha=0.7
+		)
+		plt.title(title)
+		plt.xlabel("1. komponenta")
+		plt.ylabel("2. komponenta")
+		plt.legend(title="Třída / Databáze", loc="best", fontsize=9)
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.tight_layout()
+		plt.show()
+
+	# _plot_feature_importance_1(trained_model, features)
+	# _plot_feature_importance_2(X_df, trained_model)
+	# _plot_2d_projection(X_scaled, target, df["source"], method='pca', title='2D projekce dat (PCA)')
+	# _plot_2d_projection(X_scaled, target, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
+
 	return trained_model.predict(X_scaled)
 
-# def quality_hjorth():
-# 	from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-# 	from sklearn.model_selection import train_test_split
-# 	from sklearn.metrics import classification_report, confusion_matrix
-# 	from sklearn.preprocessing import StandardScaler
+def gb_quality_hjorth(find_best_parameters=False, database='all'):
+	from bcpackage import time_count
+	import seaborn as sns
+	from sklearn.ensemble import GradientBoostingClassifier
+	from sklearn.utils.class_weight import compute_sample_weight
+	from sklearn.model_selection import train_test_split, cross_val_score
+	from sklearn.preprocessing import StandardScaler
+	from sklearn.metrics import classification_report, confusion_matrix
 
-# 	# Define sources
-# 	df_capno = pd.read_csv("./hjorth_CBq.csv")
-# 	df_capno["source"] = "capno"
+	def _plot_feature_importance_1(clf, feature_names):
+		importances = clf.feature_importances_
+		indices = np.argsort(importances)[::-1]
 
-# 	df_butppg = pd.read_csv("./hjorth_butppg.csv")
-# 	df_butppg["source"] = "but"
+		plt.figure(figsize=(10, 6))
+		plt.title("Důležitost příznaků (Random Forest)")
+		plt.bar(range(len(importances)), importances[indices], align="center")
+		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=45, ha="right")
+		plt.tight_layout()
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.show()
 
-# 	df = pd.concat([df_capno, df_butppg], ignore_index=True)
+	def _plot_feature_importance_2(_X_df, _trained_model):
+		# Library of feature thresholds with keynames
+		feature_thresholds = {feature_name: [] for feature_name in _X_df.columns}
 
-# 	# Define what will we use for classification
-# 	features = ["Mobility Filtered",
-# 				"Complexity Filtered",
-# 				"SPI Filtered",
-# 				"Spectral Ratio",
-# 				"ACF Peaks",
-# 				"Shannon Entropy"
-# 				]
-# 	X = df[features]
-# 	y = (df["Orphanidou Quality"] >= 0.9).astype(int)
+		# Go through all trees in the forest
+		for tree_estimator in _trained_model.estimators_:
+			tree = tree_estimator.tree_
+			
+			# Go through all nodes in the tree
+			for i in range(tree.node_count):
+				# Check if the node is a leaf
+				if tree.feature[i] != -2:
+					feature_idx = tree.feature[i]
+					threshold_scaled = tree.threshold[i] # This is the threshold used in the tree
+					# Add the threshold to the list for the corresponding feature
+					feature_name = X_df.columns[feature_idx]
+					feature_thresholds[feature_name].append(threshold_scaled)
 
-# 	# Scaling for uniformity of Hjorth parameters
-# 	scaler = StandardScaler()
-# 	X_scaled = scaler.fit_transform(X)
+		# Check threashold for each feature
+		for feature_name, thresholds_list in feature_thresholds.items():
+			if thresholds_list:
+				print(f"\nPrahové hodnoty pro příznak: {feature_name} (na škálovaných datech)")
+				print(f"  Počet použití:  {len(thresholds_list)}")
+				print(f"  Minimální práh: {np.min(thresholds_list):.4f}")
+				print(f"  Mediánový práh: {np.median(thresholds_list):.4f}")
+				print(f"  Průměrný práh:  {np.mean(thresholds_list):.4f}")
+				print(f"  Maximální práh: {np.max(thresholds_list):.4f}")
 
-# 	# Split the data into training and testing sets
-# 	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.2, random_state=66)
+				plt.figure(figsize=(10, 4))
+				sns.histplot(thresholds_list, kde=True, bins=20)
+				plt.title(f"Distribuce prahů pro {feature_name} (škálovaná data)")
+				plt.xlabel("Prahová hodnota (škálovaná)")
+				plt.ylabel("Frekvence")
+				plt.show()
+			else:
+				print(f"\nPro příznak {feature_name} nebyly v RF použity žádné přímé rozhodovací prahy (může být méně důležitý nebo použit v kombinaci).")
 
-# 	# Model training
-# 	_max_depth = 4
-# 	clf = RandomForestClassifier(n_estimators=100, random_state=6)
-# 	# clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=_max_depth, random_state=6)
-# 	clf.fit(X_train, y_train)
+	def _find_best_parameters(_X, _y, sample_weight):
+		"""
+		Printing out the best parameters for Random Forest Classifier that we use below.
+		"""
+		from sklearn.model_selection import GridSearchCV
 
-# 	y_pred = clf.predict(X_test)
+		param_grid = {
+			"n_estimators": [100, 150, 200],
+			"learning_rate": [0.05, 0.1, 0.2],
+			"max_depth": [3, 5, 7],
+		}
 
-# 	# Get feature importances
-# 	importances = clf.feature_importances_
+		search = GridSearchCV(GradientBoostingClassifier(random_state=42), param_grid, cv=5, scoring="f1")
+		search.fit(_X, _y, sample_weight=sample_weight)
+		print(f"Nejlepší model: {search.best_estimator_}")
+		print(f"Nejlepší F1 skóre: {search.best_score_:.3f}")
+		print(f"Nejlepší parametry: {search.best_params_}")
+		
+		# Return the best parameters
+		return search.best_params_["max_depth"], search.best_params_["learning_rate"], search.best_params_["n_estimators"]
 
-# 	# Sort the features by importance
-# 	sorted_indices = np.argsort(importances)[::-1]
+	# Start the timer
+	start_time, stop_event = time_count.terminal_time()
 
-# 	print("Důležitost příznaků podle Random Forest:")
-# 	for i in sorted_indices:
-# 		print(f"{features[i]}: {importances[i]:.4f}")
+	### Load the data from the CSV files
+	if database == 'CapnoBase30':
+		df = pd.read_csv("./hjorth_CBq.csv")
+		df["source"] = "capno"
+	elif database == 'CapnoBase300':
+		df = pd.read_csv("./hjorth_CBq_300.csv")
+		df["source"] = "capno"
+	elif database == 'BUT_PPG':
+		df = pd.read_csv("./hjorth_butppg.csv")
+		df["source"] = "but"
+	elif database == 'all':
+		df_capno = pd.read_csv("./hjorth_CBq.csv")
+		df_capno["source"] = "capno"
+		df_butppg = pd.read_csv("./hjorth_butppg.csv")
+		df_butppg["source"] = "but"
+		df = pd.concat([df_capno, df_butppg], ignore_index=True)
+	else:
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
 
-# 	# Print && show)
-# 	print("Klasifikační zpráva:")
-# 	print(classification_report(y_test, y_pred, digits=3))
-# 	print("Matice záměn:")
-# 	print(confusion_matrix(y_test, y_pred))
+	### Define what will we use for classification
+	features = ["Mobility Filtered", "Complexity Filtered", "SPI Filtered"]
+	# features = ["SPI Filtered"]
+	X_df = df[features]
 
-# 	def _plot_confusion_matrix(y_true, y_pred, class_names=["Špatná kvalita", "Dobrá kvalita"]):
-# 		import seaborn as sns
-# 		from sklearn.metrics import classification_report, confusion_matrix
+	### Define the target variable
+	target = (df["Orphanidou Quality"] >= 0.9).astype(int)
+	# target = (df["Ref Quality"] == 1)
 
-# 		# Confusion matrix
-# 		cm = confusion_matrix(y_true, y_pred)
-# 		plt.figure(figsize=(6, 5))
-# 		sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
-# 					xticklabels=class_names, yticklabels=class_names)
-# 		plt.xlabel("Predikovaná třída")
-# 		plt.ylabel("Skutečná třída")
-# 		plt.title("Matice záměn (Confusion Matrix)")
-# 		plt.tight_layout()
-# 		plt.show()
+	### Scaling
+	scaler = StandardScaler()
+	X_scaled = scaler.fit_transform(X_df)
 
-# 		# Classification report
-# 		print("\nKlasifikační zpráva:")
-# 		print(classification_report(y_true, y_pred, target_names=class_names))
+	### Split the data into training and testing sets
+	X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, stratify=target, test_size=0.4, random_state=42)
 
-# 	def _plot_feature_importance(clf, feature_names):
-# 		importances = clf.feature_importances_
-# 		indices = np.argsort(importances)[::-1]
+	# Compute sample weights for the training set
+	sample_weights = compute_sample_weight(class_weight="balanced", y=y_train)
 
-# 		plt.figure(figsize=(10, 6))
-# 		plt.title("Důležitost příznaků (Random Forest)")
-# 		plt.bar(range(len(importances)), importances[indices], align="center")
-# 		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=45, ha="right")
-# 		plt.tight_layout()
-# 		plt.grid(True, linestyle='--', alpha=0.5)
-# 		plt.show()
+	if find_best_parameters:
+		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train, sample_weights)
+	else:
+		_max_depth, _max_features, _n_estimators = 7, None, 150
 
-# 	def _plot_2d_projection(X, y, source, method='pca', title='2D projekce dat'):
-# 		from sklearn.decomposition import PCA
-# 		from sklearn.manifold import TSNE
-# 		import seaborn as sns
+	### Model training
+	trained_model = GradientBoostingClassifier(
+		n_estimators=_n_estimators, max_depth=_max_depth, random_state=42, learning_rate=0.1
+		)
+	trained_model.fit(X_train, y_train, sample_weight=sample_weights)
 
-# 		# Dimenzionální redukce
-# 		if method == 'pca':
-# 			X_proj = PCA(n_components=2).fit_transform(X)
-# 		elif method == 'tsne':
-# 			X_proj = TSNE(n_components=2, perplexity=30, n_iter=1000).fit_transform(X)
-# 		else:
-# 			raise ValueError("Podporované metody: 'pca', 'tsne'")
+	### Cross-validation: evaluating estimator performance
+	_fold = 5
+	scores = cross_val_score(trained_model, X_scaled, target, cv=_fold, scoring="f1")
+	print(f"Průměrné F1 skóre ({_fold}-fold CV): {scores.mean():.3f} ± {scores.std():.3f}")
 
-# 		# Příprava DataFrame pro seaborn
-# 		df_plot = pd.DataFrame({
-# 			"X1": X_proj[:, 0],
-# 			"X2": X_proj[:, 1],
-# 			"Třída": y,
-# 			"Databáze": source
-# 		})
+	### predicting on the test set
+	y_pred = trained_model.predict(X_test)
 
-# 		plt.figure(figsize=(8, 6))
-# 		sns.scatterplot(
-# 			data=df_plot,
-# 			x="X1", y="X2",
-# 			hue="Třída",       # barva = kvalita
-# 			style="Databáze",  # tvar = zdroj dat
-# 			palette=["#d62728", "#1f77b4"],
-# 			alpha=0.7
-# 		)
-# 		plt.title(title)
-# 		plt.xlabel("1. komponenta")
-# 		plt.ylabel("2. komponenta")
-# 		plt.legend(title="Třída / Databáze", loc="best", fontsize=9)
-# 		plt.grid(True, linestyle='--', alpha=0.5)
-# 		plt.tight_layout()
-# 		plt.show()
+	### Print && show
+	print(f"Klasifikační zpráva ({database}):")
+	print(classification_report(y_test, y_pred, digits=3))
+	print(f"Matice záměn ({database}):")
+	print("TN       FP\nFN       TP")
+	print(confusion_matrix(y_test, y_pred))
 
-# 	# _plot_confusion_matrix(y_test, y_pred)
-# 	# _plot_feature_importance(clf, features)
-# 	# _plot_2d_projection(X_scaled, y, df["source"], method='pca', title='2D projekce dat (PCA)')
-# 	# _plot_2d_projection(X_scaled, y, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
+	# Vyhodnocení zvlášť pro CapnoBase a BUT_PPG podle 'source'. musíme mít ale obě
+	if database == 'all':
+		for src in ["capno", "but"]:
+			mask = X_test[:, 0] == X_test[:, 0]  # dummy mask, will be replaced
+			if "source" in df.columns:
+				test_indices = X_test.shape[0]
+				# Najdi indexy v původním dataframe, které odpovídají X_test
+				# Protože jsme použili train_test_split na X_scaled, musíme najít odpovídající řádky v df
+				# Uděláme to přes indexy
+				_, X_test_idx = train_test_split(
+					df.index, stratify=target, test_size=0.4, random_state=42
+				)
+				source_mask = df.iloc[X_test_idx]["source"] == src
+				y_test_src = y_test[source_mask.values]
+				y_pred_src = y_pred[source_mask.values]
+				print(f"\nKlasifikační zpráva ({src}):")
+				print(classification_report(y_test_src, y_pred_src, digits=3))
+				print(f"Matice záměn ({src}):")
+				print(confusion_matrix(y_test_src, y_pred_src))
+
+	# Stop the timer and print the elapsed time
+	time_count.stop_terminal_time(start_time, stop_event, func_name='Gradient Boosting Classifier')
+
+	def _plot_2d_projection(X, y, source, method='pca', title='2D projekce dat'):
+		from sklearn.decomposition import PCA
+		from sklearn.manifold import TSNE
+		import seaborn as sns
+
+		# Dimenzionální redukce
+		if method == 'pca':
+			X_proj = PCA(n_components=2).fit_transform(X)
+		elif method == 'tsne':
+			X_proj = TSNE(n_components=2, perplexity=30, n_iter=1000).fit_transform(X)
+		else:
+			raise ValueError("Podporované metody: 'pca', 'tsne'")
+
+		# Příprava DataFrame pro seaborn
+		df_plot = pd.DataFrame({
+			"X1": X_proj[:, 0],
+			"X2": X_proj[:, 1],
+			"Třída": y,
+			"Databáze": source
+		})
+
+		plt.figure(figsize=(8, 6))
+		sns.scatterplot(
+			data=df_plot,
+			x="X1", y="X2",
+			hue="Třída",       # barva = kvalita
+			style="Databáze",  # tvar = zdroj dat
+			palette=["#d62728", "#1f77b4"],
+			alpha=0.7
+		)
+		plt.title(title)
+		plt.xlabel("1. komponenta")
+		plt.ylabel("2. komponenta")
+		plt.legend(title="Třída / Databáze", loc="best", fontsize=9)
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.tight_layout()
+		plt.show()
+
+	_plot_feature_importance_1(trained_model, features)
+	# _plot_feature_importance_2(X_df, trained_model)
+	_plot_2d_projection(X_scaled, target, df["source"], method='pca', title='2D projekce dat (PCA)')
+	_plot_2d_projection(X_scaled, target, df["source"], method='tsne', title='2D projekce dat (t-SNE)')
+
+	return trained_model.predict(X_scaled)
 
 ###############################################################
 #################### SUPPORTING FUNCTIONS #####################
@@ -832,7 +969,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 				)
 				_data["Our Quality"] = our_quality[j + 2016]
 				j += 1
-				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=True)
+				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=False)
 			else:
 				raise ValueError("\033[91m\033[1mChunking is not supported for BUT PPG database.\033[0m")
 		chunked_pieces = 10
