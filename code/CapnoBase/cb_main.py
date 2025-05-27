@@ -85,11 +85,11 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 
 	local_hr_info = calcul.heart_rate(detected_peaks, ref_hr, fs)
 	tp, fp, fn = calcul.confusion_matrix(detected_peaks, ref_peaks, tolerance=G.TOLERANCE)
-	local_sensitivity, local_precision = calcul.performance_metrics(tp, fp, fn)
+	local_sensitivity, local_precision, f1 = calcul.performance_metrics(tp, fp, fn)
 
 	statistical_info = {
 		'TP': tp, 'FP': fp, 'FN': fn,
-		'Se': local_sensitivity, 'PPV': local_precision
+		'Se': local_sensitivity, 'PPV': local_precision, 'F1': f1
 	}
 
 	################################### For testing purposes ##################################

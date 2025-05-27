@@ -146,7 +146,7 @@ Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární
 
 Naopak výpočet Hjorthovy mobility má sice po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
 
-Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v Tab.~\ref{tab:capnobase_comparison}. % add BUT PPG
+Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v Tab.~\ref{tab:capnobase_comparison_all}. % add BUT PPG
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                    KVALITA                                   %
@@ -221,7 +221,7 @@ Pro odhad kvality signálů jsme použili již zmíněný klasifikátor \emph{n�
 Na rozdíl od lineárních modelů dokáže zachytit i nelineární vztahy mezi příznaky.
 
 % parametry a jejich optimalizace
-Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn} s výchozími parametry: \texttt{n\_estimators} = 50 (počet stromů), \texttt{max\_depth} = 5 (maximální hloubka stromu) a \texttt{max\_features} = \texttt{sqrt} (pro každý uzel se testuje náhodně vybraná odmocnina z celkového počtu příznaků).
+Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn} s výchozími parametry: \texttt{n\_estimators} = 150 (počet stromů), \texttt{max\_depth} = 7 (maximální hloubka stromu) a \texttt{max\_features} = \texttt{sqrt} (pro každý uzel se testuje náhodně vybraná odmocnina z celkového počtu příznaků).
 Optimalizace těchto parametrů byla provedena pomocí metody \texttt{GridSearchCV} ze~stejné knihovny, která systematicky vybírá nejlepší kombinace z~námi předdefinovaných hodnot parametrů.
 Pro zajištění deterministického chování jsme parametr náhodné inicializace nastavili na hodnotu \texttt{random\_state = 42}.
 

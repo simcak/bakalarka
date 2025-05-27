@@ -1,4 +1,7 @@
-\chapter{Výsledky}
+% Čistě výstupy práce — tabulky, grafy, hodnoty, klasifikační skóre, výpočty, srovnání metod atd.
+% Popis, co se naměřilo, vypočítalo, co model vrátil atd., bez hlubší interpretace.
+
+\chapter{Výsledky} % Ukazujeme co jsme zjistili
 \label{ch:vysledky}
 % Jen rychlé shrnutí před vyhodnocením - co se bude hodnotit, jaké metody, jaké databáze.
 Tato kapitola prezentuje výsledky odhadu tepové frekvence z fotopletysmografických signálů pomocí tří různých metod:
@@ -18,6 +21,10 @@ Výsledky jsou vyhodnoceny samostatně pro obě použité databáze: CapnoBase a
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Výsledky pro databázi CapnoBase}
 \label{sec:vysledky_capnobase}
+% Popsat statistické metody, které jsme použili pro vyhodnocení kvality detekce vrcholů.
+% Tabulka s metrikama
+% Signál se pro tuto databázi nepodvzorkovává, ale máme původních 300 Hz.
+% Fun fact = výsledky Hjortha je pro podvzorkované signály HORŠÍ
 U této databáze máme k dispozici referenční hodnoty systolických vrcholů, a proto můžeme použít statistické metody pro vyhodnocení kvality detekce, jako je citlivost (\acs{Se}), pozitivní prediktivní hodnota (\acs{PPV}) a F1 skóre.
 Citlivost vyjadřuje procento vrcholů, které použitý algoritmus správně rozpoznal z celkového počtu \textit{referenčních} vrcholů:
 \begin{equation}
@@ -38,7 +45,9 @@ Pozitivní prediktivní hodnota vyjadřuje procento vrcholů, které vybraný al
 \end{equation}
 
 Tyto metriky počítáme pouze pro Elgendiho algoritmus a vlastní algoritmus detekce vrcholů, kvůli povaze algoritmu využívajícího Hjorthovu mobilitu, který neprovádí detekci vrcholů, ale přímo odhaduje tepovou frekvenci.
-Když jsme je ale počítali, nastavili jsme toleranční pásmo pro výpočet matice záměn na \textcolor{red}{XX}~ms, které nám definuje, jak daleko od referenčního vrcholu se může detekovaný vrchol nacházet, aby byl považován za správně detekovaný.
+Když jsme je ale počítali, nastavili jsme toleranční pásmo pro výpočet matice záměn na 0,1~\acs{s}, které nám definuje, jak daleko od referenčního vrcholu se může detekovaný vrchol nacházet, aby byl považován za správně detekovaný.
+V tabulcd \ref{tab:capnobase_comparison_all} jsou hodnoty \acs{Se} a \acs{PPV} vypočítány ze součtu všech \acs{TP}, \acs{FP} a \acs{FN}.
+\acs{F1} skóre je pak vypočítáno z těchto hodnot.
 
 Krom \acs{Se}, \acs{PPV} a \acs{F1} skóre jsme též počítali průměrnou absolutní chybu (\acs{MAE}) mezi referenční a odhadovanou tepovou frekvencí (\ref{eq:mae}), abychom porovnali kvalitu odhadů \acs{TF} pro jednotlivé algoritmy na celé databázi.
 \begin{equation}
@@ -47,54 +56,49 @@ Krom \acs{Se}, \acs{PPV} a \acs{F1} skóre jsme též počítali průměrnou abs
 \end{equation}
 
 Dále jsme stanovili poměr mezi \uv{dobře} a \uv{špatně} odhadnutou tepovou frekvencí.
-Toho jsme dosáhli nastavením prahové hodnoty \acs{MAE} na \textcolor{red}{XX} tepů za minutu.
+Toho jsme dosáhli nastavením prahové hodnoty \acs{MAE} na 5 tepů za minutu.
+To je stejný prah, jaký se používá v databázi \acs{BUT PPG}~\cite{BUT_PPG} a který vychézí z~mezinárodního standardu IEC~60601-2-27.
 Pokud je \acs{MAE} menší než tato hodnota, považujeme odhad za \uv{dobrý}, jinak za \uv{špatný}.
 % Po vypočítání průměrné kvadratické chyby (\acs{RMSE})~(\ref{eq:rmse}) mezi referenční a odhadovanou \acs{TF} jsme nastavili prahovou hodnotu \acs{RMSE} na XX tepů za minutu.
 
 Poslední metrikou je čas, který algoritmus potřeboval na zpracování databáze na našem počítači (MacBook Pro s čipem M1).
 Jedná se pouze o orientační hodnotu, která slouží k porovnání rychlosti jednotlivých algoritmů.
 Aby bylo porovnání spravedlivé, odpovídá čas zpracování všech signálů v databázi CapnoBase a v původní délce osmi minut.
-Není vhodné porovnávat časy pro CapnoBase a \acs{BUT PPG}, protože databáze mají odličnou vzorkovací frekvenci, počet signálů v databázi i jiný datový formát.
+Není vhodné porovnávat časy pro CapnoBase a \acs{BUT PPG}, protože databáze mají odlišnou vzorkovací frekvenci, počet signálů i jiný datový formát.
 
-Metriky přesnosti pro všechny tři algoritmy jsou uvedeny v tabulce~\ref{tab:capnobase_comparison}, a to vždy pro různé délky vstupního signálu.
-Jednotlivé metody jsou podrobně rozebrány v následujících podkapitolách.
+Metriky přesnosti pro všechny tři algoritmy jsou uvedeny v tabulce~\ref{tab:capnobase_comparison_all}, a to vždy pro různé délky vstupního signálu.
 
+% all quality
 \begin{table}[ht]
 	\centering
-	\caption[Srovnání metod odhadu TF na databázi CapnoBase]{Srovnání metod odhadu TF.}
-	\label{tab:capnobase_comparison}
+	\caption[Srovnání metod odhadu TF na databázi CapnoBase]{Srovnání metod odhadu TF pro všechny signály.}
+	\label{tab:capnobase_comparison_all}
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{|l|c|c|c|c|c|c|}
 			\hline
 			\textbf{                  } &  \textbf{Se}  &  \textbf{PPV} &  \textbf{F1}  &  \textbf{MAE}  & \textbf{Poměr} & \textbf{Čas} \\
 			\textbf{Metoda} (délka [s]) & \textbf{[\%]} & \textbf{[\%]} & \textbf{[\%]} & \textbf{[bpm]} & \textbf{[d:š]} & \textbf{[s]} \\
 			\hline\hline
-			Elgendi (480)        & 98,6 & 96,2 & 97,4 & 1,20 & 40:2 & 12,3 \\
+			Elgendi (480)        & 99,81 & 99,89 & 99,85 & 0,31 &   42:0   &  16,1 \\
 			\hline
-			Elgendi (62,5)       & 98,6 & 96,2 & 97,4 & 1,20 & 40:2 & 12,3 \\
+			Elgendi (62,5)       & 99,23 & 99,88 & 99,55 & 0,35 &   336:0  &  17,9 \\
 			\hline
-			Vlastní vrcholová    & 95,1 & 97,5 & 96,3 & 1,48 & 40:2 & 14,8 \\
-			detekce (480)        &      &      &      &      &      &      \\
+			Vlastní vrcholová    & 99,34 & 99,91 & 99,63 & 0,31 &   42:0   &  2,4  \\
+			detekce (480)        &       &       &       &      &          &       \\
 			\hline
-			Vlastní vrcholová    & 95,1 & 97,5 & 96,3 & 1,48 & 40:2 & 14,8 \\
-			detekce (62,5)       &      &      &      &      &      &      \\
+			Vlastní vrcholová    & 98,49 & 99,91 & 99,20 & 0,37 &   336:0  &  2,7  \\
+			detekce (62,5)       &       &       &       &      &          &       \\
 			\hline
-			Hjorth (480)         &  --  &  --  &  --  & 0,65 & 40:2 & 2,5  \\
+			Hjorth (480)         &  --   &  --   &  --   & 1,52 &   40:2   &  2,6  \\
 			\hline
-			Hjorth (60)          &  --  &  --  &  --  & 0,65 & 40:2 & 2,5  \\
+			Hjorth (60)          &  --   &  --   &  --   & 0,80 &   332:4  &  2,7  \\
+			\hline
+			Hjorth (10)          &  --   &  --   &  --   & 0,61 &  2015:1  &  14,5 \\
 			\hline
 		\end{tabular}
-	}
+		}
 \end{table}
 
-\subsection*{Referenční algoritmus - Elgendi}
-% TODO: doplnit výsledky, tabulky, grafy
-
-\subsection*{Vlastní algoritmus - detekce vrcholů}
-% TODO: doplnit výsledky, tabulky, grafy
-
-\subsection*{Vlastní algoritmus - Hjorthovy deskriptory}
-% TODO: doplnit výsledky, tabulky, grafy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             BUT PPG                             %
@@ -102,11 +106,3 @@ Jednotlivé metody jsou podrobně rozebrány v následujících podkapitolách.
 \section{Výsledky pro databázi BUT PPG}
 \label{sec:vysledky_butppg}
 
-\subsection*{Referenční algoritmus - Elgendi}
-% TODO: doplnit výsledky, tabulky, grafy
-
-\subsection*{Vlastní algoritmus - detekce vrcholů}
-% TODO: doplnit výsledky, tabulky, grafy
-
-\subsection*{Vlastní algoritmus - Hjorthovy deskriptory}
-% TODO: doplnit výsledky, tabulky, grafy

@@ -41,127 +41,130 @@ def confusion_matrix(database='all'):
 	plt.tight_layout()
 	plt.show()
 
-def hjorth_show_hr(chunked_pieces, database='CapnoBase300'):
+def hjorth_show_hr_all(database='CapnoBase300'):
 	# Load the data from the CSV file
 	if database == 'CapnoBase30':
 		data = pd.read_csv('./hjorth_CBq.csv')
+		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'CapnoBase300':
 		data = pd.read_csv('./hjorth_CBq_300.csv')
+		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
+	elif database == 'CapnoBaseFull300':
+		data = pd.read_csv('./hjorth_CB_full_300.csv')
+		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
+		selected_indices = range(0, len(data['File name']), 50)
 	elif database == 'current':
 		data = pd.read_csv('./hjorth.csv')
+		selected_indices = range(0, len(data['File name']), 8)
 	else:
-		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'current'.")
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'CapnoBaseFull300', 'BUT_PPG', or 'current'.")
 
 	# Extract relevant columns
 	file_names = data['File name']
 	hjorth_hr = data['Hjorth HR']
 	ref_hr = data['Ref HR']
 	hr_diff = data['HR diff']
-
-	average_hr_diff = data['HR diff'].mean()
-	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")
-
-	# Select every x-th file name for labeling (x = chunked_pieces)
-	selected_indices = range(0, len(file_names), chunked_pieces)
+	mae = np.mean(np.abs(hjorth_hr - ref_hr))
 
 	####################### Plot the results #######################
 	################################################################
-	plt.figure(figsize=(12, 6))
+	plt.figure(figsize=(16, 8))
 
 	# Plot Hjorth HR and Ref HR
 	plt.subplot(2, 1, 1)
-	plt.title('Hjorthova TF vs Referenční TF')
-	plt.plot(hjorth_hr, label='Hjorthova TF (tepů/min)', marker='o')
-	plt.plot(ref_hr, label='Referenční TF (tepů/min)', marker='x')
-	plt.xlabel('Index signálu')
-	plt.ylabel('Srdeční frekvence (tepů/min)')
-	plt.legend()
+	plt.title('Hjorthova TF vs Referenční TF', fontsize=16)
+	plt.plot(hjorth_hr, label='Hjorthova TF (tepů/min)', marker='o', color=G.CESA_BLUE)
+	plt.plot(ref_hr, label='Referenční TF (tepů/min)', marker='*', color="red")
+	plt.xlabel('ID signálu', fontsize=14)
+	plt.ylabel('TF (tepů/min)', fontsize=14)
+	plt.legend(fontsize=12)
 	plt.grid()
 
-	# Add vertical labels for selected file names
-	for idx in selected_indices:
-		offset = 10
-		plt.text(idx, hjorth_hr.iloc[idx] + offset, file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
 
 	# Plot HR difference
 	plt.subplot(2, 1, 2)
-	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF)')
-	plt.plot(hr_diff, label='Rozdíl TF (tepů/min)', color='red', marker='s')
-	plt.xlabel('Index signálu')
-	plt.ylabel('|Δ TF| (tepů/min)')
-	plt.legend()
+	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF)', fontsize=16)
+	plt.plot(hr_diff, label='Rozdíl TF (tepů/min)', color="red", marker='*')
+	plt.axhline(y=mae, color=G.CESA_BLUE, linestyle='--', label=f'MAE: {mae:.2f} tepů/min', linewidth=2)
+	plt.xlabel('ID signálu', fontsize=14)
+	plt.ylabel('|Δ TF| (tepů/min)', fontsize=14)
+	plt.legend(fontsize=12)
 	plt.grid()
 
-	# Add vertical labels for selected file names
-	for idx in selected_indices:
-		offset = 3
-		plt.text(idx, hr_diff.iloc[idx] + offset, file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+	# Set x-ticks to selected indices and label them with file names
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
 
 	plt.tight_layout()
 	plt.show()
 	################################################################
 
-def hjorth_show_only_quality_hr(chunked_pieces, database='CapnoBase300'):
+def hjorth_show_only_quality_hr(database='CapnoBase300'):
 	# data = data[data['Orphanidou Quality'] >= 0.9]
 	# data = data[data['HR diff'] <= 100]
+	# data = data[data['Our Quality'] == 1]
 
 	# Load the data from the CSV file
 	if database == 'CapnoBase30':
 		data = pd.read_csv('./hjorth_CBq.csv')
-		data = data[data['Our Quality'] == 1]
+		data = data[data['Orphanidou Quality'] >= 0.9]
+		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'CapnoBase300':
 		data = pd.read_csv('./hjorth_CBq_300.csv')
-		data = data[data['ourQ_this_only'] == 1]
+		data = data[data['Orphanidou Quality'] >= 0.9]
+		selected_indices = [idx for idx, name in enumerate(file_names) if not str(name).endswith('min')]
+	elif database == 'CapnoBaseFull300':
+		data = pd.read_csv('./hjorth_CB_full_300.csv')
+		data = data[data['Orphanidou Quality'] >= 0.9]
+		selected_indices = [idx for idx, name in enumerate(file_names) if not str(name).endswith('min')]
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
-		data = data[data['Our Quality'] == 1]
+		data = data[data['Orphanidou Quality'] >= 0.9]
+		# data = data[data['Ref Quality'] == 1]
+		selected_indices = range(0, len(data['File name']), 15)
+	elif database == 'current':
+		data = pd.read_csv('./hjorth.csv')
+		data = data[data['Orphanidou Quality'] >= 0.9]
+		selected_indices = range(0, len(data['File name']), 16)
 	else:
-		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG'.")
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'CapnoBaseFull300', 'BUT_PPG' or 'current'.")
 
 	# Extract relevant columns
 	file_names = data['File name']
 	hjorth_hr = data['Hjorth HR']
 	ref_hr = data['Ref HR']
 	hr_diff = data['HR diff']
-
-	average_hr_diff = hr_diff.mean()
-	print(f"\033[92m\033[1mPrůměrný rozdíl TF (tepů/min): {average_hr_diff:.2f}\033[0m")
-
-	# Select every x-th file name for labeling (x = chunked_pieces)
-	selected_indices = range(0, len(file_names), chunked_pieces)
+	mae = np.mean(np.abs(hjorth_hr - ref_hr))
 
 	####################### Plot the results #######################
 	################################################################
-	plt.figure(figsize=(12, 6))
+	plt.figure(figsize=(16, 8))
 
 	# Plot Hjorth HR and Ref HR
 	plt.subplot(2, 1, 1)
-	plt.title('Hjorthova TF vs Referenční TF (Our Quality = 1)')
-	plt.plot(hjorth_hr.values, label='Hjorthova TF (tepů/min)', marker='o')
-	plt.plot(ref_hr.values, label='Referenční TF (tepů/min)', marker='x')
-	plt.xlabel('Index signálu')
-	plt.ylabel('Srdeční frekvence (tepů/min)')
-	plt.legend()
+	plt.title('Hjorthova TF vs Referenční TF pro kvalitní signály', fontsize=16)
+	plt.plot(hjorth_hr.values, label='Hjorthova TF (tepů/min)', marker='o', color=G.CESA_BLUE)
+	plt.plot(ref_hr.values, label='Referenční TF (tepů/min)', marker='*', color="red")
+	plt.xlabel('Index signálu', fontsize=14)
+	plt.ylabel('TF (tepů/min)', fontsize=14)
+	plt.legend(fontsize=12)
 	plt.grid()
 
-	# Add vertical labels for selected file names
-	for idx in selected_indices:
-		plt.text(idx, hjorth_hr.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
 
 	# Plot HR difference
 	plt.subplot(2, 1, 2)
-	plt.title('Rozdíl TF (Hjorthova TF - Referenční TF) (Our Quality = 1)')
-	plt.plot(hr_diff.values, label='Rozdíl TF (tepů/min)', color='red', marker='s')
-	plt.xlabel('Index signálu')
-	plt.ylabel('|Δ TF| (tepů/min)')
-	plt.legend()
+	plt.title('Rozdíl TF pro kvalitní signály', fontsize=16)
+	plt.plot(hr_diff.values, label='Rozdíl TF (tepů/min)', color="red", marker='*')
+	plt.axhline(y=mae, color=G.CESA_BLUE, linestyle='--', label=f'MAE: {mae:.2f} tepů/min', linewidth=2)
+	plt.xlabel('Index signálu', fontsize=14)
+	plt.ylabel('|Δ TF| (tepů/min)', fontsize=14)
+	plt.legend(fontsize=12)
 	plt.grid()
 
-	# Add vertical labels for selected file names
-	for idx in selected_indices:
-		plt.text(idx, hr_diff.iloc[idx], file_names.iloc[idx], rotation=90, fontsize=8, ha='center')
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
 
 	plt.tight_layout()
 	plt.show()
@@ -313,7 +316,7 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 	if find_best_parameters:
 		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train)
 	else:
-		_max_depth, _max_features, _n_estimators = 7, None, 150
+		_max_depth, _max_features, _n_estimators = 7, "sqrt", 150
 
 	### Model training
 	trained_model = RandomForestClassifier(
@@ -845,7 +848,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 
 	return hjorth_info
 
-def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_quality=False):
+def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=7, compute_quality=False):
 	"""
 	Calculate by Hjorth parameters the HR for the given database and evaluate the results.
 	"""
@@ -925,7 +928,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 		}
 		return data
 
-	our_quality = quality_hjorth()
+	our_quality = quality_hjorth() if compute_quality else None
 	# Start the timer
 	start_time, stop_event = time_count.terminal_time()
 
@@ -950,7 +953,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 						file_info["ID"], file_info["fs"], chunked_singal, None, chunk_ref_hr,
 						calculate_orphanidou_quality=compute_quality
 					)
-					_data["Our Quality"] = our_quality[i * chunked_pieces + j]
+					_data["Our Quality"] = our_quality[i * chunked_pieces + j] if our_quality is not None else None
 					compute_hjorth_parameters(_data, j, autocorr_iterations, only_quality=False)
 			else:
 				raise ValueError(f"\033[91m\033[1mInvalid chunk value. Use values in range <1 ; {max_chunk_count}> == <hole signal ; 10s long chunks>\033[0m")
@@ -967,7 +970,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=5, compute_qualit
 					file_info['ID'], file_info['PPG_fs'], file_info['PPG_Signal'], file_info['Ref_Quality'], file_info['Ref_HR'],
 					calculate_orphanidou_quality=compute_quality
 				)
-				_data["Our Quality"] = our_quality[j + 2016]
+				_data["Our Quality"] = our_quality[j + 2016] if our_quality is not None else None
 				j += 1
 				compute_hjorth_parameters(_data, 0, autocorr_iterations, only_quality=False)
 			else:

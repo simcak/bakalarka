@@ -4,7 +4,7 @@ SAMPLE_NUMBER_CB = 0
 SAMPLE_NUMBER_BUT = 0
 
 # Tolerance for peak detection (in samples) - for confusion matrix
-TOLERANCE = 30
+TOLERANCE = 30		# 30 samples == 0.1s for 300Hz sampling rate
 
 # Quality threshold
 CORRELATION_THRESHOLD = 0.7
@@ -21,7 +21,7 @@ INVALID_METHOD = 'Invalid method provided. Use either "my" or "neurokit".'
 INVALID_QUALITY_METHOD = 'Invalid method provided. Use either "my" or "orphanidou".'
 
 ##################### GLOBAL COLORS ######################
-BUT_RED = '#E23F44'
+BUT_RED = "#e4002b"
 CESA_BLUE = '#02CCFF'
 
 #################### GLOBAL VARIABLES ####################

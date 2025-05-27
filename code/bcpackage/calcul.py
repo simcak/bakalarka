@@ -7,15 +7,12 @@ def performance_metrics(tp, fp, fn):
 		tp: true positive
 		fp: false positive
 		fn: false negative
-
-	Returns:
-		sensitivity: TP / (TP + FN)
-		precision: TP / (TP + FP)
 	"""
 	sensitivity = tp / (tp + fn)
 	precision = tp / (tp + fp)
+	f1 = 2 * (precision * sensitivity) / (precision + sensitivity) if (precision + sensitivity) > 0 else 0
 
-	return sensitivity, precision
+	return sensitivity, precision, f1
 
 def confusion_matrix(our_peaks, ref_peaks, tolerance):
 	"""

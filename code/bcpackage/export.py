@@ -17,12 +17,12 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 	if (database == 'CB'):
 		# assign
 		tp, fp, fn = statistical_info['TP'], statistical_info['FP'], statistical_info['FN']
-		sensitivity, precision = statistical_info['Se'], statistical_info['PPV']
+		sensitivity, precision, f1 = statistical_info['Se'], statistical_info['PPV'], statistical_info['F1']
 
 		if (type == 'My'):
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
-				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
+				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100, 'F1': f1 * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -30,7 +30,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 		elif (type == 'NK'):
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
-				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100,
+				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100, 'F1': f1 * 100,
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -86,16 +86,17 @@ def to_csv_global(sensitivity, precision, type='My', database='CB'):
 	"""
 	row = []
 	if (database == 'CB'):
+		f1_total = 2 * (sensitivity * precision) / (sensitivity + precision)
 		if (type == 'My'):
 			row.append({
-				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'Total Se': sensitivity * 100, 'Total PPV': precision * 100, 'Total F1': f1_total * 100,
+				'MAE': np.mean(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
-				'Total Se': sensitivity * 100, 'Total PPV': precision * 100,
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST),
+				'Total Se': sensitivity * 100, 'Total PPV': precision * 100, 'Total F1': f1_total * 100,
+				'MAE': np.mean(G.DIFF_HR_LIST),
 				'TP sum': np.sum(G.TP_LIST), 'FP sum': np.sum(G.FP_LIST), 'FN sum': np.sum(G.FN_LIST)
 			})
 		else:
@@ -103,11 +104,11 @@ def to_csv_global(sensitivity, precision, type='My', database='CB'):
 	elif (database == 'BUT'):
 		if (type == 'My'):
 			row.append({
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST)
+				'MAE': np.mean(G.DIFF_HR_LIST)
 			})
 		elif (type == 'NK'):
 			row.append({
-				'AVG Diff HR': np.average(G.DIFF_HR_LIST)
+				'MAE': np.mean(G.DIFF_HR_LIST)
 			})
 		else:
 			raise ValueError("Invalid type provided for global export.")
