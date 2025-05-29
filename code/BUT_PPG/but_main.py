@@ -11,9 +11,9 @@ def but_ppg_main(method: str, show=False, first=False):
 	G.DIFF_HR_LIST = []
 	start_time, stop_event = time_count.terminal_time()
 
-	for i in range(250, G.BUT_DATA_LEN):
+	for i in range(G.BUT_DATA_LEN):
 		but_signal_info = but_data.extract(i)
-		print(f"{i}: \033[92mProcessing file {i} with ID: {but_signal_info['ID']} with Ref Quality: {but_signal_info['Ref_Quality']}\033[0m")
+		# print(f"{i}: \033[92mProcessing file {i} with ID: {but_signal_info['ID']} with Ref Quality: {but_signal_info['Ref_Quality']}\033[0m")
 		if but_error.police(but_signal_info, i):
 			if show:
 				print(f"\033[91mSkipping index {i} due to invalid signal info.\033[0m")
@@ -37,7 +37,7 @@ def but_ppg_main(method: str, show=False, first=False):
 
 		# Calculate the heart rate
 		hr_info = calcul.heart_rate(detected_peaks, but_signal_info['Ref_HR'], but_signal_info['PPG_fs'])
-		print(f"Our HR: {hr_info['Calculated HR']}, Ref HR: {hr_info['Ref HR']}, Diff HR: {hr_info['Diff HR']}")
+		# print(f"Our HR: {hr_info['Calculated HR']}, Ref HR: {hr_info['Ref HR']}, Diff HR: {hr_info['Diff HR']}")
 
 		export.to_csv_local(
 			but_signal_info['ID'], 8, i, hr_info, None, type=name, database='BUT', first=first

@@ -52,7 +52,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 	##################################################
 
 	######################################## SET AXIS ########################################
-	ax1.set_ylabel('Citlivost [%]')
+	ax1.set_ylabel('Citlivost [%]', fontsize=15)
 	if chunked:
 		# Show only every 8th label on the x-axis
 		ax1.set_xticks(range(0, len(table1['df']['ID']), 8))
@@ -64,10 +64,12 @@ def plotting_SePPV(table1, table2, chunked=False):
 		# Show only the number before the '_' in the ID on the x-axis
 		ax1.set_xticks(range(len(table1['df']['ID'])))
 		ax1.set_xticklabels([label.split('_')[0] for label in table1['df']['ID']])
+	for label in ax1.get_xticklabels():
+		label.set_fontsize(12)
 	#############################################################################################
 
 	ax1.margins(x=0, y=0.1)
-	ax1.legend(fontsize='small')
+	ax1.legend(fontsize=13, bbox_to_anchor=(0.8, 0), loc='lower center')
 	ax1.tick_params(axis='x', rotation=90)
 
 	#################### Plot Positive Predictive Value (PPV) ####################
@@ -82,7 +84,7 @@ def plotting_SePPV(table1, table2, chunked=False):
 	##############################################################################
 
 	######################################## SET AXIS ########################################
-	ax2.set_ylabel('Přesnost [%]')
+	ax2.set_ylabel('Přesnost [%]', fontsize=15)
 	if chunked:
 		# Show only every 8th label on the x-axis
 		ax2.set_xticks(range(0, len(table1['df']['ID']), 8))
@@ -90,16 +92,18 @@ def plotting_SePPV(table1, table2, chunked=False):
 		# Add small marks for the rest of the signals
 		ax2.xaxis.set_minor_locator(plt.MultipleLocator(1))
 		ax2.tick_params(axis='x', which='minor', length=4, color='gray')
-		ax2.set_xlabel('ID (shown just for the 1st minute)')
+		ax2.set_xlabel('ID (pouze pro první minutu)', fontsize=14)
 	else:
 		# Show only the number before the '_' in the ID on the x-axis
 		ax2.set_xticks(range(len(table1['df']['ID'])))
 		ax2.set_xticklabels([label.split('_')[0] for label in table1['df']['ID']])
-		ax2.set_xlabel('ID')
+		ax2.set_xlabel('ID', fontsize=14)
+	for label in ax2.get_xticklabels():
+		label.set_fontsize(12)
 	#############################################################################################
 
 	ax2.margins(x=0, y=0.1)
-	ax2.legend(fontsize='small')
+	ax2.legend(fontsize=13, loc='lower center', bbox_to_anchor=(0.4, 0))
 	ax2.tick_params(axis='x', rotation=90)
 
 	plt.tight_layout()
@@ -260,3 +264,70 @@ def full_results(print_head=True):
 	# 		print("\n====================================================================================")
 
 	return tables
+
+def plot_histogram_diff(diff, bins=15):
+	"""
+	Histogram rozdílů (chyby predikce - reference).
+	"""
+	plt.figure(figsize=(6, 4))
+	plt.hist(diff, bins=bins, color='steelblue', edgecolor='black')
+	plt.axvline(np.mean(diff), color='red', linestyle='--', label=f'Průměr: {np.mean(diff):.2f}')
+	plt.xlabel('Chyba (Predikce - Reference) [BPM]')
+	plt.ylabel('Počet výskytů')
+	plt.title('Histogram rozdílů')
+	plt.legend()
+	plt.grid(True)
+	plt.tight_layout()
+	plt.show()
+
+def plot_boxplot_diff(diff):
+	"""
+	Boxplot rozdílů (chyby).
+	"""
+	plt.figure(figsize=(4, 5))
+	plt.boxplot(diff, vert=True, patch_artist=True,
+				boxprops=dict(facecolor='skyblue', color='black'),
+				medianprops=dict(color='red'))
+	plt.ylabel('Chyba (Predikce - Reference) [BPM]')
+	plt.title('Boxplot chyb')
+	plt.grid(True, axis='y')
+	plt.tight_layout()
+	plt.show()
+
+def plot_bland_altman(_id, reference, prediction, title=None, full=False):
+	"""
+	Bland-Altman graf pro porovnání dvou měření.
+	"""
+	mean_values = (reference + prediction) / 2
+	diff = prediction - reference
+	mean_diff = np.mean(diff)
+	std_diff = np.std(diff)
+	range = -5 if full else -3
+
+	loa_upper = mean_diff + 1.96 * std_diff
+	loa_lower = mean_diff - 1.96 * std_diff
+
+	plt.figure(figsize=(17, 5))
+	plt.title(title, fontsize=16)
+
+	for x, y, label in zip(mean_values, diff, _id):
+		plt.scatter(x, y, alpha=0.8, color=G.CESA_BLUE, edgecolor='k', s=50)
+		# point_positions = np.where((mean_values == x) & (diff == y))[0]
+		# if len(point_positions) > 1 and (y > loa_upper or y < loa_lower):
+		# 	plt.text(x, y, "         2x", fontsize=10, ha='center', va='center')
+		# elif (x < 70) and (y > loa_upper or y < loa_lower):
+		# 	plt.text(x, y, f' {str(label)}', fontsize=10, ha='left', va='bottom', rotation=70)
+		# elif (y > loa_upper or y < loa_lower):
+		# 	plt.text(x, y, f'  {str(label)}', fontsize=10, ha='left', va='center')
+			# plt.text(x, y, f' {str(label)}', fontsize=10, ha='left', va='bottom', rotation=70)
+	plt.axhline(0, color='gray', linestyle='-', alpha=0.7)
+	plt.axhline(mean_diff, color='green', linestyle='--', label=f'Průměr: {mean_diff:.2f}')
+	plt.axhline(loa_upper, color='red', linestyle='dotted', label=f'+1.96 SD: {loa_upper:.2f}')
+	plt.axhline(loa_lower, color='red', linestyle='dotted', label=f'-1.96 SD: {loa_lower:.2f}')
+
+	plt.xlabel('Průměrná TF [tep/min]', fontsize=14)
+	plt.ylabel('Rozdílná (detekovaná - referenční) TF [tep/min]', fontsize=14)
+	plt.legend(fontsize=13)
+	plt.grid(True)
+	plt.tight_layout()
+	plt.show()

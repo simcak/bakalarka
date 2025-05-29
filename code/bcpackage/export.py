@@ -23,6 +23,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100, 'F1': f1 * 100,
+				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -31,6 +32,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 			rows.append({
 				'ID': f'{id_}_{chunk_idx}min',
 				'Sensitivity': sensitivity * 100, 'Precision (PPV)': precision * 100, 'F1': f1 * 100,
+				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 				'TP': tp, 'FP': fp, 'FN': fn
@@ -39,12 +41,14 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 		if (type == 'My'):
 			rows.append({
 				'ID': f'{id_[:3]}-{id_[3:]}',
+				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 			})
 		elif (type == 'NK'):
 			rows.append({
 				'ID': f'{id_[:3]}-{id_[3:]}',
+				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
 			})

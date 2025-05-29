@@ -48,6 +48,9 @@
 
 \usepackage{amsmath}	% balíček pro sadu náročnější matematiky
 
+\usepackage{placeins}	% Balíček pro zajištění, že se obrázky a tabulky nebudou posouvat
+						% za kapitolu, ve které jsou uvedeny
+
 \usepackage{dirtree}	% sazba adresářové struktury
 						% vhodné pro prezentaci obsahu elektronické přílohy (např. CD)
 
@@ -217,14 +220,14 @@
 \include{text/98_zkratky}
 
 %%% Začátek příloh
-\appendix
+% \appendix
 
 %%% Vysázení seznamu příloh
 % (vynechejte, pokud máte dvě nebo méně příloh)
-\listofappendices
+% \listofappendices
 
 %%% Vložení souboru 'text/prilohy' s přílohami
 % Obvykle je přítomen alespoň popis co najdeme na přiloženém médiu
-\include{text/99_prilohy}
+% \include{text/99_prilohy}
 
 \end{document}

@@ -9,8 +9,8 @@ def main():
 	############# CapnoBase Database #############
 	##############################################
 	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
-	# capnobase_main('my', chunk=True, first=True)
-	# capnobase_main('my')
+	capnobase_main('my', chunk=True, first=True)
+	capnobase_main('my')
 	# capnobase_main('neurokit', chunk=True)
 	# capnobase_main('neurokit')
 
@@ -42,7 +42,7 @@ def main():
 	# file.to_csv('hjorth_butppg.csv', index=False)
 
 	# hjorth.confusion_matrix(database='all')
-	# hjorth.hjorth_show_hr_all(database='current')
+	# hjorth.hjorth_show_hr_all(database='CapnoBaseFull300')
 	# hjorth.hjorth_show_only_quality_hr(database='CapnoBase300')
 	# hjorth.hjorth_show_spi(database='CapnoBase300')
 
@@ -69,8 +69,39 @@ def main():
 		show.plotting_SePPV(table_dict['CB My chunked'], table_dict['CB NK chunked'], chunked=True)
 	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
 		show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
-	# if 'CB My all' in table_dict and 'CB NK all' in table_dict:
-	# 	show.plotting_SDNR(table_dict['CB My all'], table_dict['CB NK all'])
+
+	def show_bland_altman():
+		# if 'CB My all' in table_dict:
+		# 	table = table_dict['CB My all']
+		# 	_id, reference, prediction = table['df']['ID'], table['df']['Ref HR[bpm]'], table['df']['Calculated HR[bpm]']
+		# 	show.plot_bland_altman(_id, reference, prediction, title='Vlastní vrcholová detekce - celá CapnoBase', full=True)
+		# if 'CB My chunked' in table_dict:
+		# 	table = table_dict['CB My chunked']
+		# 	_id, reference, prediction = table['df']['ID'], table['df']['Ref HR[bpm]'], table['df']['Calculated HR[bpm]']
+		# 	show.plot_bland_altman(_id, reference, prediction, title='Vlastní vrcholová detekce - rozdělená CapnoBase')
+		# if 'CB NK all' in table_dict:
+		# 	table = table_dict['CB NK all']
+		# 	_id, reference, prediction = table['df']['ID'], table['df']['Ref HR[bpm]'], table['df']['Calculated HR[bpm]']
+		# 	show.plot_bland_altman(_id, reference, prediction, title='Elgendi - celá CapnoBase', full=True)
+		# if 'CB NK chunked' in table_dict:
+		# 	table = table_dict['CB NK chunked']
+		# 	_id, reference, prediction = table['df']['ID'], table['df']['Ref HR[bpm]'], table['df']['Calculated HR[bpm]']
+		# 	show.plot_bland_altman(_id, reference, prediction, title='Elgendi - rozdělená CapnoBase')
+		# file = pd.read_csv('hjorth_CB_full_300.csv')
+		# _id, reference, prediction = file['File name'].values, file['Ref HR'].values, file['Hjorth HR'].values
+		# show.plot_bland_altman(_id, reference, prediction, title='Hjorth - celá CapnoBase', full=True)
+		file = pd.read_csv('hjorth_CB_300.csv')
+		file = file[file['Orphanidou Quality'] > 0.9]
+		_id, reference, prediction = file['File name'].values, file['Ref HR'].values, file['Hjorth HR'].values
+		show.plot_bland_altman(_id, reference, prediction, title='Hjorth - rozdělená CapnoBase')
+
+		# if 'BUT My all' in table_dict:
+		# 	show.plot_bland_altman(table_dict['BUT My all'])
+		# if 'BUT NK all' in table_dict:
+		# 	show.plot_bland_altman(table_dict['BUT NK all'])
+		# if 'BUT My all' in table_dict:
+		# 	show.plot_bland_altman(table_dict['BUT My all'])
+
 	# if 'BUT My all' in table_dict and 'BUT NK all' in table_dict:
 	# 	show.plotting_hr_diffs(table_dict['BUT My all'], table_dict['BUT NK all'])
 
