@@ -9,8 +9,8 @@ def main():
 	############# CapnoBase Database #############
 	##############################################
 	G.CB_FILES, G.CB_FILES_LEN = cb_data.info()
-	capnobase_main('my', chunk=True, first=True)
-	capnobase_main('my')
+	# capnobase_main('my', chunk=True, first=True)
+	# capnobase_main('my')
 	# capnobase_main('neurokit', chunk=True)
 	# capnobase_main('neurokit')
 
@@ -63,12 +63,12 @@ def main():
 
 	############## Show the results ##############
 	##############################################
-	tables = show.full_results()
-	table_dict = {table['title']: table for table in tables}
-	if 'CB My chunked' in table_dict and 'CB NK chunked' in table_dict:
-		show.plotting_SePPV(table_dict['CB My chunked'], table_dict['CB NK chunked'], chunked=True)
-	if 'CB My all' in table_dict and 'CB NK all' in table_dict:
-		show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
+	# tables = show.full_results()
+	# table_dict = {table['title']: table for table in tables}
+	# if 'CB My chunked' in table_dict and 'CB NK chunked' in table_dict:
+	# 	show.plotting_SePPV(table_dict['CB My chunked'], table_dict['CB NK chunked'], chunked=True)
+	# if 'CB My all' in table_dict and 'CB NK all' in table_dict:
+	# 	show.plotting_SePPV(table_dict['CB My all'], table_dict['CB NK all'])
 
 	def show_bland_altman():
 		# if 'CB My all' in table_dict:
@@ -104,6 +104,56 @@ def main():
 
 	# if 'BUT My all' in table_dict and 'BUT NK all' in table_dict:
 	# 	show.plotting_hr_diffs(table_dict['BUT My all'], table_dict['BUT NK all'])
+	def but_ppg_table_results(table, title):
+		_id = table['ID'].values
+		ref_hr = table['Ref HR[bpm]'].values
+		calc_hr = table['Calculated HR[bpm]'].values
+		diff_hr = table['Diff HR[bpm]'].values
+		# sdnn = table['SDNN [s]'].values
+		# rmssd = table['RMSSD [s]'].values
+		ref_q = table['Ref Quality'].values
+		orphanidou_q = table['Orphanidou Quality'].values
+
+		print("\nAll signals:")
+		mea = np.mean(diff_hr)
+		print(f"MAE: {mea:.2f} bpm")
+		good_hr, bad_hr = np.sum(diff_hr < 5), np.sum(diff_hr >= 5)
+		print(f"Good HR: {good_hr}, Bad HR: {bad_hr}")
+
+		print("\nR-SQI:")
+		q1_mea = np.mean(diff_hr[ref_q == 1])
+		print(f"MAE: {q1_mea:.2f} bpm")
+		q1_good_hr, q1_bad_hr = np.sum(diff_hr[ref_q == 1] < 5), np.sum(diff_hr[ref_q == 1] >= 5)
+		print(f"Good HR: {q1_good_hr}, Bad HR: {q1_bad_hr}")
+		q1_id = _id[ref_q == 1]
+		q1_ref_hr = ref_hr[ref_q == 1]
+		q1_calc_hr = calc_hr[ref_q == 1]
+
+		print("\nO-SQI:")
+		q2_mea = np.mean(diff_hr[orphanidou_q >= 0.9])
+		print(f"MAE: {q2_mea:.2f} bpm")
+		q2_good_hr, q2_bad_hr = np.sum(diff_hr[orphanidou_q >= 0.9] < 5), np.sum(diff_hr[orphanidou_q >= 0.9] >= 5)
+		print(f"Good HR: {q2_good_hr}, Bad HR: {q2_bad_hr}")
+		q2_id = _id[orphanidou_q >= 0.9]
+		q2_ref_hr = ref_hr[orphanidou_q >= 0.9]
+		q2_calc_hr = calc_hr[orphanidou_q >= 0.9]
+
+		show.plot_bland_altman(_id, ref_hr, calc_hr, title=f'{title} celá databáze')
+		show.plot_bland_altman(q1_id, q1_ref_hr, q1_calc_hr, title=f'{title} R-SQI')
+		show.plot_bland_altman(q2_id, q2_ref_hr, q2_calc_hr, title=f'{title} O-SQI')
+
+	# print("\n\033[96mBUT PPG - Our peak detection results:\033[0m")
+	# table = pd.read_csv('results_butppg_our.csv')
+	# but_ppg_table_results(table, "Vlastní vrcholová detekce -")
+
+	# print("\n\033[96mBUT PPG - Elgendi peak detection results:\033[0m")
+	# table = pd.read_csv('results_butppg_elgendi.csv')
+	# but_ppg_table_results(table, "Elgendi -")
+
+	# print("\n\033[96mBUT PPG - Hjorth peak detection results:\033[0m")
+	# table = pd.read_csv('hjorth_butppg.csv')
+	# but_ppg_table_results(table, "Hjorth -")
+
 
 if __name__ == "__main__":
 	main()

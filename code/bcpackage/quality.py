@@ -231,15 +231,21 @@ def orphanidou_quality_plot(threshold, chunked_pieces):
 	# Determine colors based on equality
 	colors = [G.CESA_BLUE if oq >= threshold and rq == 1 else G.BUT_RED for oq, rq in zip(orph_quality, ref_quality)]
 
-	plt.figure(figsize=(13, 6))
-	plt.scatter(x_idx, orph_quality, c=colors, alpha=0.7, edgecolors='k')
+	plt.figure(figsize=(10, 13))
+	plt.scatter(x_idx, orph_quality, c=colors, alpha=0.7, edgecolors='k', s=20)
 	# plt.axhline(y=threshold, color="grey", linestyle="--", linewidth=1)
 	plt.title("Orphanidou vs Referenční kvalita BUT PPG", fontsize=16)
 	plt.ylabel("Orphanidou kvalita", fontsize=14)
 	plt.xlabel("ID signálu", fontsize=14)
 	tick_positions = x_idx[::chunked_pieces]
 	tick_labels = signal_ids[::chunked_pieces]
-	plt.xticks(tick_positions, tick_labels, rotation=90)
+	tick_labels_mod = []
+	for i, label in enumerate(tick_labels):
+		if i % 2 == 0:
+			tick_labels_mod.append(label)
+		else:
+			tick_labels_mod.append(' ')
+	plt.xticks(tick_positions, tick_labels_mod, rotation=90)
 	plt.grid(axis="y", alpha=0.3)
 	plt.tight_layout()
 	plt.legend(

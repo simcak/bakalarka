@@ -1,9 +1,5 @@
 % todo:
-% - přidat obrázek vykreslující autokorelace + popis proč máme 5 iterací
-% - odkaz na podkapitoly ve výsledcích (konec kapitoly 6.1)
-% - KAPITOLA 6.2 - KVALITA obecně
 % - najít zdroj mluvící o využití Hjorthových deskriptorů pro kvalitu signálu
-% - aktualizovat obrázek 6.1
 
 \chapter{Využití Hjorthových deskriptorů na odhad TF a kvality signálů}
 \label{ch:hjorth}
@@ -28,7 +24,7 @@ Struktura navrženého algoritmu je znázorněna na Obr.~\ref{fig:hjorth_schemat
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=1\textwidth]{./obrazky/hjorth_schema.png} % aktualizovat hodnocení kvality
+	\includegraphics[width=1\textwidth]{./obrazky/hjorth_schema.png}
 	\caption[Schéma našeho algorimu, který využívá Hjorthových deskriptorů]{Blokové schéma našeho využití Hjorthových deskriptorů.}
 	\label{fig:hjorth_schemata}
 \end{figure}
@@ -146,7 +142,7 @@ Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární
 
 Naopak výpočet Hjorthovy mobility má sice po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
 
-Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v~Tab.~\ref{tab:capnobase_comparison}. % add BUT PPG
+Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v~Tab.~\ref{tab:capnobase_comparison} a Tab.~\ref{tab:but_ppg_comparison}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                    KVALITA                                   %
@@ -248,7 +244,7 @@ Hodnocení je však závislé na lidském úsudku i~použitém softwaru.
 
 Pro trénink a evaluaci algoritmů na obou databázích jsme se rozhodli použít odlišné referenční hodnoty kvality.
 Pro jejich výpočet jsme zvolili algoritmus dle Orphanidou~\cite{Orphanidou2015,NeuroKit2}.
-Ten vyhodnocuje kvalitu signálu pomocí kombinace pravidel založených na detekci pulzů a následného porovnání morfologie jednotlivých pulzních vln s průměrnou šablonou.
+Ten vyhodnocuje kvalitu signálu pomocí kombinace pravidel založených na detekci pulzů a následného porovnání morfologie jednotlivých pulzních vln s průměrnou šablonou. % Tato metoda hodnotí signály na základě spektrální dominance, pravidelnosti inter-beat intervalů a morfologické stability pulzních vln.
 Byl převzat z knihovny \texttt{NeuroKit2}~\cite{NeuroKit2}, která vrací spojité skóre v rozsahu $<0, 1>$, založené na průměrné korelaci mezi jednotlivými pulzy a vytvořenou šablonou.
 Jako prahovou hodnotu pro binární klasifikaci jsme zvolili hodnotu 0,9, což odpovídá vysoké kvalitě signálu.
 

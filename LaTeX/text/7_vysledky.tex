@@ -138,13 +138,13 @@ Tato rozdílová analýza umožňuje posoudit, jak výrazně se odhady liší od
 Obr.~\ref{fig:capnobase_BlandAltman_hjorth} zachycuje výsledky Bland-Altmanovy analýzy pro metodu využívající Hjorthovy deskriptory.
 Grafy jsou opět rozděleny dle délky analyzovaných úseků: horní pro celé signály, prostřední pro minutové segmenty a spodní pro desetisekundové úseky.
 V posledním grafu byly zahrnuty pouze signály označené jako kvalitní, čímž byl vyloučen jeden extrémně odlehlý případ (signál 0147, 25. minuta), který by vzhledem ke své vysoké chybě narušil škálu zobrazení.
-Tento úsek je detailně zachycen na obrázku~\ref{fig:capnobase_hjorth_err}, kde je patrná výrazná deformace signálu a posun dominantní frekvence.
+Tento úsek je detailně zachycen na Obr.~\ref{fig:capnobase_hjorth_err}, kde je patrná výrazná deformace signálu a posun dominantní frekvence.
 Společně s ním bylo vyloučeno dalších 15 signálů.
 
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/vysledky/BlandAltman_CB_peaks.png}
-	\caption[Bland-Altmanova analýza pro metody detekující vrcholy]{Bland-Altmanova analýza pro metody detekující vrcholy.}
+	\caption[Bland-Altmanova analýza pro metody detekující vrcholy - CapnoBase]{Bland-Altmanova analýza pro metody detekující vrcholy.}
 	% \vspace{-10mm}
 	\label{fig:capnobase_BlandAltman_peaks}
 \end{figure}
@@ -152,7 +152,7 @@ Společně s ním bylo vyloučeno dalších 15 signálů.
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/vysledky/BlandAltman_CB_Hjorth.png}
-	\caption[Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory]{Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory.}
+	\caption[Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory - CapnoBase]{Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory.}
 	\label{fig:capnobase_BlandAltman_hjorth}
 \end{figure}
 
@@ -162,41 +162,67 @@ Společně s ním bylo vyloučeno dalších 15 signálů.
 \FloatBarrier
 \section{Výsledky pro databázi BUT PPG}
 \label{sec:vysledky_butppg}
+% Popsat jaké metriky jsme použili pro vyhodnocení kvality detekce TF - už nedetekujeme vrcholy.
+Databáze \acs{BUT PPG} neobsahuje referenční anotace systolických vrcholů, a není proto možné vyhodnotit metriky citlivosti (\acs{Se}), přesnosti (\acs{PPV}) ani F1 skóre.
+Pro posouzení výkonu jednotlivých algoritmů při odhadu tepové frekvence jsme proto použili průměrnou absolutní chybu (\acs{MAE}) definovanou rovnicí~(\ref{eq:mae}).
+Za správně odhadnuté byly považovány ty signály, u nichž byla \acs{MAE} menší než 5~\acs{bpm}, tedy ve shodě s prahovou hodnotou použité již v předchozí podkapitole a doporučenou dle normy IEC~60601-2-27.
+
+Jelikož se v databázi nachází značný počet nekvalitních signálů, byly výsledky interpretovány s ohledem na kvalitu vstupních dat.
+K tomu byly využity dvě hodnoty: původní, referenční skóre \acs{R-SQI}, přítomné v metadatech databáze, a dále skóre \acs{O-SQI} získané pomocí algoritmu podle Orphanidou, detailněji popisovaného v~podkapitole~\ref{subsec:referencni_hodnota_kvality}.
+Obě hodnoty umožňují binárně rozdělit signály na kvalitní a nekvalitní, což následně slouží k oddělenému hodnocení přesnosti odhadů \acs{TF}.
+
+Souhrnné výsledky pro všechny tři metody odhadu \acs{TF} jsou uvedeny v Tab.~\ref{tab:but_ppg_comparison}.
+Výsledky jsou prezentovány ve třech scénářích: pro celou databázi, pro signály označené jako kvalitní na základě \acs{R-SQI} a pro kvalitní signály dle \acs{O-SQI}.
+Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} uvedeny také poměry dobře a špatně odhadnutých tepových frekvencí a orientační výpočetní čas algoritmů.
 
 \begin{table}[!ht]
 	\centering
 	\caption[Srovnání metod odhadu TF na databázi BUT PPG]{Srovnání metod odhadu TF.}
-	\label{tab:but_ppg_comparison_all}
+	\label{tab:but_ppg_comparison}
 	\resizebox{\textwidth}{!}{
-		\begin{tabular}{|l|c|c|c|c|c|c|c|}
+		\begin{tabular}{|l|c|c||c|c||c|c||c|}
 			\hline
-			& \multicolumn{2}{|c|}{\textbf{}} & \multicolumn{2}{|c|}{\textbf{}}  & \multicolumn{2}{|c|}{\textbf{}} &  \\
+			\textbf{       } & \multicolumn{2}{|c|}{\textbf{celá databáze}} & \multicolumn{2}{|c|}{\textbf{\acs{R-SQI}}}  & \multicolumn{2}{|c|}{\textbf{\acs{O-SQI}}} &  \\
 			\hline
-			\textbf{                  } &  \textbf{Se}  &  \textbf{PPV} &  \textbf{F1}  &     \textbf{MAE}     & \textbf{Poměr} & \textbf{MAE}   & \textbf{Čas} \\
-			\textbf{Metoda} (délka [s]) & \textbf{[\%]} & \textbf{[\%]} & \textbf{[\%]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[bpm]} & \textbf{[s]} \\
+			\textbf{       } &     \textbf{MAE}     & \textbf{Poměr} &     \textbf{MAE}     & \textbf{Poměr} &     \textbf{MAE}     & \textbf{Poměr} & \textbf{Čas} \\
+			\textbf{Metoda}  & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[s]} \\
 			\hline\hline
-			Elgendi (480)        & 99,81 & 99,89 & 99,85 & 0,31 &   42:0   &  16,1  &  6 \\
+			Elgendi          &  18,84  & 875\textbf{:}2.797 &  6,73   &  511\textbf{:}299  &  7,82  &  177\textbf{:}90  &  x  \\
 			\hline
-			Elgendi (62,5)       & 99,23 & 99,88 & 99,55 & 0,35 &   336:0  &  17,9  &  1 \\
+			Vlastní          &         &                    &         &                    &        &                   &     \\
+			vrcholová        &  20,54  & 875\textbf{:}2.797 &  7,80   &  507\textbf{:}303  &  7,12  &  183\textbf{:}84  &  x  \\
+			detekce          &         &                    &         &                    &        &                   &     \\
 			\hline
-			Vlastní vrcholová    & 99,34 & 99,91 & 99,63 & 0,31 &   42:0   &  2,4   &  2 \\
-			detekce (480)        &       &       &       &      &          &        &    \\
-			\hline
-			Vlastní vrcholová    & 98,49 & 99,91 & 99,20 & 0,37 &   336:0  &  2,7   &  1 \\
-			detekce (62,5)       &       &       &       &      &          &        &    \\
-			\hline
-			Hjorth (480)         &  --   &  --   &  --   & 1,52 &   40:2   &  2,6   &  1 \\
-			\hline
-			Hjorth (60)          &  --   &  --   &  --   & 0,80 &   332:4  &  2,7   &  6 \\
-			\hline
-			Hjorth (10)          &  --   &  --   &  --   & 0,61 &  2015:1  &  14,5  &  6 \\
+			Hjorth           &  31,22  & 624\textbf{:}3.048 &  12,98  &  497\textbf{:}313  &  8,05  &  182\textbf{:}85  &  x  \\
 			\hline
 		\end{tabular}
 		}
 \end{table}
 
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/BA_BUT_Elgendi.png}
+	\caption[Bland-Altmanova analýza pro Elgendiho metodu - BUT PPG]{Bland-Altmanova analýza pro Elgendiho metodu.}
+	\label{fig:BUT_BlandAltman_elgendi}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/BA_BUT_VVD.png}
+	\caption[Bland-Altmanova analýza pro naši metodu detekující vrcholy - BUT PPG]{Bland-Altmanova analýza pro naši metodu detekující vrcholy.}
+	\label{fig:BUT_BlandAltman_vvd}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/BA_BUT_Hjorth.png}
+	\caption[Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory - BUT PPG]{Bland-Altmanova analýza pro metodu využívající Hjorthovy deskriptory.}
+	\label{fig:BUT_BlandAltman_hjorth}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             Kvalita                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\FloatBarrier
 \section{Výsledky automatického posouzení kvality}
 \label{sec:vysledky_kvalita}

@@ -6,7 +6,7 @@ import csv
 
 ###################################################################################
 def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
-				 type='My', database='CB', first=False):
+				 type='My', database='CB', first=False, quality_info=None):
 	"""
 	Framework for exporting chosen data and results of one signal into a CSV file.
 	
@@ -44,6 +44,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
+				'Ref Quality': quality_info['Ref Q.'], 'Orphanidou Quality': quality_info['Orphanidou Q.'],
 			})
 		elif (type == 'NK'):
 			rows.append({
@@ -51,6 +52,7 @@ def to_csv_local(id_, chunk_idx, i, hr_info, statistical_info,
 				'Ref HR[bpm]': hr_info['Ref HR'], 'Calculated HR[bpm]': hr_info['Calculated HR'],
 				'Diff HR[bpm]': hr_info['Diff HR'],
 				'SDNN [s]': hr_info['SDNN'], 'RMSSD [s]': hr_info['RMSSD'],
+				'Ref Quality': quality_info['Ref Q.'], 'Orphanidou Quality': quality_info['Orphanidou Q.'],
 			})
 	else:
 		raise ValueError("Invalid type provided for local export.")

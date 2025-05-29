@@ -307,11 +307,11 @@ def plot_bland_altman(_id, reference, prediction, title=None, full=False):
 	loa_upper = mean_diff + 1.96 * std_diff
 	loa_lower = mean_diff - 1.96 * std_diff
 
-	plt.figure(figsize=(17, 5))
-	plt.title(title, fontsize=16)
+	plt.figure(figsize=(9, 4))
+	plt.title(title, fontsize=14)
 
 	for x, y, label in zip(mean_values, diff, _id):
-		plt.scatter(x, y, alpha=0.8, color=G.CESA_BLUE, edgecolor='k', s=50)
+		plt.scatter(x, y, alpha=0.8, color=G.CESA_BLUE, edgecolor='k', s=20)
 		# point_positions = np.where((mean_values == x) & (diff == y))[0]
 		# if len(point_positions) > 1 and (y > loa_upper or y < loa_lower):
 		# 	plt.text(x, y, "         2x", fontsize=10, ha='center', va='center')
@@ -321,13 +321,13 @@ def plot_bland_altman(_id, reference, prediction, title=None, full=False):
 		# 	plt.text(x, y, f'  {str(label)}', fontsize=10, ha='left', va='center')
 			# plt.text(x, y, f' {str(label)}', fontsize=10, ha='left', va='bottom', rotation=70)
 	plt.axhline(0, color='gray', linestyle='-', alpha=0.7)
-	plt.axhline(mean_diff, color='green', linestyle='--', label=f'Průměr: {mean_diff:.2f}')
-	plt.axhline(loa_upper, color='red', linestyle='dotted', label=f'+1.96 SD: {loa_upper:.2f}')
-	plt.axhline(loa_lower, color='red', linestyle='dotted', label=f'-1.96 SD: {loa_lower:.2f}')
+	plt.axhline(mean_diff, color='g', linestyle='dashed', label=f'ME: {mean_diff:.2f}')
+	plt.axhline(loa_upper, color='red', linestyle='dotted', label=f'+1.96 · SD: {loa_upper:.2f}')
+	plt.axhline(loa_lower, color='red', linestyle='dotted', label=f'-1.96 · SD: {loa_lower:.2f}')
 
-	plt.xlabel('Průměrná TF [tep/min]', fontsize=14)
-	plt.ylabel('Rozdílná (detekovaná - referenční) TF [tep/min]', fontsize=14)
-	plt.legend(fontsize=13)
+	plt.xlabel('Průměrná TF [tepy/min]', fontsize=12)
+	plt.ylabel('Rozdílná TF [tepy/min]', fontsize=12)
+	plt.legend(fontsize=11, loc="upper left")
 	plt.grid(True)
 	plt.tight_layout()
 	plt.show()
