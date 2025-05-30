@@ -73,20 +73,16 @@ Metriky přesnosti pro všechny tři algoritmy jsou uvedeny v~Tab.~\ref{tab:capn
 			\textbf{                  } &  \textbf{Se}  &  \textbf{PPV} &  \textbf{F1}  &     \textbf{MAE}     & \textbf{Poměr} & \textbf{Čas} \\
 			\textbf{Metoda} (délka [s]) & \textbf{[\%]} & \textbf{[\%]} & \textbf{[\%]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[s]} \\
 			\hline\hline
-			Elgendi (480)        & 99,81 & 99,89 & 99,85 & 0,31 &   42:0   &  16,1 \\
-			\hline
-			Elgendi (62,5)       & 99,23 & 99,88 & 99,55 & 0,35 &   336:0  &  17,9 \\
+			Elgendi (480)        & 99,81 & 99,89 & 99,85 & 0,31 &   42:0   &  1,37 \\
+			Elgendi (62,5)       & 99,23 & 99,88 & 99,55 & 0,35 &   336:0  &  1,65 \\
 			\hline
 			Vlastní vrcholová    & 99,34 & 99,91 & 99,63 & 0,31 &   42:0   &  2,4  \\
 			detekce (480)        &       &       &       &      &          &       \\
-			\hline
 			Vlastní vrcholová    & 98,49 & 99,91 & 99,20 & 0,37 &   336:0  &  2,7  \\
 			detekce (62,5)       &       &       &       &      &          &       \\
 			\hline
 			Hjorth (480)         &  --   &  --   &  --   & 1,52 &   40:2   &  2,6  \\
-			\hline
 			Hjorth (60)          &  --   &  --   &  --   & 0,80 &   332:4  &  2,7  \\
-			\hline
 			Hjorth (10)          &  --   &  --   &  --   & 0,61 &  2015:1  &  14,5 \\
 			\hline
 		\end{tabular}
@@ -175,6 +171,7 @@ Souhrnné výsledky pro všechny tři metody odhadu \acs{TF} jsou uvedeny v Tab.
 Výsledky jsou prezentovány ve třech scénářích: pro celou databázi, pro signály označené jako kvalitní na základě \acs{R-SQI} a pro kvalitní signály dle \acs{O-SQI}.
 Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} uvedeny také poměry dobře a špatně odhadnutých tepových frekvencí a orientační výpočetní čas algoritmů.
 
+% table with comparison of methods for BUT PPG based on MAE a poměr and all database, R-SQI and O-SQI + time
 \begin{table}[!ht]
 	\centering
 	\caption[Srovnání metod odhadu TF na databázi BUT PPG]{Srovnání metod odhadu TF.}
@@ -187,17 +184,32 @@ Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} u
 			\textbf{       } &     \textbf{MAE}     & \textbf{Poměr} &     \textbf{MAE}     & \textbf{Poměr} &     \textbf{MAE}     & \textbf{Poměr} & \textbf{Čas} \\
 			\textbf{Metoda}  & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[\acs{bpm}]} & \textbf{[d:š]} & \textbf{[s]} \\
 			\hline\hline
-			Elgendi          &  18,84  & 875\textbf{:}2.797 &  6,73   &  511\textbf{:}299  &  7,82  &  177\textbf{:}90  &  x  \\
+			Elgendi      & 18,84 & 875\textbf{:}2.797 & 6,73  &  511\textbf{:}299  & 7,82 & 177\textbf{:}90 & 49,46  \\
 			\hline
-			Vlastní          &         &                    &         &                    &        &                   &     \\
-			vrcholová        &  20,54  & 875\textbf{:}2.797 &  7,80   &  507\textbf{:}303  &  7,12  &  183\textbf{:}84  &  x  \\
-			detekce          &         &                    &         &                    &        &                   &     \\
+			Vlastní      &       &                    &       &                    &      &                 &        \\
+			vrcholová    & 20,54 & 875\textbf{:}2.797 & 7,80  &  507\textbf{:}303  & 7,12 & 183\textbf{:}84 & 45,48  \\
+			detekce      &       &                    &       &                    &      &                 &        \\
 			\hline
-			Hjorth           &  31,22  & 624\textbf{:}3.048 &  12,98  &  497\textbf{:}313  &  8,05  &  182\textbf{:}85  &  x  \\
+			Hjorth       & 31,22 & 624\textbf{:}3.048 & 12,98 &  497\textbf{:}313  & 8,05  & 182\textbf{:}85 & 79,27 \\
 			\hline
 		\end{tabular}
 		}
 \end{table}
+
+Rozdíl mezi referenční a odhadovanou \acs{TF} na databázi \acs{BUT PPG} znázorňují Bland-Altmanovy grafy na Obr.~\ref{fig:BUT_BlandAltman_elgendi}, Obr.~\ref{fig:BUT_BlandAltman_vvd} a Obr.~\ref{fig:BUT_BlandAltman_hjorth}, a to zvlášť pro všechny tři zkoumané metody: Elgendiho algoritmus, vlastní metodu detekce vrcholů a metodu využívající Hjorthovy deskriptory.
+Každý z grafů je rozdělen podle způsobu hodnocení kvality signálu: celá databáze, signály označené jako kvalitní dle \acs{R-SQI} a signály označené jako kvalitní podle \acs{O-SQI}.
+V grafech je vykreslena střední odchylka (ME) a hranice shody $\pm1{,}96$ směrodatné odchylky (\acs{SD}), což odpovídá 95\% limitům shody.
+
+Pro bližší pohled na konkrétní hodnoty odhadované a referenční \acs{TF} byl zkonstruován graf na Obr.~\ref{fig:BUT_hr_dif_O-SQI}, který zobrazuje výstup Hjorthovy metody pro podmnožinu signálů označených jako kvalitní pomocí \acs{O-SQI}.
+Horní panel zobrazuje obě časové řady — referenční a odhadovanou \acs{TF} — pro každý signál, zatímco dolní panel ukazuje absolutní hodnotu rozdílu mezi nimi.
+Přerušovaná čára vyjadřuje průměrnou absolutní chybu (\acs{MAE}) spočtenou na této množině.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/hjorth_hr_diff_butppg_Q-SQI.png}
+	\caption[Porovnání TF pro jednotlivé kvalitní signály - BUT PPG]{Porovnání TF pro jednotlivé signály s vysokým O-SQI skóre.}
+	\label{fig:BUT_hr_dif_O-SQI}
+\end{figure}
 
 \begin{figure}[!ht]
 	\centering
@@ -226,3 +238,81 @@ Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} u
 \FloatBarrier
 \section{Výsledky automatického posouzení kvality}
 \label{sec:vysledky_kvalita}
+% \acs{ROC}, \acs{FPR}, \acs{TPR} + scatter plot + confusion matrix
+% $0,9$ prahová hodnota pro \acs{O-SQI}
+K automatickému hodnocení kvality \acs{PPG} signálů jsme využili model náhodného lesa (\acs{RF}), který jako vstupní příznaky využívá Shannonovu entropii a spektrální index výkonu (\acs{SPI}).
+Model byl trénován na kombinovaných datech z databází CapnoBase a \acs{BUT PPG}, zpracované podle metodiky popsané v~podkapitole~\ref{subsec:segmentace_predzpracovani}.
+Za referenční hodnotu kvality jsme zvolili skóre podle metody Orphanidou (\acs{O-SQI}), u které jsme vypočítali průměrnou hodnotu výstupního řetězce \acs{O-SQI} a nastavili prahovou hodnotu na $0,9$.
+Podrobněji je metoda popsaná v~podkapitole~\ref{subsec:referencni_hodnota_kvality}.
+
+Na Obr.~\ref{fig:roc_kvalita} je vykreslena \acs{ROC} křivka vyhodnoceného klasifikačního modelu.
+Na ose $x$ je míra falešně pozitivních případů (\acs{FPR}), zatímco osa $y$ zobrazuje míru skutečně pozitivních případů (\acs{TPR}, též \acs{Se}).
+Plocha pod křivkou (\acs{AUC}) dosahuje hodnoty $0,957$.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/ROC.png}
+	\caption[ROC křivka pro automatické posouzení kvality signálů]{ROC křivka pro automatické posouzení kvality signálů.}
+	\label{fig:roc_kvalita}
+\end{figure}
+
+Obr.~\ref{fig:scatterplot_kvalita} zobrazuje prostor příznaků modelu ve dvou rozměrech: Shannonova entropie a~\acs{SPI}.
+Data jsou barevně odlišena podle binárního označení kvality dle Orphanidou a tvarově odlišena podle databáze, ze které pocházejí.
+
+\begin{figure}[ht]
+	\centering
+	\vspace{-7mm}
+	\includegraphics[width=0.95\textwidth]{./obrazky/vysledky/scatterplot.png}
+	\caption[Prostor příznaků pro BUT PPG a CapnoBase]{Prostor příznaků pro BUT PPG a CapnoBase s přiblížením na přechodovou část.}
+	\vspace{-8mm}
+	\label{fig:scatterplot_kvalita}
+\end{figure}
+
+\FloatBarrier
+Souhrnné metriky přesnosti klasifikace pro jednotlivé třídy (kvalitní vs. nekvalitní) a databáze uvádíme v Tab.~\ref{tab:vysledky_kvalita}.
+Pro každou skupinu jsou uvedeny hodnoty citlivosti (\acs{Se}), pozitivní prediktivní hodnoty (\acs{PPV}), F1 skóre a počet signálů (podpora), které byly použity k vyhodnocení metrik na testovací množině.
+Tyto metriky byly vypočteny zvlášť pro každou třídu a databázi na základě stejných trénovaných modelů, přičemž třída \texttt{0} odpovídá nekvalitním a třída \texttt{1} kvalitním signálům.
+
+% tabulka s metrikami přesnosti klasifikace kvality pomocí náhodného lesa
+\begin{table}[!ht]
+	\centering
+	\caption[Srovnání klasifikační přesnosti automatického hodnocení kvality]{Souhrnné metriky přesnosti klasifikace automatického posouzení kvality signálů pro jednotlivé databáze a třídy.}
+	\label{tab:vysledky_kvalita}
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{| p{3cm} | p{2cm} | p{2cm} | p{2cm} | p{2cm} | p{2cm} |}
+			\hline
+			\textbf{Databáze} & \textbf{Třída} & \textbf{Se [\%]} & \textbf{PPV [\%]} & \textbf{F1 [\%]} & \textbf{Podpora} \\
+			\hline\hline
+			Všechny        & 0 & 89,77 & 91,99 & 90,86 &  1.368  \\
+			               & 1 & 88,22 & 85,12 & 86,64 &   908   \\
+			\hline
+			CapnoBase      & 0 & 0,00  & 0,00  & 0,00  &    3    \\
+			               & 1 & 90,78 & 99,59 & 94,98 &   803   \\
+			\hline
+			BUT PPG        & 0 & 89,96 & 97,38 & 93,53 &  1.365  \\
+			               & 1 & 68,57 & 34,45 & 45,86 &   105   \\
+			\hline
+		\end{tabular}
+		}
+\end{table}
+
+Výslednou klasifikaci modelu ilustruje matice záměn na Obr.~\ref{fig:confusion_matrix_kvalita}, kde jsou znázorněny výsledky pro celou testovací množinu a dále odděleně pro databáze CapnoBase a \acs{BUT PPG}.
+
+Hodnoty v maticích odpovídají počtům případů rozdělených podle skutečné a predikované třídy: levý horní čtverec (\acs{TN}), pravý horní (\acs{FP}), levý dolní (\acs{FN}), pravý dolní (\acs{TP}).
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/vysledky/confusion_matrix_rf.png}
+	\caption[Matice záměn pro automatické posouzení kvality signálů]{Matice záměn pro automatické posouzení kvality signálů.}
+	\label{fig:confusion_matrix_kvalita}
+\end{figure}
+
+Na základě těchto matic byla vypočtena klasifikační úspěšnost (\acs{ACC}) i metriky pro jednotlivé třídy, které jsou shrnuty v Tab.~\ref{tab:vysledky_kvalita}.
+Klasifikační přesnost se počítá jako podíl správně klasifikovaných signálů z celkového počtu signálů v testovací množině.
+\begin{equation}
+	\label{eq:acc}
+	\acs{ACC} = \frac{\acs{TP} + \acs{TN}}{\acs{TP} + \acs{TN} + \acs{FP} + \acs{FN}} \cdot 100\%
+\end{equation}
+
+Výsledky pro celou testovací množinu dosahují klasifikační úspěšnosti $89,15~\%$.
+Pro databázi \acs{BUT PPG} je klasifikační úspěšnost $88,44~\%$, zatímco pro databázi CapnoBase dosahuje $90,45~\%$.

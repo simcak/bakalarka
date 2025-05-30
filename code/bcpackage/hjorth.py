@@ -7,47 +7,13 @@ import pandas as pd
 ##################### SHOWING && PLOTTING #####################
 ###############################################################
 
-def confusion_matrix(database='all'):
-	import seaborn as sns
-	from sklearn.metrics import confusion_matrix
-
-	if database == 'CapnoBase30':
-		data = pd.read_csv('./hjorth_CBq.csv')
-	elif database == 'CapnoBase300':
-		data = pd.read_csv('./hjorth_CBq_300.csv')
-	elif database == 'BUT_PPG':
-		data = pd.read_csv('./hjorth_butppg.csv')
-	elif database == 'all':
-		data_cb = pd.read_csv('./hjorth_CBq.csv')
-		data_but = pd.read_csv('./hjorth_butppg.csv')
-		data = pd.concat([data_cb, data_but], ignore_index=True)
-	else:
-		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
-
-	# Calculate confusion matrix
-	cm = confusion_matrix(
-		data['ourQ_this_only'],
-		(data['Orphanidou Quality'] >= 0.9).astype(int)
-	)
-
-	# Plot confusion matrix with colors
-	plt.figure(figsize=(6, 5))
-	sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False, 
-				xticklabels=["Bad Quality", "Good Quality"], 
-				yticklabels=["Bad Quality", "Good Quality"])
-	plt.xlabel("Predicted Quality")
-	plt.ylabel("True Quality")
-	plt.title("Confusion Matrix")
-	plt.tight_layout()
-	plt.show()
-
 def hjorth_show_hr_all(database='CapnoBase300'):
 	# Load the data from the CSV file
 	if database == 'CapnoBase30':
-		data = pd.read_csv('./hjorth_CBq.csv')
+		data = pd.read_csv('./hjorth_CB.csv')
 		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'CapnoBase300':
-		data = pd.read_csv('./hjorth_CBq_300.csv')
+		data = pd.read_csv('./hjorth_CB_300.csv')
 		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'CapnoBaseFull300':
 		data = pd.read_csv('./hjorth_CB_full_300.csv')
@@ -108,11 +74,11 @@ def hjorth_show_only_quality_hr(database='CapnoBase300'):
 
 	# Load the data from the CSV file
 	if database == 'CapnoBase30':
-		data = pd.read_csv('./hjorth_CBq.csv')
+		data = pd.read_csv('./hjorth_CB.csv')
 		data = data[data['Orphanidou Quality'] >= 0.9]
 		selected_indices = [idx for idx, name in enumerate(data['File name']) if not str(name).endswith('min')]
 	elif database == 'CapnoBase300':
-		data = pd.read_csv('./hjorth_CBq_300.csv')
+		data = pd.read_csv('./hjorth_CB_300.csv')
 		data = data[data['Orphanidou Quality'] >= 0.9]
 		selected_indices = [idx for idx, name in enumerate(file_names) if not str(name).endswith('min')]
 	elif database == 'CapnoBaseFull300':
@@ -140,31 +106,31 @@ def hjorth_show_only_quality_hr(database='CapnoBase300'):
 
 	####################### Plot the results #######################
 	################################################################
-	plt.figure(figsize=(16, 8))
+	plt.figure(figsize=(8, 7))
 
 	# Plot Hjorth HR and Ref HR
 	plt.subplot(2, 1, 1)
 	plt.title('Hjorthova TF vs Referenční TF pro kvalitní signály', fontsize=16)
-	plt.plot(hjorth_hr.values, label='Hjorthova TF (tepů/min)', marker='o', color=G.CESA_BLUE)
-	plt.plot(ref_hr.values, label='Referenční TF (tepů/min)', marker='*', color="red")
-	plt.xlabel('Index signálu', fontsize=14)
-	plt.ylabel('TF (tepů/min)', fontsize=14)
-	plt.legend(fontsize=12)
+	plt.plot(hjorth_hr.values, label='Hjorthova TF', marker='o', color=G.CESA_BLUE)
+	plt.plot(ref_hr.values, label='Referenční TF', marker='*', color="red")
+	plt.xlabel('Index signálu')
+	plt.ylabel('TF (tepů/min)')
+	plt.legend()
 	plt.grid()
 
-	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90)
 
 	# Plot HR difference
 	plt.subplot(2, 1, 2)
 	plt.title('Rozdíl TF pro kvalitní signály', fontsize=16)
-	plt.plot(hr_diff.values, label='Rozdíl TF (tepů/min)', color="red", marker='*')
+	plt.plot(hr_diff.values, label='Rozdíl TF', color="red", marker='*')
 	plt.axhline(y=mae, color=G.CESA_BLUE, linestyle='--', label=f'MAE: {mae:.2f} tepů/min', linewidth=2)
-	plt.xlabel('Index signálu', fontsize=14)
-	plt.ylabel('|Δ TF| (tepů/min)', fontsize=14)
-	plt.legend(fontsize=12)
+	plt.xlabel('Index signálu')
+	plt.ylabel('|Δ TF| (tepů/min)')
+	plt.legend()
 	plt.grid()
 
-	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90, fontsize=8)
+	plt.xticks(selected_indices, [file_names.iloc[idx] for idx in selected_indices], rotation=90)
 
 	plt.tight_layout()
 	plt.show()
@@ -173,9 +139,9 @@ def hjorth_show_only_quality_hr(database='CapnoBase300'):
 def hjorth_show_spi(database='CapnoBase300'):
 	# Plot the relationship between SPI and HR difference
 	if database == 'CapnoBase30':
-		data = pd.read_csv('./hjorth_CBq.csv')
+		data = pd.read_csv('./hjorth_CB.csv')
 	elif database == 'CapnoBase300':
-		data = pd.read_csv('./hjorth_CBq_300.csv')
+		data = pd.read_csv('./hjorth_CB_300.csv')
 	elif database == 'BUT_PPG':
 		data = pd.read_csv('./hjorth_butppg.csv')
 	else:
@@ -198,7 +164,185 @@ def hjorth_show_spi(database='CapnoBase300'):
 ######################### ML QUALITY ##########################
 ###############################################################
 
-def quality_hjorth(find_best_parameters=False, database='all'):
+def quality_hjorth_rf(database='all', find_best_parameters=False, print_show=False):
+	import pandas as pd
+	import seaborn as sns
+	import matplotlib.pyplot as plt
+	from sklearn.ensemble import RandomForestClassifier
+	from sklearn.preprocessing import StandardScaler
+	from sklearn.model_selection import train_test_split
+	from sklearn.metrics import roc_curve, auc, classification_report, confusion_matrix
+
+	def _find_best_parameters(_X, _y):
+		"""
+		Printing out the best parameters for Random Forest Classifier that we use below.
+		"""
+		from sklearn.model_selection import GridSearchCV
+
+		param_grid = {
+			"n_estimators": [75, 100, 150],
+			"max_depth": [2, 3, 5],
+			"max_features": ["sqrt", "log2", None],
+		}
+
+		search = GridSearchCV(RandomForestClassifier(class_weight="balanced", random_state=42), param_grid, cv=5, scoring="f1")
+		search.fit(_X, _y)
+		print(f"Nejlepší model: {search.best_estimator_}")
+		print(f"Nejlepší F1 skóre: {search.best_score_:.3f}")
+		print(f"Nejlepší parametry: {search.best_params_}")
+		
+		# Return the best parameters
+		return search.best_params_["max_depth"], search.best_params_["max_features"], search.best_params_["n_estimators"]
+
+	if database == 'CapnoBase30':
+		df = pd.read_csv("./hjorth_CB.csv")
+		df["source"] = "capno"
+	elif database == 'CapnoBase300':
+		df = pd.read_csv("./hjorth_CB_300.csv")
+		df["source"] = "capno"
+	elif database == 'BUT_PPG':
+		df = pd.read_csv("./hjorth_butppg.csv")
+		df["source"] = "but"
+	elif database == 'all':
+		df_butppg = pd.read_csv("./hjorth_butppg.csv")
+		df_capno = pd.read_csv("./hjorth_CB.csv")
+		df_butppg["Database"] = "BUT"
+		df_capno["Database"] = "CapnoBase"
+		df = pd.concat([df_butppg, df_capno], ignore_index=True)
+	else:
+		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
+
+	# Vytvoř cílový label
+	df["Target"] = (df["Orphanidou Quality"] >= 0.9).astype(int)
+
+	# Vyber pouze příznaky
+	features = ["SPI Filtered", "Shannon Entropy"]
+	X = df[features]
+	y = df["Target"]
+
+	# Škálování
+	scaler = StandardScaler()
+	X_scaled = scaler.fit_transform(X)
+
+	# Rozdělení na trénovací/testovací sadu
+	X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, stratify=y, test_size=0.4, random_state=42)
+
+	if find_best_parameters:
+		_max_depth, _max_features, _n_estimators = _find_best_parameters(X_train, y_train)
+	else:
+		_max_depth, _max_features, _n_estimators = 5, "sqrt", 100
+
+	# Trénink RF modelu
+	clf = RandomForestClassifier(
+		n_estimators=_n_estimators, max_depth=_max_depth, max_features=_max_features, random_state=42, class_weight="balanced"
+		)
+	clf.fit(X_train, y_train)
+
+	# Predikce a pravděpodobnosti
+	y_pred = clf.predict(X_test)
+	y_proba = clf.predict_proba(X_test)[:, 1]
+
+	if print_show:
+		### Print && show
+		print(f"Klasifikační zpráva ({database}):")
+		print(classification_report(y_test, y_pred, digits=4))
+		print(f"Matice záměn ({database}):")
+		print("TN       FP\nFN       TP")
+		print(confusion_matrix(y_test, y_pred))
+
+		# Vyhodnocení zvlášť pro CapnoBase a BUT_PPG podle 'source'. musíme mít ale obě
+		if database == 'all':
+			for src in ["CapnoBase", "BUT"]:
+				mask = X_test[:, 0] == X_test[:, 0]  # dummy mask, will be replaced
+				if "Database" in df.columns:
+					test_indices = X_test.shape[0]
+					# Najdi indexy v původním dataframe, které odpovídají X_test
+					# Protože jsme použili train_test_split na X_scaled, musíme najít odpovídající řádky v df
+					# Uděláme to přes indexy
+					_, X_test_idx = train_test_split(
+						df.index, stratify=y, test_size=0.4, random_state=42
+					)
+					source_mask = df.iloc[X_test_idx]["Database"] == src
+					y_test_src = y_test[source_mask.values]
+					y_pred_src = y_pred[source_mask.values]
+					print(f"\nKlasifikační zpráva ({src}):")
+					print(classification_report(y_test_src, y_pred_src, digits=4))
+					print(f"Matice záměn ({src}):")
+					print(confusion_matrix(y_test_src, y_pred_src))
+
+					# Plot confusion matrix based on source
+					plt.figure(figsize=(5, 5))
+					sns.heatmap(
+						confusion_matrix(y_test_src, y_pred_src),
+						annot=True, fmt='d', cmap='Blues',
+						cbar=False, annot_kws={"size": 16},
+						xticklabels=["Negativní", "Pozitivní"],
+						yticklabels=["Negativní", "Pozitivní"]
+					)
+					plt.title(f"Matice záměn ({src})", fontsize=18)
+					plt.xlabel("Predikovaná třída", fontsize=16)
+					plt.ylabel("Skutečná třída", fontsize=16)
+					plt.tight_layout()
+					plt.show()
+
+		plt.figure(figsize=(5, 5))
+		sns.heatmap(
+			confusion_matrix(y_test, y_pred),
+			annot=True, fmt='d', cmap='Blues',
+			cbar=False, annot_kws={"size": 16},
+			xticklabels=["Negativní", "Pozitivní"],
+			yticklabels=["Negativní", "Pozitivní"]
+		)
+		plt.title(f"Matice záměn (obě databáze)", fontsize=18)
+		plt.xlabel("Predikovaná třída", fontsize=16)
+		plt.ylabel("Skutečná třída", fontsize=16)
+		plt.tight_layout()
+		plt.show()
+
+		########### 2D SCATTERPLOT ###########
+		plt.figure(figsize=(15, 13))
+		plt.title("Prostor příznaků Shannonovy entropie a SPI pro BUT PPG a CapnoBase", fontsize=24)
+		df_plot = pd.DataFrame({
+			"SPI": X_scaled[:, 0],
+			"Shannon Entropy": X_scaled[:, 1],
+			"Kvalita (Orphanidou)": y,
+			"Databáze": df.iloc[y.index if hasattr(y, "index") else y_test.index]["Database"].values if database == "all" else (["CapnoBase"] * len(y))
+		})
+		sns.scatterplot(
+			data=df_plot,
+			x="SPI",
+			y="Shannon Entropy",
+			hue="Kvalita (Orphanidou)",
+			style="Databáze",
+			palette={0: "red", 1: G.CESA_BLUE},
+			markers={"CapnoBase": "*", "BUT": "o"},
+			alpha=0.42,
+			edgecolor="k",
+			s=42
+		)
+		plt.xlabel("SPI (škálovaný)", fontsize=20)
+		plt.ylabel("Shannonova entropie (škálovaná)", fontsize=20)
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.legend(loc="best", fontsize=17)
+		plt.tight_layout()
+		plt.show()
+
+		############## ROC CURVE ##############
+		fpr, tpr, _ = roc_curve(y_test, y_proba)
+		roc_auc = auc(fpr, tpr)
+
+		plt.figure(figsize=(8, 6))
+		plt.title("ROC křivka pro RF model (SPI + Shannonova entropie)")
+		plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}", color="red")
+		plt.plot([0, 1], [0, 1], 'k--', label="Náhodná klasifikace")
+		plt.xlabel("Míra falešné pozitivity (FPR)")
+		plt.ylabel("Míra pravdivé pozitivity (TPR, citlivost)")
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.legend(loc="lower right")
+		plt.tight_layout()
+		plt.show()
+
+def quality_hjorth_playground(find_best_parameters=False, database='all'):
 	from bcpackage import time_count
 	import seaborn as sns
 	from sklearn.ensemble import RandomForestClassifier
@@ -281,16 +425,16 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 
 	### Load the data from the CSV files
 	if database == 'CapnoBase30':
-		df = pd.read_csv("./hjorth_CBq.csv")
+		df = pd.read_csv("./hjorth_CB.csv")
 		df["source"] = "capno"
 	elif database == 'CapnoBase300':
-		df = pd.read_csv("./hjorth_CBq_300.csv")
+		df = pd.read_csv("./hjorth_CB_300.csv")
 		df["source"] = "capno"
 	elif database == 'BUT_PPG':
 		df = pd.read_csv("./hjorth_butppg.csv")
 		df["source"] = "but"
 	elif database == 'all':
-		df_capno = pd.read_csv("./hjorth_CBq.csv")
+		df_capno = pd.read_csv("./hjorth_CB.csv")
 		df_capno["source"] = "capno"
 		df_butppg = pd.read_csv("./hjorth_butppg.csv")
 		df_butppg["source"] = "but"
@@ -299,8 +443,8 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 		raise ValueError("Invalid database name. Choose 'CapnoBase30', 'CapnoBase300', 'BUT_PPG', or 'all'.")
 
 	### Define what will we use for classification
-	features = ["Mobility Filtered", "Complexity Filtered", "SPI Filtered"]
-	# features = ["SPI Filtered"]
+	features = ["SPI Filtered", "Complexity Filtered"]
+	# features = ["SPI Filtered", "Shannon Entropy"]
 	X_df = df[features]
 
 	### Define the target variable
@@ -407,7 +551,7 @@ def quality_hjorth(find_best_parameters=False, database='all'):
 
 	return trained_model.predict(X_scaled)
 
-def gb_quality_hjorth(find_best_parameters=False, database='all'):
+def gb_quality_hjorth_playbround(find_best_parameters=False, database='all'):
 	from bcpackage import time_count
 	import seaborn as sns
 	from sklearn.ensemble import GradientBoostingClassifier
@@ -491,16 +635,16 @@ def gb_quality_hjorth(find_best_parameters=False, database='all'):
 
 	### Load the data from the CSV files
 	if database == 'CapnoBase30':
-		df = pd.read_csv("./hjorth_CBq.csv")
+		df = pd.read_csv("./hjorth_CB.csv")
 		df["source"] = "capno"
 	elif database == 'CapnoBase300':
-		df = pd.read_csv("./hjorth_CBq_300.csv")
+		df = pd.read_csv("./hjorth_CB_300.csv")
 		df["source"] = "capno"
 	elif database == 'BUT_PPG':
 		df = pd.read_csv("./hjorth_butppg.csv")
 		df["source"] = "but"
 	elif database == 'all':
-		df_capno = pd.read_csv("./hjorth_CBq.csv")
+		df_capno = pd.read_csv("./hjorth_CB.csv")
 		df_capno["source"] = "capno"
 		df_butppg = pd.read_csv("./hjorth_butppg.csv")
 		df_butppg["source"] = "but"
@@ -770,10 +914,32 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 
 		return mobility_q, complexity_q, spi_q
 
+	# Shannon Entropyx
+	def _shannon_entropy(signal, bins=30):
+		# bins = 30 is number of bins for histogram -> 30 is good for 30Hz, 10s long signal
+		# Normalize the signal to range [0, 1] for histogram calculation
+		def _normalize_signal_01(signal):
+			"""
+			Normalize the signal to range [0, 1].
+			"""
+			min_val = np.min(signal)
+			max_val = np.max(signal)
+			normalized_signal = (signal - min_val) / (max_val - min_val) if max_val - min_val > 0 else signal
+			return normalized_signal
+
+		norm_signal = _normalize_signal_01(signal)
+		# Calculate the histogram of the norm_signal
+		hist, _ = np.histogram(norm_signal, bins=bins)
+		probabilities = hist / np.sum(hist)  # Normalize to get probabilities
+		p = probabilities[probabilities > 0] # Remove zeros to avoid log(0)
+
+		return -np.sum(p * np.log2(p))
+
 	if orphanidou_quality is not None:
 		mobility, complexity, spi = _hjorth_quality(filtered_signal, sampling_frequency)
+		shannon_entropy = _shannon_entropy(filtered_signal)
 	else:
-		mobility, complexity, spi = None, None, None
+		mobility, complexity, spi, shannon_entropy = None, None, None, None
 	###############################################################
 
 	hjorth_info = {
@@ -785,6 +951,7 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		"Mobility Filtered": mobility,
 		"Complexity Filtered": complexity,
 		"SPI Filtered": spi,
+		"Shannon Entropy": shannon_entropy,
 		"Orphanidou Quality": orphanidou_quality,
 		"Our Quality": our_quality,
 		"Ref Quality": data["Ref Quality"],
@@ -928,7 +1095,7 @@ def hjorth_alg(database, chunked_pieces=1, autocorr_iterations=7, compute_qualit
 		}
 		return data
 
-	our_quality = quality_hjorth() if compute_quality else None
+	our_quality = quality_hjorth_rf() if compute_quality else None
 	# Start the timer
 	start_time, stop_event = time_count.terminal_time()
 

@@ -32,6 +32,10 @@ def but_ppg_main(method: str, show=False, first=False):
 			# 	'Ref Q.': but_signal_info['Ref_Quality'],
 			# 	'Orphanidou Q.': np.mean(nk_signals_1['PPG_Quality'])
 			# }
+			quality_info = {
+				'Ref Q.': None,
+				'Orphanidou Q.': None
+			}
 		
 		# Execute NeuroKit library with:
 		# 	Elgendi method for peak detection

@@ -177,13 +177,17 @@ Zde jsme navíc potlačili i složky nad 3,35~Hz (201~tepům za minutu), čímž
 
 \subsection*{Výpočet příznaků pro náhodný les}
 \label{subsec:rf_features}
-% mobilitu jsme už popsali = eq:hjorth_mobility
-% navíc popsat komplexitu a SPI
+% popsat komplexitu a z ní SPI
 % komplexita definovaná v Hjorth1970 je ve VUT pojmenována jako "Relativní složitost"
-První dva příznaky odpovídají Hjorthovým deskriptorům, přičemž mobilita (\acs{H_1}) již byla popsána v předchozí podkapitole rovnicí~(\ref{eq:hjorth_mobility}).
+Prvním příznakem je index spektrální čistoty (\acs{SPI}), který je definován jako převrácená hodnota komplexity:
+\begin{equation}
+	\label{eq:hjorth_SPI}
+	SPI = \frac{1}{H_2} = \frac{\sigma_{x'}^2}{\sigma_{x''} \cdot \sigma_{x}} \; [-].
+\end{equation}
 
-Druhý příznak, Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se signál v čase odchyluje od harmonického průběhu.
-Je definována jako poměr mobility první derivace signálu ku mobilitě samotného signálu~\cite{Hjorth1970,Geetika2022}:
+% komplexita a z ní SPI
+Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se signál v čase odchyluje od harmonického průběhu.
+Je definována jako poměr mobility~(\ref{eq:hjorth_mobility}) první derivace signálu ku mobilitě samotného signálu~\cite{Hjorth1970,Geetika2022}:
 \begin{equation}
 	\label{eq:hjorth_complexity}
 	H_{2} = \sqrt{ \frac{H_1(x')}{H_1(x)} }
@@ -194,16 +198,25 @@ kde $x$, $x'$, $x''$ jsou signál, jeho první derivace a jeho druhá derivace.
 $\sigma_x$ označuje směrodatnou odchylku.
 Pro čistě harmonický signál, jako je sinusoida, by vycházelo $H_2 = 1$.
 S rostoucím podílem vyšších frekvenčních složek se však signál stává proměnlivějším, a tím vyšší je hodnota \( H_2 \).
+To znamená, že \acs{SPI}, definovaná jako obrácená hodnota komplexity, bude klesat s rostoucí nepravidelností signálu.
 
-Hjorthova komplexita tak slouží jako bezrozměrný ukazatel nepravidelnosti signálu např. při automatickém hodnocení kvality EEG signálů~\cite{Geetika2022}.
-
-Třetím příznakem je index spektrální čistoty (\acs{SPI}), který je definován jako převrácená hodnota komplexity:
+% Shannonova entropie
+Druhým příznakem je Shannonova entropie, která měří míru neuspořádanosti signálu na základě jeho rozdělení hodnot.
+Jde o metriku založenou na teorii informace, jež vyjadřuje očekávané množství informace potřebné k~popisu jedné hodnoty ze signálu:
 \begin{equation}
-	\label{eq:hjorth_SPI}
-	SPI = \frac{1}{H_2} = \frac{\sigma_{x'}^2}{\sigma_{x''} \cdot \sigma_{x}} \; [-].
+	\label{eq:shannon_entropy}
+	S = - \sum_{i=1}^{N} p_i \cdot \log_2(p_i) \; [\text{bit}],
 \end{equation}
+kde $p_i$ je pravděpodobnost, že hodnota signálu spadá do $i$-tého intervalu histogramu a $N$ je celkový počet binů.
 
-Všechny tři příznaky jsou standardizovány pomocí funkce \texttt{StandardScaler}, aby byl zajištěn jejich jednotný váhový vliv při klasifikaci.
+Pro výpočet histogramu byl signál nejprve normalizován do intervalu $< 0, 1 >$ a následně rozdělen do $N = 30$ stejně širokých binů.
+Tento počet byl zvolen empiricky jako kompromis mezi rozlišením a stabilitou odhadu, při konstantní délce 10~s a vzorkovací frekvenci 30~Hz.
+
+Shannonova entropie nabývá nízkých hodnot u pravidelných signálů s úzkým rozdělením (např. téměř periodická sinusoida),
+zatímco chaotické nebo arteficiální signály, jejichž hodnoty se rozprostírají napříč celým intervalem, vykazují vyšší entropii.
+
+% Standardizace na konci
+Oba příznaky jsou standardizovány pomocí funkce \texttt{StandardScaler}, aby byl zajištěn jejich jednotný váhový vliv při klasifikaci.
 
 \subsection*{Náhodný les}
 \label{subsec:random_forest}
@@ -217,7 +230,7 @@ Pro odhad kvality signálů jsme použili již zmíněný klasifikátor \emph{n�
 Na rozdíl od lineárních modelů dokáže zachytit i nelineární vztahy mezi příznaky.
 
 % parametry a jejich optimalizace
-Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn} s výchozími parametry: \texttt{n\_estimators} = 150 (počet stromů), \texttt{max\_depth} = 7 (maximální hloubka stromu) a \texttt{max\_features} = \texttt{sqrt} (pro každý uzel se testuje náhodně vybraná odmocnina z celkového počtu příznaků).
+Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn} s výchozími parametry: \texttt{n\_estimators} = 100 (počet stromů), \texttt{max\_depth} = 5 (maximální hloubka stromu) a \texttt{max\_features} = \texttt{sqrt} (pro každý uzel se testuje náhodně vybraná odmocnina z celkového počtu příznaků).
 Optimalizace těchto parametrů byla provedena pomocí metody \texttt{GridSearchCV} ze~stejné knihovny, která systematicky vybírá nejlepší kombinace z~námi předdefinovaných hodnot parametrů.
 Pro zajištění deterministického chování jsme parametr náhodné inicializace nastavili na hodnotu \texttt{random\_state = 42}.
 
@@ -237,16 +250,22 @@ To lze interpretovat jako hlasování lesa o~každém testovaném signálu, zde 
 
 \subsection*{Referenční hodnota kvality}
 \label{subsec:referencni_hodnota_kvality}
-% Referenčním hodnotám uvedených v BUT PPG nevěříme, proto musíme implementovat Orphanidou výpočet kvality z NeuroKit2 = sami si nastavíme referenční kvalitu signálů
-Databáze \acs{BUT PPG}~\cite{BUT_PPG,BUT_PPG_database} poskytuje binární anotace kvality signálu založené na schopnosti odhadnout tepovou frekvenci z~\acs{PPG} signálu.
-Ten je označen jako kvalitní, pokud alespoň tři z pěti expertů určili \acs{TF} s~chybou menší nebo rovnou 5~tepů za~minutu vůči referenci z \acs{EKG}.
-Hodnocení je však závislé na lidském úsudku i~použitém softwaru.
 
-Pro trénink a evaluaci algoritmů na obou databázích jsme se rozhodli použít odlišné referenční hodnoty kvality.
-Pro jejich výpočet jsme zvolili algoritmus dle Orphanidou~\cite{Orphanidou2015,NeuroKit2}.
-Ten vyhodnocuje kvalitu signálu pomocí kombinace pravidel založených na detekci pulzů a následného porovnání morfologie jednotlivých pulzních vln s průměrnou šablonou. % Tato metoda hodnotí signály na základě spektrální dominance, pravidelnosti inter-beat intervalů a morfologické stability pulzních vln.
-Byl převzat z knihovny \texttt{NeuroKit2}~\cite{NeuroKit2}, která vrací spojité skóre v rozsahu $<0, 1>$, založené na průměrné korelaci mezi jednotlivými pulzy a vytvořenou šablonou.
-Jako prahovou hodnotu pro binární klasifikaci jsme zvolili hodnotu 0,9, což odpovídá vysoké kvalitě signálu.
+Databáze \acs{BUT PPG}~\cite{BUT_PPG,BUT_PPG_database} poskytuje binární anotace kvality signálů založené na schopnosti odhadnout tepovou frekvenci z~\acs{PPG}.
+Segment je označen jako kvalitní, pokud alespoň tři z~pěti expertů určili \acs{TF} s~absolutní chybou do 5~tepů za minutu vůči referenci z~\acs{EKG}.
+Tato anotace však vychází z~lidského úsudku a konkrétní implementace referenčního algoritmu, což omezuje její objektivitu a opakovatelnost.
+
+Proto jsme se rozhodli použít alternativní metodu hodnocení kvality signálů založenou na práci Orphanidou et al.~\cite{Orphanidou2015} a její implementaci v knihovně \texttt{NeuroKit2}~\cite{NeuroKit2}.
+Zvolený algoritmus posuzuje kvalitu signálu na základě tzv. adaptivního porovnávání tvaru pulzních vln.
+
+V první fázi algoritmus aplikuje heuristická pravidla, která ověřují, zda se inter-beat intervaly a srdeční frekvence nachází ve~fyziologicky věrohodném rozmezí.
+Pokud tyto pravidla nejsou splněny, je segment automaticky označen jako nekvalitní.
+Ve druhé fázi se detekují jednotlivé pulzy v~signálu, vytvoří se průměrná šablona pulzní vlny a následně se spočítá korelační koeficient mezi touto šablonou a každým detekovaným pulzem.
+Průměrná korelace slouží jako měřítko morfologické pravidelnosti a stability v~čase.
+
+Výstupem je spojité skóre kvality pro každý pulz v rozsahu $<0,1>$, kde vyšší hodnoty značí vyšší míru podobnosti mezi pulzy.
+Pro účely binární klasifikace jsme vypočítali průměrnou skóre z výstupního řetězce hodnot a následně jsme zvolili prahovou hodnotu $0,9$, což odpovídá vysoké kvalitě signálu.
+Tato metoda je plně automatická, replikovatelná a vhodná pro trénování algoritmů založených na strojovém učení.
 
 Obr.~\ref{fig:orphanidou_mismatch} ukazuje rozptyl skóre kvality dle Orphanidou pro celou \acs{BUT PPG} databázi a jejich vztah k binární anotaci.
 Je patrné, že se hodnoty kvalit neshodují.

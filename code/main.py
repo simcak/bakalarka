@@ -29,24 +29,25 @@ def main():
 		chunked_pieces 20 == 24s - best results = 0,66 avg HR diff
 		chunked_pieces 48 == 10s like in BUT PPG = 0,82 avg HR diff || 0,81 after eliminating by Orphanidu (22 samples removed)
 	"""
-	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=False)
-	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=True)
+	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=True)
+	hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=False)
+
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=7)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=8, autocorr_iterations=7, compute_quality=False)
 
 	##### Quality Algorithm - HJORTH #####
+	# hjorth.quality_hjorth_rf(database='all', print_show=True)
 	# hjorth.quality_hjorth(database='all', find_best_parameters=False)
 	# our_quality = hjorth.quality_hjorth(database='all', find_best_parameters=False)
 	# file = pd.read_csv('hjorth_butppg.csv')
 	# file["ourQ_this_only"] = our_quality
 	# file.to_csv('hjorth_butppg.csv', index=False)
 
-	# hjorth.confusion_matrix(database='all')
 	# hjorth.hjorth_show_hr_all(database='CapnoBaseFull300')
-	# hjorth.hjorth_show_only_quality_hr(database='CapnoBase300')
+	# hjorth.hjorth_show_only_quality_hr(database='BUT_PPG')
 	# hjorth.hjorth_show_spi(database='CapnoBase300')
 
-	############## Quality Algorithm - Orphanidou ##############
+	############### Orphanidou Quality Algorithm ###############
 	############################################################
 	from bcpackage import quality
 	chunked_pieces = 48
