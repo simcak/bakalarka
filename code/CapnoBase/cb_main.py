@@ -94,9 +94,10 @@ def _process_signal(file_info, method, i, show, chunk=False, chunk_idx=0):
 
 	################################### For testing purposes ##################################
 	if method == 'my' and show:
-		cb_show.test_hub(preprocess.standardize_normalize_signal(ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
+		cb_show.test_hub((ppg_signal), filtered_ppg_signal, ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
 	elif method == 'neurokit' and show:
-		cb_show.neurokit_show(nk_signals, nk_info, i)
+		cb_show.test_hub((ppg_signal), nk_signals['PPG_Clean'], ref_peaks, detected_peaks, local_hr_info, G.CB_FILES[i], i)
+		# cb_show.neurokit_show(nk_signals, nk_info, i)
 	############################################################################################
 
 	return name, local_hr_info, statistical_info

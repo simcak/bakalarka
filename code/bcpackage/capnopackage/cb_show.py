@@ -50,7 +50,7 @@ def two_signals_peaks(signal_raw, signal_filtr, ref_peaks, peaks_our, capnobase_
 	"""
 	fs = 300
 
-	plt.figure(figsize=(14.4, 6))
+	plt.figure(figsize=(8, 4))
 	plt.title(f'CapnoBase ID: {os.path.basename(capnobase_file)[0:4]}', fontsize=16)
 	plt.plot(signal_raw, label='Původní signál', color='#E23F44')
 	plt.plot(signal_filtr, label='Filtrovaný signál', color='black', alpha=0.5)

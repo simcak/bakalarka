@@ -1,20 +1,24 @@
 \chapter*{Úvod}
 \phantomsection
 \addcontentsline{toc}{chapter}{Úvod}
+\label{ch:uvod}
+\chapter{Úvod}
 
-% !? jak správně psát v práci zkratky. kdy a jak je využívat?
-Tepová frekvence je jedním z klíčových zdravotních parametrů, který poskytuje důležité informace o stavu kardiovaskulárního systému subjektu.
-Měření a monitorování srdeční tepové frekvence se stalo nepostradatelným nástrojem nejen v medicíně, ale také ve sportovní vědě a kondičním tréninku.
-Tradiční metody měření tepové frekvence, jako je \acs{EKG} (\acl{EKG}), jsou přesné, ale jejich nevýhodami jsou vyšší cena a uživatelská nepřívětivost v používání \acs{EKG} systémů. 
-V posledních letech získává na popularitě \acs{PPG} (\acl{PPG}).
-Jedná se o neinvazivní a relativně levnou metodu, která umožňuje monitorovat tepovou frekvenci pomocí optických senzorů.
+Tepová frekvence představuje jeden ze základních fyziologických parametrů, který poskytuje klíčové informace o aktuálním stavu kardiovaskulárního systému jedince.
+Její monitorování je široce využíváno nejen v klinické praxi, ale i ve sportovní medicíně, rehabilitaci či oblasti osobního zdraví.
+Zatímco elektrokardiografie (\acs{EKG}) je zlatým standardem pro přesné měření tepové frekvence, její použití bývá spojeno s vyššími náklady a omezenou mobilitou.
 
-Fotopletysmografie funguje na principu detekce změn objemu krve v tkáni pomocí světla, které je absorbováno nebo reflektováno.
-Výhodou \acs{PPG} je možnost integrace do nositelných zařízení, jako jsou chytré hodinky nebo fitness náramky, což umožňuje nepřetržité monitorování tepové frekvence v reálném čase bez zásahu do běžného života měřeného.
+V posledních letech proto nabývá na významu fotopletysmografie (\acs{PPG}) jakožto neinvazivní optická metoda, která umožňuje kontinuální a uživatelsky přívětivé měření tepové frekvence.
+Princip \acs{PPG} spočívá v detekci změn objemu krve v periferních tkáních na základě absorpce či odrazu světla.
+Díky své jednoduchosti a možnosti integrace do nositelných zařízení, jako jsou chytré hodinky či fitness náramky, umožňuje \acs{PPG} dlouhodobé sledování srdeční aktivity v běžném životním prostředí.
 
 Cílem této bakalářské práce je popsat metody odhadu tepové frekvence z \acs{PPG} signálů a navrhnout vlastní algoritmy, které umožní spolehlivé stanovení tepové frekvence.
-K otestování algoritmů budou využity databáze \acs{PPG} signálů: CapnoBase a \acs{BUT PPG} (\acl{BUT PPG}).
+Dalším cílem je ověřit možnost automatického hodnocení kvality \acs{PPG} signálů na základě Shannonovy entropie a indexu spektrální čistoty (\acs{SPI}), a následně klasifikovat segmenty signálu na použitelné a znehodnocené.
 
+Zhodnocení navržených metod je provedeno na dvou veřejně dostupných databázích: CapnoBase a \acs{BUT PPG}.
+Výsledky jsou porovnány pomocí standardních metrik výkonnosti, jako jsou citlivost, pozitivní prediktivní hodnota, střední absolutní chyba nebo ROC analýza.
+
+V celé práci je dodržena citační norma \texttt{ČSN ISO 690}~\cite{Vyklad_normy_CSN_ISO_690-2022,CSN_ISO_690-2022}, přičemž veškeré zdroje jsou uváděny v jednotném stylu.
 
 % \bigskip
 % Úvod studentské práce, např\,\dots

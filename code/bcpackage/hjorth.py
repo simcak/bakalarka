@@ -991,8 +991,8 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		hjorth_df = pd.concat([hjorth_df, pd.DataFrame([hjorth_info])], ignore_index=True)
 		hjorth_df.to_csv(output_file, header=True, index=False)
 
-	_show = False
-	if _show and hjorth_info["HR diff"] < 0.2:
+	_show = True
+	if _show and hjorth_info["HR diff"] > 60 and hjorth_info["Orphanidou Quality"] >= 0.9:
 		# frekvenční spektrum (pomocí FFT)
 		freqs = np.fft.rfftfreq(len(filtered_signal), d=1/sampling_frequency)
 		fft_magnitude = np.abs(np.fft.rfft(filtered_signal))
@@ -1007,30 +1007,30 @@ def compute_hjorth_parameters(data, index, autocorr_iterations, only_quality=Fal
 		fft_magnitude_raw_rescaled = fft_magnitude_raw / np.max(fft_magnitude_raw)
 
 		# Vykreslení filtrovaného a autokorelovaného signálu
-		plt.figure(figsize=(12, 8))
+		plt.figure(figsize=(8, 7))
 
 		plt.subplot(2, 1, 1)
-		plt.title("Porovnání fází předzpracování signálu", fontsize=16)
-		plt.xlabel("Čas [s]", fontsize=14)
-		plt.ylabel("Relativní amplituda", fontsize=14)
+		plt.title("Porovnání fází předzpracování signálu")
+		plt.xlabel("Čas [s]")
+		plt.ylabel("Relativní amplituda")
 		time_axis = np.arange(len(filtered_signal)) / sampling_frequency
 		plt.plot(time_axis, (signal), label="Původní signál", color='grey', alpha=0.5)
 		plt.plot(time_axis, (filtered_signal), label="Filtrovaný signál")
 		plt.plot(time_axis, (autocorrelated_signal), label="Autokorelovaný signál", color=G.BUT_RED)
-		plt.legend(fontsize=12)
+		plt.legend()
 		plt.grid()
 
 		# Vykreslení frekvenčního spektra
 		plt.subplot(2, 1, 2)
 		freq_max = 15
-		plt.title("Frekvenční spektra před a po autokorelaci", fontsize=16)
-		plt.ylabel("Relativní amplituda", fontsize=14)
-		plt.xlabel("Frekvence [Hz]", fontsize=14)
+		plt.title("Frekvenční spektra před a po autokorelaci")
+		plt.ylabel("Relativní amplituda")
+		plt.xlabel("Frekvence [Hz]")
 		plt.plot(freqs_raw[freqs_raw <= freq_max], fft_magnitude_raw_rescaled[freqs_raw <= freq_max], label="Spektrum původního signálu", color='grey', alpha=0.5)
 		plt.plot(freqs[freqs <= freq_max], fft_magnitude_rescaled[freqs <= freq_max], label="Spektrum filtrovaného signálu")
 		plt.plot(freqs_autocorr[freqs_autocorr <= freq_max], fft_magnitude_autocorr_rescaled[freqs_autocorr <= freq_max], label="Spektrum signálu po autokorelacích", color=G.BUT_RED)
 		plt.axvline(x=hjorth_info["Domain Freq [Hz]"], color=G.CESA_BLUE, linestyle='--', label=f"Mobilita: {hjorth_info['Domain Freq [Hz]']:.2f} Hz ({hjorth_info['Hjorth HR']:.2f} tepů/min), ref. TF: {hjorth_info['Ref HR']:.2f} tepů/min")
-		plt.legend(fontsize=12)
+		plt.legend()
 		plt.grid()
 
 		plt.tight_layout()

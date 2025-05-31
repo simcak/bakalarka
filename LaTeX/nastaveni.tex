@@ -113,15 +113,21 @@
 
 %%% Abstrakt - todo
 \abstract[
-This bachelor thesis focuses on heart rate estimation from photoplethysmographic (PPG) signals.
-The work utilizes two databases: CapnoBase and BUT PPG.
-The aim is not only to provide an overview of heart rate estimation methods from PPG signals but also to design, implement, and test algorithms for reliable detection of systolic peaks and heart rate determination.
-The advantages and limitations of each method are also discussed.
+This bachelor thesis addresses the problem of heart rate estimation from photoplethysmographic (PPG) signals and the automatic evaluation of signal quality.
+Three approaches to heart rate estimation are compared: Elgendi’s algorithm, a custom peak detection method, and a novel approach based on Hjorth descriptors.
+Additionally, a machine learning model based on Shannon entropy and spectral power index is proposed to classify signal quality.
+Methods are evaluated on two public databases: CapnoBase and BUT PPG.
+The results show high accuracy of peak detection methods on clean signals, while the Hjorth-based method achieves promising results for short, high-quality segments.
+The signal quality classifier achieves good performance on combined data (AUC = 0.957), but limited generalization to individual databases so the results should be interpreted with caution.
+Limitations and potential improvements are discussed.
 ]{
-Tato bakalářská práce se zaměřuje na odhad tepové frekvence ze signálů fotopletysmografie (PPG).
-Práce využívá dvě databáze: CapnoBase a BUT PPG.
-Cílem je nejen přehledně popsat metody odhadu tepové frekvence ze signálů PPG, ale také navrhnout, implementovat a otestovat algoritmy pro spolehlivou detekci systolických vrcholů a stanovení tepové frekvence.
-Diskutovány jsou také výhody a omezení jednotlivých metod.
+Tato bakalářská práce se zabývá odhadem srdeční tepové frekvence (TF) ze signálů fotopletysmografie (PPG) a automatickým hodnocením kvality těchto signálů.
+Porovnávány jsou tři přístupy k odhadu TF: Elgendiho algoritmus, vlastní metoda detekce vrcholů a nově navržený přístup založený na Hjorthových deskriptorech.
+Dále je navržen klasifikační model využívající Shannonovu entropii a index spektrální čistoty pro hodnocení kvality signálu.
+Metody jsou testovány na dvou veřejných databázích: CapnoBase a BUT PPG.
+Výsledky ukazují vysokou přesnost detekčních metod u kvalitních signálů, zatímco metoda založená na Hjorthových parametrech dosahuje slibných výsledků zejména u krátkých úseků.
+Model pro klasifikaci kvality vykazuje dobrou výkonnost na spojené databázi (AUC = 0,957), avšak omezenou schopnost generalizace na jednotlivé databáze, takže je tento výsledek nutné brát s rezervou.
+Diskutována jsou omezení a možnosti budoucího rozšíření.
 }
 
 %%% Klíčová slova

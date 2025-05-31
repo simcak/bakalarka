@@ -26,7 +26,7 @@ def main():
 	import numpy as np
 
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=True)
-	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=False)
+	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=True)
 
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=7)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=8, autocorr_iterations=7, compute_quality=False)

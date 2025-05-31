@@ -7,22 +7,20 @@
 \chapter*{Závěr} % Shrnuje, co je důležité
 \phantomsection
 \addcontentsline{toc}{chapter}{Závěr}
+\label{chap:zaver}
+Tato bakalářská práce se zabývala problematikou odhadu srdeční tepové frekvence (\acs{TF}) a hodnocení kvality signálu z fotopletysmografických (\acs{PPG}) dat.
+Byly porovnány tři odlišné přístupy k odhadu TF: Elgendiho algoritmus, vlastní metoda detekce vrcholů a nově navržený přístup založený na Hjorthových deskriptorech.
+Současně byl představen model pro automatické hodnocení kvality PPG signálů na základě Shannonovy entropie a spektrálního indexu výkonu (\acs{SPI}).
 
-% !? Jak později v práci správně psát zkratky?
-Tato bakalářská práce se zaměřila na odhad tepové frekvence (\acs{TF}) z fotopletysmografických (\acs{PPG}) signálů.
-Cílem bylo jednak poskytnout stručný přehled existujících metod pro odhad TF z PPG signálů, jednak navrhnout a popsat algoritmy pro spolehlivé stanovení tepové frekvence.
+Výsledky ukazují, že obě metody detekce vrcholů dosahují vysoké přesnosti na databázi CapnoBase, přičemž Elgendiho algoritmus vykazuje o něco konzistentnější výkon i na méně kvalitních datech.
+Vlastní algoritmus poskytuje srovnatelné výsledky, přičemž v některých případech dosahuje vyšší přesnosti při zachování nízké výpočetní náročnosti.
 
-V teoretické části byla popsána fotopletysmografie jako neinvazivní optická metoda monitorování změn objemu krve v tkáních, která se používá zejména pro sledování kardiovaskulárních parametrů.
-Byly představeny základní principy PPG signálů a faktory, které mohou ovlivnit jejich kvalitu a přesnost měření.
+Naopak metoda založená na Hjorthových parametrech nevychází z detekce jednotlivých pulzů, ale analyzuje celkovou periodičnost signálu.
+Tento přístup se ukázal jako robustní zejména pro krátké segmenty kvalitních signálů, u nichž dosahuje velmi nízké chyby odhadu TF.
+Bez předchozí selekce kvalitních segmentů však výkonnost metody výrazně klesá a objevují se extrémní odchylky.
 
-Praktická část práce se soustředila na implementaci a testování několika algoritmů pro detekci systolických vrcholů v PPG signálech, včetně Aboyova algoritmu, jeho vylepšené verze Aboy++, Elgendiho algoritmu, Rezonátoru s nulovou frekvencí (ZFR) a nově navrženého Upraveného Aboyova algoritmu.
-Algoritmy byly testovány na dvou databázích: CapnoBase a BUT PPG.
+Automatické hodnocení kvality signálu pomocí Shannonovy entropie a \acs{SPI} potvrdilo, že tyto dva příznaky nesou dostatek informace pro binární klasifikaci signálu.
+Přestože model náhodného lesa dosáhl vysoké přesnosti na sloučené databázi, jeho výkonnost se při samostatném testování na jednotlivých databázích snížila.
+Tato skutečnost ukazuje na omezenou schopnost generalizace a poukazuje na nutnost tréninku na vyvážených a heterogenních datech.
 
-Výsledky ukázaly, že Rezonátor s nulovou frekvencí (ZFR) dosahuje nejlepších výsledků na databázi CapnoBase, přičemž vykazuje vysokou citlivost a pozitivní prediktivní hodnotu.
-Elgendiho algoritmus se prokázal jako nejspolehlivější na databázi BUT PPG, přičemž dosahoval nejnižší průměrné odchylky mezi detekovanou a referenční TF.
-
-Jedním z klíčových cílů této práce byl vývoj a implementace upraveného Aboyova algoritmu.
-Tento algoritmus dosahuje lepších odhadů TF na databázi CapnoBase ve srovnání s původní verzí, a to zejména díky zjednodušení a odstranění některých kroků, které způsobovaly přehlížení skutečných systolických vrcholů.
-Na databázi BUT PPG však vykazoval vyšší odchylky TF, což naznačuje potřebu další optimalizace pro spolehlivější detekci.
-
-Dalším krokem pro zlepšení přesnosti odhadu TF by mohlo být využití pokročilejších technik strojového učení a hlubokých neuronových sítí, které mohou nabídnout lepší adaptaci na různé typy signálů a zlepšit robustnost algoritmů vůči šumu a artefaktům.
+V rámci budoucího výzkumu by bylo vhodné zaměřit se na rozšíření množiny příznaků, začlenění adaptivních metod zpracování signálu a testování na větším množství nezávislých databází.
