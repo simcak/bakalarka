@@ -6,7 +6,7 @@ V této práci jsme využívali dvě databáze fotopletysmografických signálů
 
 Na těchto databázích jsme testovali a porovnávali výsledky použitých algoritmů.
 U databáze CapnoBase jsme porovnávali naměřené systolické vrcholy s referenčními hodnotami a díky tomu jsme porovnávali i rozdíl v srdeční tepové frekvenci (\acs{TF}).
-U databáze \acs{BUT PPG} nebyly referenční hodnoty systolických vrcholů k dispozici, ale byly zde referenční hodnoty \acs{TF} signálů a ty jsme porovnávali s naměřenými výsledky.
+U databáze \acs{BUT PPG} nebyly referenční hodnoty systolických vrcholů k dispozici, ale byly zde referenční hodnoty \acs{TF} signálů, které jsme porovnávali s naměřenými výsledky.
 
 \section{CapnoBase}
 \label{sec:capnobase}
@@ -33,8 +33,8 @@ Surový \acs{PPG} signál byl extrahován z červené složky nahraného videa (
 
 Každý \acs{PPG} záznam byl synchronizován s \acs{EKG} a rozdělen do desetisekundových segmentů, které následně hodnotilo tři až pět expertů~\cite{BUT_PPG_database}.
 Pro označení kvality vycházeli výhradně z rozdílu mezi \acs{TF} odhadnutou z \acs{PPG} a referenční tepovou frekvencí z \acs{EKG}.
-Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako „dobré“ (1), jinak jako „špatné“ (0).
-Tato hranice vychází z mezinárodní normy IEC 60601-2-27 a v databázi \acs{BUT PPG} je aplikována ještě přísněji~\cite{BUT_PPG}.
+Pokud byla odchylka do pěti úderů za minutu, bylo dané měření označeno jako \uv{dobré} (1), jinak jako \uv{špatné} (0).
+Tato hranice vychází z mezinárodní normy IEC~60601-2-27 a v databázi \acs{BUT PPG} je aplikována ještě přísněji~\cite{BUT_PPG}.
 
 Přibližně polovina záznamů vznikla přiložením prstu na zadní kameru a \acs{LED}, druhá pak snímáním ucha v poloze připomínající telefonování.
 V novější části databáze se rozšiřuje množství subjektů i situací, včetně manipulací s osvětlením, vyšším tlakem prstu na čočku, mluvením či chůzí, a nově se přidávají i údaje o krevním tlaku, glykémii a saturaci krve kyslíkem.
@@ -48,4 +48,4 @@ Díky této variabilitě podmínek a bohatým anotacím je \acs{BUT PPG} unikát
 	\label{fig:videoZaznamPPG}
 \end{figure}
 
-Spojením klinicky orientované databáze CapnoBase a mobilně zaměřené \acs{BUT PPG} vzniká možnost vzájemného porovnání a ověření přesnosti algoritmů, které musejí obstát v rozdílných kontextech: v relativně stabilním, klinickém, prostředí a v krátkých záznamech z chytrého telefonu.
+Spojením klinicky orientované databáze CapnoBase a mobilně zaměřené \acs{BUT PPG} vzniká možnost vzájemného porovnání a ověření přesnosti algoritmů, které musejí obstát v rozdílných kontextech: v relativně stabilním klinickém prostředí a v krátkých záznamech z chytrého telefonu.

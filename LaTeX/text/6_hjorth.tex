@@ -1,6 +1,3 @@
-% todo:
-% - najít zdroj mluvící o využití Hjorthových deskriptorů pro kvalitu signálu
-
 \chapter{Využití Hjorthových deskriptorů na odhad TF a kvality signálů}
 \label{ch:hjorth}
 % Důvody použití Hjorthových deskriptorů pro odhad TF.
@@ -11,14 +8,14 @@ V této kapitole je popsán alternativní přístup k odhadu srdeční tepové f
 Na rozdíl od standardních metod~\cite{ENIKÖ,Charlton2022,NeuroKit2}, které se opírají o detekci jednotlivých systolických vrcholů a výpočet \acs{IBI}, využívá tento přístup frekvenční vlastnosti analyzovaného signálu.
 To je výhodou v případech, kdy je signál poškozen šumem, artefakty, nebo když je kladen důraz na výpočetní náročnost a rychlost algoritmu.
 
-V podkapitole~\ref{sec:hjorth_kvalita} je popsán způsob využití Hjorthových deskriptorů pro odhad kvality signálu pomocí náhodného lesa (\acs{RF}).
+V podkapitole~\ref{sec:hjorth_kvalita} je popsán způsob využití Hjorthových deskriptorů pro odhad kvality signálu pomocí metody náhodného lesa (\acs{RF}).
 
 Hjorthovy deskriptory představují trojici příznaků určených z časového průběhu signálu, původně zavedených Hjorthem v~roce 1970 pro kvantitativní popis elektroencefalografických (\acs{EEG}) signálů~\cite{Hjorth1970,Hjorth1973}.
 Jedná se o \textit{aktivitu} (\(H_0\)), \textit{mobilitu} (\(H_1\)) a \textit{komplexitu} (\(H_2\)), které odrážejí střední výkon, střední úhlovou frekvenci a šířku pásma.
 Jejich výpočet vychází čistě z časové domény a nevyžaduje Fourierovu transformaci.
 
 V dostupné literatuře jsme nenašli studie, které by Hjorthovy deskriptory využívaly k odhadu \acs{TF} z \acs{PPG} signálu.
-Proto v této práci navrhujeme a realizujeme nový přístup založený na Hjorthově \textit{mobilitě} (\(H_1\)).
+Proto v této práci navrhujeme a realizujeme nový přístup založený na Hjorthově mobilitě~(\(H_1\)).
 Tu počítáme na filtrovaných a několikanásobně autokorelovaných signálech.
 Struktura navrženého algoritmu je znázorněna na Obr.~\ref{fig:hjorth_schemata}.
 
@@ -36,15 +33,15 @@ Struktura navrženého algoritmu je znázorněna na Obr.~\ref{fig:hjorth_schemat
 \label{sec:hjorth_mobilita_tf}
 % Načtení signálů z databází probíhá stejně jako u \ref{sec:alg_load}
 % Rozdělení signálů je více modulativní, než u \ref{sec:alg_split} pro CapnoBase můžeme použít celý signál nebo libovolný počet oken s maximální délkou odpovídající 10s signálu. Pro BUT PPG (10s signály) to není možné.
-Jak již bylo uvedeno, Hjorthova \textit{mobilita} (\( H_1 \)) představuje odhad střední (resp. dominantní) frekvence signálu v časové oblasti a to bez nutnosti výpočtu Fourierovy transformace.
+Jak již bylo uvedeno, Hjorthova mobilita (\( H_1 \)) představuje odhad střední (resp. dominantní) frekvence signálu v časové oblasti, a to bez nutnosti výpočtu Fourierovy transformace.
 
 Načtení signálů z databází probíhá stejným způsobem jako u našeho prvního algoritmu, popsaného v podkapitole~\ref{sec:alg_load}.
 Odlišný přístup jsme však zvolili při dělení signálů.
-Zatímco v předchozím algoritmu jsme signály z \textit{CapnoBase} databáze dělili na minutové úseky, zde si můžeme ve vstupu funkce zvolit libovolný počet úseků, na které signál rozdělíme.
+Zatímco v předchozím algoritmu jsme signály z CapnoBase databáze dělili na minutové úseky, zde si můžeme ve vstupu funkce zvolit libovolný počet úseků, na které signál rozdělíme.
 Maximální počet těchto úseků odpovídá situaci, kdy jeden úsek trvá 10~s.
 Pokud zbyde po rozdělení signálu část, která je kratší než délka jednoho úseku, tak ji dále nezpracováváme.
 Je proto důležité zvolit takové dělení, které minimalizuje délku zahozených úseků.
-Alternativou by bylo upravit algoritmus tak, aby zbylé části zpracoval samostatně nebo je přičlenil k předchozímu úseku.
+Alternativou by bylo upravit algoritmus tak, aby zbylé části zpracoval samostatně, nebo je přičlenil k předchozímu úseku.
 Tím bychom však porovnávali signály různých délek, což by mohlo výsledky zkreslit.
 
 \subsection*{Předzpracování}
@@ -57,7 +54,7 @@ Tím bychom však porovnávali signály různých délek, což by mohlo výsledk
 U analyzovaných signálů jsme provedli standardizaci.
 Nejprve jsme odstranili stejnosměrnou (\acs{DC}) složku signálu, tedy jeho střední hodnotu \(\mu\).
 Tento krok slouží k centrování signálu kolem nuly, čímž omezíme vliv \acs{DC} složky na výpočet rozptylu signálu.
-Druhý krok standardizace je dělení signálu zbaveného hodnoty \(\mu\) jeho směrodatnou odchylkou \(\sigma\).
+Ve druhém kroku standardizace jsme dělili signál zbavený hodnoty \(\mu\) jeho směrodatnou odchylkou \(\sigma\).
 Rovnice pro standardizaci signálu je následující:
 \begin{equation}
 	\label{eq:standardizace}
@@ -65,7 +62,15 @@ Rovnice pro standardizaci signálu je následující:
 \end{equation}
 
 Následně byl signál filtrován Butterworthovým hornopropustným filtrem čtvrtého řádu s mezní frekvencí 0,5~Hz v obou směrech.
+Jeho amplitudová charakteristika i její druhá mocnina jsou zobrazeny na Obr.~\ref{fig:hjorth_filter}.
 Cílem této filtrace bylo potlačení respirační složky, přičemž prahová frekvence byla zvolena na základě předpokládané minimální hodnoty \acs{TF}, jak je uvedeno v podkapitole~\ref{sec:STF}.
+
+\begin{figure}[!th]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/hjorth/hp_filter_response_linear.png}
+	\caption[Amplitudová charakteristika hornopropustného filtru]{Amplitudová charakteristika hornopropustného filtru.}
+	\label{fig:hjorth_filter}
+\end{figure}
 
 Získaný signál byl dále sedmkrát za sebou autokorelován.
 Autokorelace je operace, při které se signál koreluje sám se sebou při různých časových posunech.
@@ -79,7 +84,7 @@ kde \( N \) je délka signálu a \( m \) je zpoždění.
 Výpočet probíhal ve frekvenční oblasti pomocí rychlé Fourierovy transformace, čímž se snížila výpočetní náročnost na~\(O(i \cdot N \log N)\), kde~\(i\) je počet iterací autokorelace.
 Bez použití \acs{FFT} by byla složitost \(O(N^2)\).
 
-Po každé iteraci autokorelace byl signál převeden do rozsahu~\([-1, 1]\) pomocí normalizace podle maximální absolutní hodnoty:
+Po každé iteraci autokorelace byl signál převeden do rozsahu~\(<-1, 1>\) pomocí normalizace podle maximální absolutní hodnoty:
 \begin{equation}
 	\hat{x}[n] = \frac{x[n]}{\max |x[n]|}.
 \end{equation}
@@ -138,11 +143,11 @@ Z hodnoty \( H_1 \) jsme následně odvodili dominantní frekvenci \( f_{dom} \)
 Hodnota dominantní frekvence je graficky znázorněna i písemně zmíněna na Obr.~\ref{fig:hjorth_predzpracovani} společně s odpovídající tepovou frekvencí a referenční hodnotou \acs{TF} z databáze.
 
 \paragraph{}
-Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem s asymptotickou složitostí \( O(N) \), jejich praktická složitost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavování bloků zájmu (popsané v podkapitole~\ref{sec:blocks}).
+Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem s asymptotickou složitostí \( O(N) \), jejich praktická složitost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavováním bloků zájmu (popsané v podkapitole~\ref{sec:blocks}).
 
 Naopak výpočet Hjorthovy mobility má sice po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
 
-Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v~Tab.~\ref{tab:capnobase_comparison} a Tab.~\ref{tab:but_ppg_comparison}.
+Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou popsány v kapitole~\ref{ch:vysledky}, přičemž porovnání rychlosti exekuce algoritmů je uvedeno v~Tab.~\ref{tab:capnobase_comparison} a Tab.~\ref{tab:but_ppg_comparison}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                    KVALITA                                   %
@@ -153,8 +158,8 @@ Výsledky odhadu \acs{TF} na základě Hjorthovy mobility jsou diskutovány v ka
 % - Mobilita_filtr a Komplexita_filtr
 % Vysvětlit jak se počítá SPI
 % Jaké prahy jsme nastavili pro hodnocení kvality signálu.
-Tato podkapitola popisuje metodu automatického hodnocení kvality \acs{PPG} signálů pomocí Hjorthových deskriptorů s využitím klasifikátoru typu \uv{náhodný les} (\acs{RF}).
-Cílem této analýzy je ověřit, zda kombinace mobility, komplexity a indexu spektrální čistoty (\acs{SPI}), postačuje k automatické binární klasifikaci \acs{PPG} signálů na základě jejich kvality definované referenčním algoritmem od Orphanidou z knihovny NeuroKit2~\cite{NeuroKit2}.
+Tato podkapitola popisuje metodu automatického hodnocení kvality \acs{PPG} signálů pomocí Hjorthových deskriptorů s využitím klasifikátoru typu náhodný les (\acs{RF}).
+Cílem této analýzy je ověřit, zda kombinace indexu spektrální čistoty (\acs{SPI}) a Shannonovy entropie, postačuje k automatické binární klasifikaci \acs{PPG} signálů na základě jejich kvality definované referenčním algoritmem od Orphanidou z knihovny NeuroKit2~\cite{NeuroKit2}.
 
 \subsection*{Segmentace a předzpracování signálů}
 \label{subsec:segmentace_predzpracovani}
@@ -171,7 +176,7 @@ Jelikož tato metoda neobsahuje předběžnou dolnofrekvenční filtraci, mohlo 
 Abychom tomuto jevu předešli, aplikovali jsme před převzorkováním dolnopropustný filtr typu Butterworth čtvrtého řádu s mezní frekvencí 14~Hz.
 Tím jsme potlačili složky nad polovinou cílové vzorkovací frekvence a zachovali pouze spektrum relevantní pro analýzu srdeční činnosti.
 
-Po sjednocení délky a vzorkovací frekvence byly všechny signály standardizovány viz~(\ref{eq:standardizace}).
+Po sjednocení délky a vzorkovací frekvence byly všechny signály standardizovány~(\ref{eq:standardizace}).
 V souladu s postupem uvedeným v podkapitole~\ref{sec:hjorth_mobilita_tf} jsme dále odstranili nízkofrekvenční složky pod 0,5~Hz.
 Zde jsme navíc potlačili i složky nad 3,35~Hz (201~tepům za minutu), čímž jsme omezili spektrum pouze na fyziologicky očekávané rozsahy srdeční frekvence.
 
@@ -186,7 +191,7 @@ Prvním příznakem je index spektrální čistoty (\acs{SPI}), který je defino
 \end{equation}
 
 % komplexita a z ní SPI
-Hjorthova komplexita (\acs{H_2}), kvantifikuje míru toho, jak se signál v čase odchyluje od harmonického průběhu.
+Hjorthova komplexita (\acs{H_2}) kvantifikuje míru toho, jak se signál v čase odchyluje od harmonického průběhu.
 Je definována jako poměr mobility~(\ref{eq:hjorth_mobility}) první derivace signálu ku mobilitě samotného signálu~\cite{Hjorth1970,Geetika2022}:
 \begin{equation}
 	\label{eq:hjorth_complexity}
@@ -197,7 +202,7 @@ Je definována jako poměr mobility~(\ref{eq:hjorth_mobility}) první derivace s
 kde $x$, $x'$, $x''$ jsou signál, jeho první derivace a jeho druhá derivace.
 $\sigma_x$ označuje směrodatnou odchylku.
 Pro čistě harmonický signál, jako je sinusoida, by vycházelo $H_2 = 1$.
-S rostoucím podílem vyšších frekvenčních složek se však signál stává proměnlivějším, a tím vyšší je hodnota \( H_2 \).
+S rostoucím podílem vyšších frekvenčních složek se však signál stává proměnlivějším, a tím roste hodnota \( H_2 \).
 To znamená, že \acs{SPI}, definovaná jako obrácená hodnota komplexity, bude klesat s rostoucí nepravidelností signálu.
 
 % Shannonova entropie
@@ -210,7 +215,7 @@ Jde o metriku založenou na teorii informace, jež vyjadřuje očekávané množ
 kde $p_i$ je pravděpodobnost, že hodnota signálu spadá do $i$-tého intervalu histogramu a $N$ je celkový počet binů.
 
 Pro výpočet histogramu byl signál nejprve normalizován do intervalu $< 0, 1 >$ a následně rozdělen do $N = 30$ stejně širokých binů.
-Tento počet byl zvolen empiricky jako kompromis mezi rozlišením a stabilitou odhadu, při konstantní délce 10~s a vzorkovací frekvenci 30~Hz.
+Tento počet byl zvolen empiricky jako kompromis mezi rozlišením a stabilitou odhadu, při vědomí, že konstantní délka signálu je 10~s a vzorkovací frekvenci 30~Hz.
 
 Shannonova entropie nabývá nízkých hodnot u pravidelných signálů s úzkým rozdělením (např. téměř periodická sinusoida),
 zatímco chaotické nebo arteficiální signály, jejichž hodnoty se rozprostírají napříč celým intervalem, vykazují vyšší entropii.
@@ -226,7 +231,7 @@ Oba příznaky jsou standardizovány pomocí funkce \texttt{StandardScaler}, aby
 % Vysvětlit jak funguje Random Forest
 % Stratifikace = zajištění stejného poměru tříd v trénovací a testovací sadě
 % výsledky hodnotíme pomocí F1 skóre z Cross-Validation
-Pro odhad kvality signálů jsme použili již zmíněný klasifikátor \emph{náhodný les} (\acs{RF}), který tvoří sadu rozhodovacích stromů a kombinuje jejich výstupy hlasováním.
+Pro odhad kvality signálů jsme použili již zmíněný klasifikátor náhodný les (\acs{RF}), který tvoří sadu rozhodovacích stromů a kombinuje jejich výstupy hlasováním.
 Na rozdíl od lineárních modelů dokáže zachytit i nelineární vztahy mezi příznaky.
 
 % parametry a jejich optimalizace
@@ -239,18 +244,27 @@ Rozdělení datasetu do trénovací a testovací množiny proběhlo v poměru 60
 Jelikož datová sada vykazovala nevyváženost tříd, aktivovali jsme parametr \texttt{class\_weight='balanced'}, který upravuje váhy jednotlivých tříd podle jejich četnosti.
 To zajišťuje, že model nebude preferovat většinovou třídu, ať už kvalitní nebo nekvalitní.
 
-Jednou z výhod \acs{RF} je možnost kvantifikovat důležitost jednotlivých příznaků na základě jejich vlivu na rozhodování stromů, což přispívá k interpretovatelnosti modelu a transparentnosti výsledků.
+Jednou z výhod \acs{RF} je možnost kvantifikovat důležitost jednotlivých příznaků na základě jejich vlivu na rozhodování stromů, což přispívá k interpretovatelnosti modelu a transparentnosti výsledků, jak je zobrazeno na Obr.~\ref{fig:hjorth_feature_importance}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./obrazky/quality/feature_importance.png}
+	\caption[Důležitost příznaků pro klasifikaci kvality signálů pomocí náhodného lesa]{Důležitost příznaků pro klasifikaci kvality signálů pomocí náhodného lesa.}
+	\label{fig:hjorth_feature_importance}
+\end{figure}
 
 % cross-validation
 Výkonnost modelu jsme hodnotili pomocí pětinásobného křížového ověření, což umožňuje stabilní odhad generalizační chyby bez závislosti na konkrétním rozdělení dat.
 Jako hlavní metriku jsme zvolili $F_1$ skóre, které je definované jako harmonický průměr mezi přesností (\acs{PPV}) a citlivostí (\acs{Se}).
 
 Výstupem modelu je pravděpodobnostní binární skóre kvality signálů.
-To lze interpretovat jako hlasování lesa o~každém testovaném signálu, zde je daný signál kvalitní nebo ne.
+To lze chápat jako hlasování lesa o~každém testovaném signálu, zda je daný signál kvalitní nebo ne.
 
 \subsection*{Referenční hodnota kvality}
 \label{subsec:referencni_hodnota_kvality}
-
+% nevěříme referenční hodnotě kvality z databáze BUT PPG
+% Orphanidou et al. 2015 - adaptivní porovnávání tvaru pulzních vln
+% NeuroKit2 - implementace
 Databáze \acs{BUT PPG}~\cite{BUT_PPG,BUT_PPG_database} poskytuje binární anotace kvality signálů založené na schopnosti odhadnout tepovou frekvenci z~\acs{PPG}.
 Segment je označen jako kvalitní, pokud alespoň tři z~pěti expertů určili \acs{TF} s~absolutní chybou do 5~tepů za minutu vůči referenci z~\acs{EKG}.
 Tato anotace však vychází z~lidského úsudku a konkrétní implementace referenčního algoritmu, což omezuje její objektivitu a opakovatelnost.
@@ -264,7 +278,7 @@ Ve druhé fázi se detekují jednotlivé pulzy v~signálu, vytvoří se průměr
 Průměrná korelace slouží jako měřítko morfologické pravidelnosti a stability v~čase.
 
 Výstupem je spojité skóre kvality pro každý pulz v rozsahu $<0,1>$, kde vyšší hodnoty značí vyšší míru podobnosti mezi pulzy.
-Pro účely binární klasifikace jsme vypočítali průměrnou skóre z výstupního řetězce hodnot a následně jsme zvolili prahovou hodnotu $0,9$, což odpovídá vysoké kvalitě signálu.
+Pro účely binární klasifikace jsme vypočítali průměrné skóre z výstupního řetězce hodnot a následně jsme zvolili prahovou hodnotu $0,9$, což odpovídá vysoké kvalitě signálu.
 Tato metoda je plně automatická, replikovatelná a vhodná pro trénování algoritmů založených na strojovém učení.
 
 Obr.~\ref{fig:orphanidou_mismatch} ukazuje rozptyl skóre kvality dle Orphanidou pro celou \acs{BUT PPG} databázi a jejich vztah k binární anotaci.
@@ -275,18 +289,18 @@ Chyba referenčního odhadu \acs{TF} je u tohoto signálu 26~tepů za minutu.
 Z těchto důvodů považujeme skóre podle Orphanidou za vhodnější základ pro trénink modelu automatického hodnocení kvality PPG signálu.
 
 Úspěšnost algoritmů odhadující \acs{TF} budeme hodnotit pomocí obou referenčních hodnot kvality.
-Výsledky těchto algoritmů budou diskutovány v kapitole~\ref{ch:vysledky}.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=1\textwidth]{./obrazky/quality/Orphanidou_Ref_Q.png}
-	\caption[Porovnání kvality dle Orphanidou a referenční anotace z databáze \acs{BUT PPG}]{Porovnání kvality dle Orphanidou a referenční anotace z databáze \acs{BUT PPG}.}
-	\label{fig:orphanidou_mismatch}
-\end{figure}
+Výsledky těchto algoritmů budou popsány v kapitole~\ref{ch:vysledky}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/quality/good_but_not_good.png}
 	\caption[Signál označený databází za kvalitní]{Příklad signálu označeného jako kvalitní, přestože obsahuje silné artefakty a vykazuje vysokou chybu odhadu \acs{TF}.}
 	\label{fig:bad_quality_passed}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1\textwidth]{./obrazky/quality/Orphanidou_Ref_Q.png}
+	\caption[Porovnání kvality dle Orphanidou a referenční anotace z databáze \acs{BUT PPG}]{Porovnání kvality dle Orphanidou a referenční anotace z databáze \acs{BUT PPG}.}
+	\label{fig:orphanidou_mismatch}
 \end{figure}

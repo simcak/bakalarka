@@ -44,7 +44,7 @@ My jsme se rozhodli přenastavit funkci v knihovně tak, aby odpovídala původn
 Filtr je nastaven jako pásmová propust s~dolní a horní mezí 0,5~Hz a 8~Hz, který má potlačit ty složky signálu, které odpovídají šumu a kolísání nulové izolinie~\cite{Elgendi2013}.
 Na Obr.~\ref{fig:filter-example} je ukázka amplitudové charakteristiky filtru a porovnání původního a filtrovaného úseku signálu.
 
-Po filtraci je kaldná část signálu umocněna na druhou viz.~(\ref{eq:square}).
+Po filtraci je kladná část signálu umocněna na druhou~(\ref{eq:square}).
 To je provedeno s cílem zdůraznit rozdíly mezi systolickou vlnou a ostatními složkami, jako jsou diastolické zářezy nebo šum~\cite{Elgendi2013}.
 Výsledná hodnota $y[n]$ po umocnění je dána vztahem:
 \begin{equation}
@@ -61,19 +61,19 @@ Porovnání filtrovaného a umocněného signálu je ilustrováno na Obr.~\ref{f
 \section{Určení bloků zájmů a nalezení vrcholů}
 \label{sec:thr_peaks}
 % 
-Po úvodní filtraci a umocnění fotopletysmografického signálu, vypočítává Elgendiho algoritmus dva klouzavé průměry (\acs{MA}), které se od sebe liší v samotné šířce průměrujícího okna~\cite{Elgendi2013}.
+Po úvodní filtraci a umocnění fotopletysmografického signálu vypočítává Elgendiho algoritmus dva klouzavé průměry (\acs{MA}), které se od sebe liší v samotné šířce průměrujícího okna~\cite{Elgendi2013}.
 
-Kratší okno \(W_1\) je nastaveno tak, aby sloužilo ke zdůraznění systolické špičky, zatímco delší okno \(W_2\) se vybralo tak, aby zdůraznilo období celého srdečního cyklu.
+Kratší okno \(W_1\) je nastaveno tak, aby sloužilo ke zdůraznění systolické špičky, zatímco delší okno \(W_2\) je vybráno tak, aby zdůraznilo období celého srdečního cyklu.
 Tyto konstanty odpovídají šířkám oken v milisekundách, ve kterých se počítají klouzavé průměry (\ref{eq:MA_P}) a (\ref{eq:MA_B}).
-Pro vypočítání konkrétních velikostí oken bylo provedeno metodou \uv{hrubé sily} vhodných parametrů tak, že se vyzkoušely různé kombinace délek těchto a dalších a konstant.
-Jako nejlepší kombinace se vybrala ta, po které dosahoval algoritmus nejvyššího skóre v citlivosti (\acs{Se}) a pozitivní prediktivní hodnotě (\acs{PPV}) na trénovací sadě dat~\cite{Elgendi2013}.
+Vypočítání konkrétních velikostí oken bylo provedeno metodou \uv{hrubé síly} vhodných parametrů tak, že se vyzkoušely různé kombinace délek těchto a dalších a konstant.
+Jako nejlepší kombinace byla vybrána ta, po které dosahoval algoritmus nejvyššího skóre v citlivosti (\acs{Se}) a pozitivní prediktivní hodnotě (\acs{PPV}) na trénovací sadě dat~\cite{Elgendi2013}.
 Pro \(W_1\) byla zvolena hodnota 111 (odpovídající milisekundám) a pro \(W_2\) hodnota 667.
 
 \subsection*{Výpočet klouzavých průměrů} % ⚠️ Lépe popsat = porozumět + dodat graf
 \label{sec:MA}
 % 
 Elgendi definuje umocěný a vyfiltrovaný \acs{PPG} signál jako \(y[n]\).
-Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypočítá rovnicí
+Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypočítá rovnicí:
 
 \begin{equation}
 	MA_{peak}[n] \;=\;
@@ -81,8 +81,7 @@ Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypoč�
 	(y[n - \frac{W_1-1}{2}] + \ldots + y[n] + \ldots + y[n + \frac{W_1-1}{2}]),
 	\label{eq:MA_P}
 \end{equation}
-
-kde je \(W_1\) konstanta popsaná v podkapitole~\ref{sec:thr_peaks}~\cite{Elgendi2013}
+kde je \(W_1\) konstanta popsaná v podkapitole~\ref{sec:thr_peaks}~\cite{Elgendi2013}.
 Podobně se s delším oknem \(W_2\) vypočítá \acs{MA_B}, který reprezentuje přibližnou délku jednoho srdečního cyklu:
 
 \begin{equation}
@@ -98,10 +97,10 @@ Tyto klouzavé průměry slouží k vypočítání \acs{THR_1} a následných bl
 \subsection*{Nastavení dvou dynamických prahů}
 \label{sec:thresholds}
 % 
-Pro další zpracování se zvolí dvě prahové hodnoty.
-První dynamický práh \acs{THR_1} se vpočítá posunutím signálu \acs{MA_B} o konstantu \(\beta\) vynásobenou průměrnou hodnotou umocněného signálu \(\overline{z}\) viz.~(\ref{eq:THR_1}).
-Tato průměrná hodnota se vypočítává z celého umocněného signálu.
-\(\beta\) je jedním z~parametrů, který se nastavuje metodou \uv{hrubé síly} a nejlepší výsledky vyšly, když se \(\beta\) nastavila na hodnotu 2~\cite{Elgendi2013}.
+Pro další zpracování Elgendi zvolí dvě prahové hodnoty.
+První dynamický práh \acs{THR_1} se vypočítá posunutím signálu \acs{MA_B} o konstantu \(\beta\) vynásobenou průměrnou hodnotou umocněného signálu \(\overline{z}\)~(\ref{eq:THR_1}).
+Tuto průměrnou hodnotu vypočítá z celého umocněného signálu.
+\(\beta\) je jedním z~parametrů, který byl nastaven metodou \uv{hrubé síly} a nejlepší výsledky vyšly, když byla $\beta$ nastavena na hodnotu $2$~\cite{Elgendi2013}.
 
 \begin{equation}
 	THR_1[n] \;=\; MA_{beat}[n] \;+\; \beta \,\cdot\, \overline{z}.
@@ -120,7 +119,7 @@ Elgendi využívá tento práh pro eliminaci všech bloků, které jsou kratší
 \label{sec:blocks}
 % ...
 Porovnáním výše uvedeného klouzavého průměru \acs{MA_P} a prvního prahu (\acs{THR_1}) jsou určeny bloky zájmu.
-Tyto bloky jsou definovány jako úseky, kde je \acs{MA_P} větší než \acs{THR_1} a zároveň jejich šířka je větší než \acs{THR_2} viz.~(\ref{eq:blocks})~\cite{Elgendi2013}.
+Tyto bloky jsou definovány jako úseky $n$, kde je \acs{MA_P} větší než \acs{THR_1} a zároveň je jeho šířka větší než \acs{THR_2}~(\ref{eq:blocks})~\cite{Elgendi2013}.
 Bloky zájmu jsou zobrazeny jako šedé úseky na Obr.~\ref{fig:thresholds_peaks_clean} a~\ref{fig:thresholds_peaks}.
 
 \begin{equation}

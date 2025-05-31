@@ -24,20 +24,16 @@ def main():
 	from bcpackage import hjorth
 	import pandas as pd
 	import numpy as np
-	"""
-		chunked_pieces 1 == 8min is full signal
-		chunked_pieces 20 == 24s - best results = 0,66 avg HR diff
-		chunked_pieces 48 == 10s like in BUT PPG = 0,82 avg HR diff || 0,81 after eliminating by Orphanidu (22 samples removed)
-	"""
+
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=48, autocorr_iterations=7, compute_quality=True)
-	hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=False)
+	# hjorth.hjorth_alg(database='BUT_PPG', autocorr_iterations=7, compute_quality=False)
 
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=1, autocorr_iterations=7)
 	# hjorth.hjorth_alg(database='CapnoBase', chunked_pieces=8, autocorr_iterations=7, compute_quality=False)
 
 	##### Quality Algorithm - HJORTH #####
-	# hjorth.quality_hjorth_rf(database='all', print_show=True)
-	# hjorth.quality_hjorth(database='all', find_best_parameters=False)
+	# hjorth.quality_hjorth_rf(database='all', print_show=False)
+
 	# our_quality = hjorth.quality_hjorth(database='all', find_best_parameters=False)
 	# file = pd.read_csv('hjorth_butppg.csv')
 	# file["ourQ_this_only"] = our_quality

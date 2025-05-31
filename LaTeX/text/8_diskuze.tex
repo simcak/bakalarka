@@ -9,18 +9,95 @@
 % - „Tento výsledek může být způsoben tím, že…“,
 % - „Na rozdíl od práce XY jsme zaznamenali…“,
 % - „Překvapivě model selhal při…“
-Z~grafů je patrné, že až na několik málo odchylek u~jednotlivých signálů dosahují obě metody v~průměru vysokých hodnot \acs{Se} i \acs{PPV}.
+Tato kapitola se věnuje interpretaci dosažených výsledků při odhadu srdeční tepové frekvence (\acs{TF}) ze signálu \acs{PPG} pomocí tří odlišných metod: Elgendiho algoritmu, vlastní metody detekce vrcholů a přístupu založeného na Hjorthových deskriptorech.
+Dále je diskutováno automatické hodnocení kvality signálu s využitím Shannonovy entropie a indexu spektrální čistoty.
 
-Na Obr.~\ref{fig:capnobase_our_err} došlo k~selhání detekce z~důvodu přítomnosti silné respirační vlny.
+\section{Shrnutí hlavních výsledků a jejich interpretace}
+% Cíl: Zdůraznit, co jsem zjistil a proč je to důležité.
+% Budeme rovnou porovnávat s literaturou.
+% rozdělíme to na čtyři části: capnobase, but ppg, kvalita a čas
+% Výsledky detekce TF (Se, PPV) — ne/potvrzuje výkonnost.
+% Vysvětlit výsledky Bland-Altmanovy analýzy – kdy je chyba závislá na TF
+% Shrnou výkonnost vlastního algoritmu detekující vrcholy - pro CapnoBase a BUT PPG zvlášť
+% Shrnou výkonnost Hjorth algoritmu - pro CapnoBase a BUT PPG zvlášť
+% Shrnou výkonnost automatického hodnocení kvality PPG signálů pomocí Shannonovy entropie a SPI. - pro CapnoBase a BUT PPG zvlášť
+% Interpretuj AUC a ROC křivku pro kvalitu — dobrá separace pro mix, ale špatná pro jednotlivé databáze.
+% KEEP IN MIND: co výsledek „znamená“, nejen „je vysoký Se“
 
-% V BA analýze se na osu $x$ obvykle klade průměr hodnot získaných oběma metodami (zde: referenční a odhadnutá TF).
-% Důvodem je, že chyby mohou být závislé na velikosti měřené veličiny – tedy chceme vidět, zda se chyba mění se vzrůstající hodnotou.
-% = to je pravda, diskutujme to.
+% CapnoBase:
+Z~grafů je patrné, že až na několik málo odchylek u~jednotlivých signálů dosahují obě metody v~průměru vysokých hodnot \acs{Se} i \acs{PPV}. % to znamená, že dokážou spolehlivě detekovat systolické vrcholy v~signálech.
 
+Z výsledků uvedených v Tab.~\ref{tab:capnobase_comparison} a Tab.~\ref{tab:but_ppg_comparison} vyplývá, že metody založené na detekci vrcholů (Elgendiho i vlastní) vykazují vysokou přesnost při odhadu TF na databázi CapnoBase, s hodnotami MAE do 0{,}37~\acs{bpm} a 100\% přesností detekce TF dle mezinárodního standardu IEC~60601-2-27. % vejdeme se do rozmezí 5~\acs{bpm}.
+Oproti tomu metoda využívající Hjorthovu mobilitu dosahuje vyšší chyby (např. MAE = 1{,}52~\acs{bpm} na celé databázi), nicméně její výkon se zlepšuje při kratších úsecích a po aplikaci selekce podle kvality - u desetisekundových kvalitních segmentů dosahuje MAE pouze 0{,}61~\acs{bpm}. % to je sice dvojnásobek toho, co Elgendiho a vlastní metoda, ale stále velmi dobré.
+
+% Při podvzorkování dat z CapnoBase došlo ke zhoršení MAE o 0,1 bpm = na Hjorha má tedy vliv i vzorkovací frekvence.
+
+% BUT PPG:
+Na databázi BUT PPG, která obsahuje vyšší počet signálů celkově a především ty s nízkou kvalitou.
+Proto jsou výsledky všech metod horší než na CapnoBase, docházíme ale k lepším výsledkům, když odstraníme nekvalitní signály podle R-SQI nebo O-SQI.
+Nejlepších výsledků dosahují metody na databázi ochuzenou o O-SQI < 0,9, ale i tak je naše MAE vyšší než je doporučená hodnota 5~\acs{bpm}. % furt je to alo horší než pro CapnoBase
+
+Hjorthova metoda má nejvyšší chyby, ale je u ní velký rozdíl, jestli odstraníme nekvalitní signály podle R-SQI nebo O-SQI. % pro osqi klesne ME, což neplatí pro algoritmy detekující vrcholy, kde je ME podobné pro signály bez rsqi i osqi.
+
+% V BA analýze se na osu $x$ klade průměr hodnot získaných oběma metodami (zde: referenční a odhadnutá TF).
+% Pozorujeme, zda se chyba (osa $y$) mění s velikostí TF.
+% jinými slovy:
 % Bland-Altmanova analýza nám umožňuje posoudit, jak výrazně se odhady liší od referenčních hodnot a zda je chyba závislá na velikosti tepové frekvence.
+% = to je pravda, diskutujme to.
+% = pro capnobase: víc je to vidět na rozdělených signálech, ale i tak se hodnota chyby s TF mění u Elgendiho i našeho algoritmu detekujícího vrcholy. Hjorthova metoda je naopak relativně stabilní (je to pravda?)
+% = pro BUT PPG: zde je vidět, že Elgendiho i náš algoritmus detekující vrcholy jsou stabilní a s rostoucí TF se chyba výrazně nemění (u našeho algoritmu pro všechny signály trochu roste, ale ne dramaticky). Naopak Hjorthova metoda má vyšší chybu u vyšších TF, což naznačuje, že je méně robustní vůči variabilitě signálů, ale zase jen pro nekvalitní signály - když z databáze vyřadíme nekvalitní signály (R-SQI nebo O-SQI), tak se chyba výrazně sníží a je srovnatelná s detekčními algoritmy. To znamená, že je Hjorthova metoda aplikovatelná po klasifikaci kvality signálů.
 
 %% vysledky kvality:
 % Křivka vykazuje vysokou separační schopnost s plochou pod křivkou (\acs{AUC}) rovnající se $0,957$.
 % Je patrná výrazná separace mezi třídami, zejména v oblasti vyšších hodnot \acs{SPI} a nižší Shannonovy entropie.
 % Model dosahuje vysoké přesnosti na obou databázích, přičemž většina kvalitních signálů je správně identifikována.
 % Mírně vyšší míra chybně klasifikovaných nekvalitních signálů je patrná u databáze \acs{BUT PPG}, což pravděpodobně souvisí s větší variabilitou a artefakty přítomnými v těchto datech.
+
+% Model náhodného lesa trénovaný na dvojici příznaků — Shannonově entropii a SPI — dosáhl dobré klasifikační schopnosti s AUC = 0{,}957, jak je patrné z ROC křivky na Obr.~\ref{fig:ROC}.
+% Ve scatterplotu (Obr.~\ref{fig:scatterplot}) lze pozorovat oddělení tříd byť ne zcela výrazné.
+% Problém ale je, že databáze samostatně jsou velmi nevyvážené co se týče počtu kvalitních a nekvalitních signálů. Myslili jsme, že by bylo vhodné trénovat model na kombinovaných datech z obou databází, což se ale nepotvrdilo, jelikoož na posouzení, jestli model správně generalizuje i pro signály z jiných databází máme příliš málo dat.
+
+% Jak vidíme na tabulce~\ref{tab:vysledky_kvalita}:
+% Hodnoty pro obě spojené databáze dosahují vysoké přesnosti (...) ale hodnoty jsou nižší, když se podíváme na jednotlivé databáze zvlášť.
+
+% Největší problémy vykazuje model u signálů z databáze BUT PPG, kde se objevuje vyšší chybovost u pozitivní třídy (kvalitních signálů), viz matice záměn (Obr.~\ref{fig:confusion_matrix_rf}).
+
+% Výpočetní náročnost nebo-li čas výpočtu:
+% Z pohledu výpočetního času jsou všechny tři metody použitelné v reálném čase.
+% elgendiho je nejrychlejší, ale bacha - v neurokit jsme museli zakomentovat výpočet kvality signálu, který tam je defaultně. s ní byl výpočet o cca 10s pomalejší = výrazně pomalejší než ostatní.
+% Nejrychlejší metodou je Elgendiho algoritmus, přičemž všechny metody zpracovaly CapnoBase do 3~s, což je zcela přijatelné pro embedded systémy.
+% nejpomalejší je vlastní algoritmus využívající hjorthovy deskriptory, ale to je pro 10s signály, což jinak u Capnobase neděláme, tudíž toto srovnání není relevantní. Ale dá se srovnat u BUT PPG, kde je hjorth též nejpomalejší, a tady to dokonce je relevantní. Ukazuje se, že je tato metoda časově náročná u krátkých signálů. I když jsme si hráli s počtem autokorelací, tak jsme čas výpočtu o moc nezkrátili
+
+
+\section{Omezení a potenciální příčiny chyb}
+% Cíl: Ukázat kritickou reflexi a že rozumíš slabým stránkám.
+% Vysvětli případové selhání z Obr.~\ref{fig:capnobase_our_err} - proč tam selhaly detekce?
+% U Hjorth parametrů: citlivost na šum, závislost na frekvenčním spektru.
+% U RF klasifikace kvality: možná overfitting na CapnoBase vs. generalizace na BUT = nevyváženost dat v databázích.
+% Shannonova entropie – riziko zmatení artefaktem, pokud je signál chaotický, ale ne nutně „nekvalitní“.
+% Podvzorkování: vliv frekvence na výpočet derivací a odhady frekvence.
+
+% Hjorth na CapnoBase rozděleným do 10s úseků - největší chyba je 16,99 bpm pro tento signál:
+Na Obr.~\ref{fig:capnobase_our_err} došlo k~selhání detekce z~důvodu přítomnosti silné respirační vlny.
+
+
+\section{Reflexe metod a návrhy pro budoucí výzkum}
+% Cíl: Navrhnout, jak by šla metoda vylepšit - prokázat znalost metodologie.
+% odhad TF:
+% u Hjortha by bylo fajn přidat maximální a minimální hodnotu TF, abychom omezili výkyty mimo rozsah 30-200 bpm.
+% kvalita:
+% RF: natrénováno pouze na dva příznaky - šlo by přidat další pro lepší využití RF.
+% Šlo by vyzkoušet jiný klasifikátor (např. XGBoost, SVM) a porovnat s RF?
+% Šlo by přidat další databázi, která by byla vyváženější a lépe reprezentovala různé typy signálů?
+
+
+Výsledky ukazují potenciál Hjorthových parametrů pro odhad TF i hodnocení kvality, avšak naznačují i jejich limity. Pro zvýšení robustnosti by bylo vhodné:
+\begin{itemize}
+	\item rozšířit model o další příznaky (např. skewness, variability, vyšší derivace),
+	\item využít pokročilejší klasifikátory (např. konvoluční sítě, XGBoost),
+	\item aplikovat adaptivní strategie výběru délky okna,
+	\item kombinovat spektrální analýzu s morfologickými detekčními metodami (hybridní přístup).
+\end{itemize}
+
+Díky své výpočetní nenáročnosti a schopnosti obejít se bez detekce vrcholů je Hjorthova metoda slibná zejména pro nasazení v mobilních a nositelných zařízeních, kde bývá signál často znehodnocen a standardní detekce selhává.
+

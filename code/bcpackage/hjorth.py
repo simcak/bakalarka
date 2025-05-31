@@ -170,7 +170,7 @@ def quality_hjorth_rf(database='all', find_best_parameters=False, print_show=Fal
 	import matplotlib.pyplot as plt
 	from sklearn.ensemble import RandomForestClassifier
 	from sklearn.preprocessing import StandardScaler
-	from sklearn.model_selection import train_test_split
+	from sklearn.model_selection import train_test_split, cross_val_score
 	from sklearn.metrics import roc_curve, auc, classification_report, confusion_matrix
 
 	def _find_best_parameters(_X, _y):
@@ -193,6 +193,19 @@ def quality_hjorth_rf(database='all', find_best_parameters=False, print_show=Fal
 		
 		# Return the best parameters
 		return search.best_params_["max_depth"], search.best_params_["max_features"], search.best_params_["n_estimators"]
+
+	def _feature_importance_plot(clf):
+		importances = clf.feature_importances_
+		indices = np.argsort(importances)[::-1]
+		feature_names = ["SPI", "Shannonova entropie"]
+
+		plt.figure(figsize=(6, 4))
+		plt.title("Důležitost příznaků (Náhodný les)")
+		plt.bar(range(len(importances)), importances[indices], align="center")
+		plt.xticks(range(len(importances)), [feature_names[i] for i in indices], ha="center")
+		plt.tight_layout()
+		plt.grid(True, linestyle='--', alpha=0.5)
+		plt.show()
 
 	if database == 'CapnoBase30':
 		df = pd.read_csv("./hjorth_CB.csv")
@@ -243,6 +256,14 @@ def quality_hjorth_rf(database='all', find_best_parameters=False, print_show=Fal
 	y_proba = clf.predict_proba(X_test)[:, 1]
 
 	if print_show:
+		### Cross-validation: evaluating estimator performance
+		_fold = 5
+		scores = cross_val_score(clf, X_scaled, y, cv=_fold, scoring="f1")
+		print(f"Průměrné F1 skóre ({_fold}-fold CV): {scores.mean():.3f} ± {scores.std():.3f}")
+
+		print("Průměrné F1 skóre na testovací sadě:", classification_report(y_test, y_pred, output_dict=True)['1']['f1-score'])
+		print("Průměrná směrodatná odchylka F1 skóre na testovací sadě:", scores.std())
+
 		### Print && show
 		print(f"Klasifikační zpráva ({database}):")
 		print(classification_report(y_test, y_pred, digits=4))
@@ -341,6 +362,8 @@ def quality_hjorth_rf(database='all', find_best_parameters=False, print_show=Fal
 		plt.legend(loc="lower right")
 		plt.tight_layout()
 		plt.show()
+
+		_feature_importance_plot(clf)
 
 def quality_hjorth_playground(find_best_parameters=False, database='all'):
 	from bcpackage import time_count

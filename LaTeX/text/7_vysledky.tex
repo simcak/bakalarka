@@ -47,7 +47,7 @@ Dále jsme vyhodnotili průměrnou absolutní chybu (\acs{MAE}) mezi referenčn�
 
 \begin{equation}
 	\label{eq:mae}
-	\acs{MAE} = \frac{1}{N} \sum_{i=1}^{N} |TF_{i,ref} - TF_{i,est}|
+	\acs{MAE} = \frac{1}{N} \sum_{i=1}^{N} |TF_{i,ref} - TF_{i,est}|.
 \end{equation}
 
 Jako dodatečné kritérium jsme stanovili poměr mezi dobře a špatně odhadnutými signály.
@@ -115,14 +115,14 @@ Nejnižší hodnotu citlivosti vykazuje náš algoritmus ve druhé minutě sign�
 \end{figure}
 
 Je důležité poznamenat, že zobrazené hodnoty \acs{Se} a~\acs{PPV} se v~grafech liší od hodnot uvedených v~Tab.~\ref{tab:capnobase_comparison}.
-V tabulce jsou hodnoty vypočteny jako agregovaná hodnota pro celou databází (tj. globální součet všech \acs{TP}, \acs{FP} a~\acs{FN})
-Na druhou stranu, v~grafech jsou vypočítané hodnoty \acs{Se} a~\acs{PPV} individuálně a~z~těch je následně vypočítán a vykreslen průměr.
+V tabulce jsou hodnoty vypočteny jako agregovaná hodnota pro celou databází (tj. globální součet všech \acs{TP}, \acs{FP} a~\acs{FN}).
+Na druhou stranu, v~grafech jsou vypočítané hodnoty \acs{Se} a~\acs{PPV} individuálně, a~z~těch je následně vypočítán a vykreslen průměr.
 Tento přístup lépe odpovídá srovnání výkonnosti napříč jednotlivými záznamy, zatímco tabulková metrika lépe charakterizuje celkový výkon algoritmů.
 
 Bland-Altmanovy grafy znázorněné na Obr.~\ref{fig:capnobase_BlandAltman_peaks} porovnávají rozdíl mezi odhadovanou a~referenční tepovou frekvencí pro obě metody detekce vrcholů.
 Výsledky jsou rozděleny nejen podle použité metody (vlastní versus Elgendi), ale také podle délky analyzovaných úseků -- zvlášť pro celé osmiminutové signály a zvlášť pro jejich 62,5~s dlouhé úseky.
 V grafech jsou vyznačeny průměrné odchylky (\acs{ME}) jako zelená přerušovaná čára, zatímco hranice shody, definované jako $\pm1,96 \cdot \acs{SD}$, jsou znázorněny červenými přerušovanými čarami.
-Tato rozdílová analýza umožňuje posoudit, jak výrazně se odhady liší od referenčních hodnot a zda je chyba závislá na velikosti tepové frekvence.
+Tato rozdílová analýza umožňuje posoudit, jak výrazně se odhady liší od referenčních hodnot, a zda je chyba závislá na velikosti tepové frekvence.
 
 \begin{figure}[!bh]
 	\centering
@@ -161,7 +161,7 @@ Společně s ním bylo vyloučeno dalších 15 signálů.
 % Popsat jaké metriky jsme použili pro vyhodnocení kvality detekce TF - už nedetekujeme vrcholy.
 Databáze \acs{BUT PPG} neobsahuje referenční anotace systolických vrcholů, a není proto možné vyhodnotit metriky citlivosti (\acs{Se}), přesnosti (\acs{PPV}) ani F1 skóre.
 Pro posouzení výkonu jednotlivých algoritmů při odhadu tepové frekvence jsme proto použili průměrnou absolutní chybu (\acs{MAE}) definovanou rovnicí~(\ref{eq:mae}).
-Za správně odhadnuté byly považovány ty signály, u nichž byla \acs{MAE} menší než 5~\acs{bpm}, tedy ve shodě s prahovou hodnotou použité již v předchozí podkapitole a doporučenou dle normy IEC~60601-2-27.
+Za správně odhadnuté byly považovány ty signály, u nichž byla \acs{MAE} menší než 5~\acs{bpm}, tedy ve shodě s prahovou hodnotou použitou již v předchozí podkapitole a doporučenou dle normy IEC~60601-2-27.
 
 Jelikož se v databázi nachází značný počet nekvalitních signálů, byly výsledky interpretovány s ohledem na kvalitu vstupních dat.
 K tomu byly využity dvě hodnoty: původní, referenční skóre \acs{R-SQI}, přítomné v metadatech databáze, a dále skóre \acs{O-SQI} získané pomocí algoritmu podle Orphanidou, detailněji popisovaného v~podkapitole~\ref{subsec:referencni_hodnota_kvality}.
@@ -169,7 +169,7 @@ Obě hodnoty umožňují binárně rozdělit signály na kvalitní a nekvalitní
 
 Souhrnné výsledky pro všechny tři metody odhadu \acs{TF} jsou uvedeny v Tab.~\ref{tab:but_ppg_comparison}.
 Výsledky jsou prezentovány ve třech scénářích: pro celou databázi, pro signály označené jako kvalitní na základě \acs{R-SQI} a pro kvalitní signály dle \acs{O-SQI}.
-Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} uvedeny také poměry dobře a špatně odhadnutých tepových frekvencí a orientační výpočetní čas algoritmů.
+Podobně jako u vyhodnocení databáze CapnoBase jsou kromě hodnoty \acs{MAE} uvedeny také poměry dobře a špatně ([d:š]) odhadnutých tepových frekvencí a orientační výpočetní čas algoritmů.
 
 % table with comparison of methods for BUT PPG based on MAE a poměr and all database, R-SQI and O-SQI + time
 \begin{table}[!ht]
@@ -295,10 +295,12 @@ Tyto metriky byly vypočteny zvlášť pro každou třídu a databázi na zákla
 		\end{tabular}
 		}
 \end{table}
+Hodnoty v tabulce nejsou odvozeny z křížového ověření modelu, ale z~testovací množiny, která byla vytvořena z~dat, jež nebyla použita při trénování modelu.
+Výsledky křížového ověření modelu na všech signálech jsou vůči testovací množině skeptičtější o $1,1~\%$.
 
-Výslednou klasifikaci modelu ilustruje matice záměn na Obr.~\ref{fig:confusion_matrix_kvalita}, kde jsou znázorněny výsledky pro celou testovací množinu a dále odděleně pro databáze CapnoBase a \acs{BUT PPG}.
+Výslednou klasifikaci modelu ilustruje matice záměn na Obr.~\ref{fig:confusion_matrix_kvalita}, kde jsou znázorněny výsledky pro celou testovací množinu, a dále odděleně pro databáze CapnoBase a \acs{BUT PPG}.
 
-Hodnoty v maticích odpovídají počtům případů rozdělených podle skutečné a predikované třídy: levý horní čtverec (\acs{TN}), pravý horní (\acs{FP}), levý dolní (\acs{FN}), pravý dolní (\acs{TP}).
+Hodnoty v maticích odpovídají počtům případů rozdělených podle skutečné a predikované třídy: levý horní čtverec (\acs{TN}), pravý horní čtverec (\acs{FP}), levý dolní čtverec (\acs{FN}), pravý dolní čtverec (\acs{TP}).
 
 \begin{figure}[ht]
 	\centering
@@ -307,11 +309,11 @@ Hodnoty v maticích odpovídají počtům případů rozdělených podle skuteč
 	\label{fig:confusion_matrix_kvalita}
 \end{figure}
 
-Na základě těchto matic byla vypočtena klasifikační úspěšnost (\acs{ACC}) i metriky pro jednotlivé třídy, které jsou shrnuty v Tab.~\ref{tab:vysledky_kvalita}.
+Na základě těchto matic byla vypočtena klasifikační úspěšnost (\acs{Acc}) i metriky pro jednotlivé třídy, které jsou shrnuty v Tab.~\ref{tab:vysledky_kvalita}.
 Klasifikační přesnost se počítá jako podíl správně klasifikovaných signálů z celkového počtu signálů v testovací množině.
 \begin{equation}
 	\label{eq:acc}
-	\acs{ACC} = \frac{\acs{TP} + \acs{TN}}{\acs{TP} + \acs{TN} + \acs{FP} + \acs{FN}} \cdot 100\%
+	\acs{Acc} = \frac{\acs{TP} + \acs{TN}}{\acs{TP} + \acs{TN} + \acs{FP} + \acs{FN}} \cdot 100\%
 \end{equation}
 
 Výsledky pro celou testovací množinu dosahují klasifikační úspěšnosti $89,15~\%$.

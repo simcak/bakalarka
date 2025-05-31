@@ -1,4 +1,4 @@
-\chapter{Vlastní algoritmus založený na detekci vrcholů}
+\chapter[Vlastní algoritmus založený na detekci systolických vrcholů]{Vlastní algoritmus založený na detekci \\systolických vrcholů}
 \label{ch:VlastniAlg}
 V této kapitole se zaměříme na popis vlastního algoritmu pro detekci systolických vrcholů a odhad srdeční tepové frekvence z fotopletysmografických signálů.
 
@@ -12,15 +12,15 @@ Našim cílem je vytvořit jednoduchý a efektivní algoritmus, který poskytne 
 % - Záznamy jsou uloženy v různých formátech, proto je nutné je převést do jednotného formátu.
 %    - numpy řetězce, int, float, ... do jedné python knihovny.
 % - Dovygenerujeme referenční TF z referenčních systolických vrcholů - použijeme stejný algoritmus pro výpočet ref TF jako pro výpočet TF z námi detekovaných vrcholů.
-Jelikož pracujeme se dvěma databázemi - \emph{CapnoBase} a \emph{BUT~PPG}, výstupem po načtení signálů jsou dvě odlišné knihovny, které zpracováváme samostatně později.
+Jelikož pracujeme se dvěma databázemi - CapnoBase a \acs{BUT PPG}, výstupem po načtení signálů jsou dvě odlišné knihovny, které zpracováváme samostatně později.
 Obě databáze mají odlišnou strukturu souborů a formát signálů, což vyžaduje samostatný přístup při jejich načítání.
 
-Databáze \emph{CapnoBase} obsahuje signály uložené v \texttt{.mat} souborech.
+Databáze CapnoBase obsahuje signály uložené v \texttt{.mat} souborech.
 Z každého souboru načítáme signál \acs{PPG}, referenční systolické vrcholy a vzorkovací frekvenci~\cite{CapnoBase}.
 Navíc si vygenerujeme referenční tepovou frekvenci (TF) z referenčních vrcholů, a to pomocí stejného algoritmu, který později použijeme pro výpočet TF z našich detekovaných vrcholů.
 Pro účely čitelnější vizualizace a zpracování ukládáme též identifikátor záznamu, což jsou první čtyři znaky názvu souboru.
 
-Oproti tomu databáze \emph{BUT~PPG} používá formát \acl{WFDB} (\acs{WFDB}) a obsahuje \acs{PPG} záznamy v \texttt{.dat} a \texttt{.hea} souborech.
+Oproti tomu databáze \acs{BUT PPG} používá formát \acl{WFDB} (\acs{WFDB}) a obsahuje \acs{PPG} záznamy v \texttt{.dat} a \texttt{.hea} souborech.
 Tato databáze původně obsahovala 48 záznamů, které byly později rozšířeny o dalších 3~840 záznamů.
 Při načítání bylo nutné zohlednit, že starší \acs{PPG} signály byly uloženy v jednom kanálu, zatímco ostatní signály byly rozděleny do tří kanálů, odpovídajících třem různým barevným složkám signálu~\cite{BUT_PPG_database}.
 Z novějších záznamů jsme jako referenční \acs{PPG} signál vybrali pouze červenou složku, která nejvíce odpovídá standardnímu \acs{PPG} signálu.
@@ -31,7 +31,7 @@ Výsledkem načtení jsou dvě knihovny, které obsahují dostupná data z~obou 
 \label{sec:alg_split}
 % - Dlouhé záznamy z CapnoBase můžeme rozdělit na kratší úseky, které budou zpracovány jednotlivě.
 %   - Z osmiminutového záznamu vytvoříme 8x 1minutový úsek s 10ti procentním překryvem.
-Záznamy v databázi \emph{CapnoBase} jsou dlouhé osm minut.
+Záznamy v databázi CapnoBase jsou dlouhé osm minut.
 Tuto délku jsme považovali za nevhodnou pro výpočet tepové frekvence, protože výsledná hodnota \acs{TF} by mohla být zkreslená kratšími úseky se zvýšenou nebo sníženou \acs{TF}.
 Mohlo by se tedy stát, že referenční a naše tepové frekvence by vykazovaly podobné výsledky, přestože by se v jednotlivých úsecích mohly výrazně lišit.
 
@@ -39,7 +39,7 @@ Proto jsme přistoupili k rozdělení každého dlouhého záznamu na kratší, 
 Takový překryv byl zaveden proto, abychom testovali algoritmy na všech vrcholech v záznamu a nedošlo k vynechání některých vrcholů na začátku nebo na konci segmentu.
 Navíc takový překryv vyhovoval i proto, že počet oken popsaných v podkapitole~\ref{sec:alg_peaks} se rozšíří pouze o jeden.
 Rozdělený signál je znázorněn na Obr.~\ref{fig:my-detection}.
-Výsledné, 63 sekund dlouhé úseky byly dále považovány za samostatné signály, které byly zpracovány jednotlivě.
+Výsledné, 63 sekund dlouhé úseky, byly dále považovány za samostatné signály, které byly zpracovány jednotlivě.
 
 \subsection*{Filtrace}
 \label{sec:alg_filter}
@@ -55,14 +55,15 @@ V nastavení prahů vycházíme z obecných hraničních hodnot lidské tepové 
 
 Samotný Butterworthův filtr byl zvolen pro jeho rovnost v propustném pásmu, takže amplitudová charakteristika filtru je hladká a nevykazuje vlnění, které je typické pro některé jiné typy filtrů.
 Čtvrtý řád zajišťuje dostatečný kompromis mezi strmostí přechodu a numerickou stabilitou filtru.
-Pro odstranění fázového posunu, který je charakteristický pro použitý filtr, jsme použili filtr s nulovou fází, jenž provádí filtraci v obou směrech.
+Butterworthův filtr nemá nulovou fázovou charakteristiku, což znamená, že při jeho aplikaci dochází k fázovému posunu signálu.
+Proto jsme použili dopřednou a zpětnou filtraci.
+
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{./obrazky/My_AFC.png}
 	\vspace{-5mm}
 	\caption[Vlastní amplitudová charakteristika Butterworthova filtru]{Amplitudová charakteristika Butterworthova filtru.}
-	\vspace{-5mm}
 	\label{fig:my_AFC}
 \end{figure}
 
@@ -80,7 +81,7 @@ Po těchto krocích jsme získali očištěný a normalizovaný signál, připra
 %       - pokud je větší než oba AND je větší než nastavené prahy, tak je to vrchol.
 % - na konci jen odstraníme vrcholy, které jsou na stejném vzorku (kvůli překrývání oken), protože chceme v budoucnu pracovat i s tím, kolik jsme našli vrcholů v okně - duplikáty by nám to zkreslily.
 Hledání vrcholů probíhá v pětisekundových oknech, která se překrývají o 50\%.
-Funguje to tak, že nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
+Nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
 Tímto způsobem pokryjeme celý signál a zajistíme, že žádný vrchol nebude vynechán.
 Na jeden minutový signál obvykle připadá 23 oken, ale protože máme 5\% překryv celého minutového záznamu, délka výsledného signálu je 63 sekund, a proto analyzujeme o jedno okno navíc.
 Vizuálně je to znázorněno na Obr.~\ref{fig:my-detection}.
@@ -101,7 +102,7 @@ Byla nastavena na počet vzorků odpovídající dvěma stům tepům za minutu.
 V každém okně jsme provedli standardizaci a normalizaci signálu do rozsahu od \(-1\) do \(1\), abychom zajistili, že nastavené prahy budou co nejpřesněji odpovídat předpokládaným systolickým a diastolickým fázím \acs{PPG} křivky.
 Tyto kroky jsou důležité, protože maximální hodnoty systolické vlny se mohou v průběhu času měnit, jak je patrné z Obr.~\ref{fig:my-detection}, což by vedlo k falešně negativním výsledkům.
 
-Samotná detekce vrcholů je realizována jednoduchým algoritmem hledající lokální maxima.
+Samotná detekce vrcholů je realizována jednoduchým algoritmem hledajícím lokální maxima.
 Funguje tak, že každý vzorek v okně je porovnán se svým předchozím a následujícím sousedem.
 Pokud je jeho hodnota větší než hodnota obou sousedů a současně překračuje oba zadané prahy, je tento vzorek označen jako systolický vrchol.
 
@@ -119,7 +120,7 @@ Příklad takové chyby je zobrazen na Obr.~\ref{fig:filter-peaks}, ve druhém o
 % - výpočet IBI z detekovaných vrcholů + popsat matematicky IBI
 % - výpočet TF z IBI: TF = 60 / median(IBI) OR TF = 60 / mean(IBI) -- my použijeme median protože počítáme, že se v minutovém úseku (nebo desetisekundovém úseku BUT PPG) může objevit nějaký výrazný artefakt, který by nám zkreslil výpočet průměru. Pro delší úseky bychom použili průměr.
 % - stejný postup je i pro výpočet ref TF z referenčních vrcholů (viz. \ref{sec:alg_load}) = můžeme porovnat s naším výstupem.
-Základní veličinou pro tento výpočet je interval mezi dvěma po sobě následujícími vrcholy, označovaný jako tepový interval - \acs{IBI} (z anglického \uv{Inter-Beat Interval}).
+Základní veličinou pro tento výpočet je interval mezi dvěma po sobě následujícími vrcholy, označovaný jako tepový interval \acs{IBI} (z anglického \uv{Inter-Beat Interval}).
 Ten jsme vypočítali tak, že jsme vzali rozdíl mezi časem detekce aktuálního vrcholu a časem detekce předchozího vrcholu:
 \begin{equation}
 	\label{eq:IBI}
@@ -134,14 +135,14 @@ Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném ro
 	TF = \frac{60}{IBI_{median}}
 \end{equation}
 
-Po volbě mezi průměrem, mediánem a modusem jsme se rozhodli pro medián.
-Na rozdíl od modusové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty.
+Po volbě mezi průměrem, mediánem a modem jsme se rozhodli pro medián.
+Na rozdíl od modové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty.
 Na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
 
 \begin{figure}[b]
 	\centering
 	\includegraphics[width=0.7\textwidth]{./obrazky/HR_Hist.png}
-	\caption[Histogram IBI]{Stanovení TF z IBI pomocí průměru, mediánu a modusu.}
+	\caption[Histogram \acs{IBI}]{Stanovení \acs{TF} z \acs{IBI} pomocí průměru, mediánu a modu.}
 	\vspace{-5mm}
 	\label{fig:HR_hist}
 \end{figure}
