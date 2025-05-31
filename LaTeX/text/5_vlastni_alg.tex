@@ -12,12 +12,12 @@ Našim cílem je vytvořit jednoduchý a efektivní algoritmus, který poskytne 
 % - Záznamy jsou uloženy v různých formátech, proto je nutné je převést do jednotného formátu.
 %    - numpy řetězce, int, float, ... do jedné python knihovny.
 % - Dovygenerujeme referenční TF z referenčních systolických vrcholů - použijeme stejný algoritmus pro výpočet ref TF jako pro výpočet TF z námi detekovaných vrcholů.
-Jelikož pracujeme se dvěma databázemi - CapnoBase a \acs{BUT PPG}, výstupem po načtení signálů jsou dvě odlišné knihovny, které zpracováváme samostatně později.
+Jelikož pracujeme se dvěma databázemi - CapnoBase a \acs{BUT PPG}, výstupem po~načtení signálů jsou dvě odlišné knihovny, které zpracováváme samostatně později.
 Obě databáze mají odlišnou strukturu souborů a formát signálů, což vyžaduje samostatný přístup při jejich načítání.
 
 Databáze CapnoBase obsahuje signály uložené v \texttt{.mat} souborech.
 Z každého souboru načítáme signál \acs{PPG}, referenční systolické vrcholy a vzorkovací frekvenci~\cite{CapnoBase}.
-Navíc si vygenerujeme referenční tepovou frekvenci (TF) z referenčních vrcholů, a to pomocí stejného algoritmu, který později použijeme pro výpočet TF z našich detekovaných vrcholů.
+Navíc si vygenerujeme referenční tepovou frekvenci (TF) z referenčních vrcholů, a~to pomocí stejného algoritmu, který později použijeme pro výpočet TF z našich detekovaných vrcholů.
 Pro účely čitelnější vizualizace a zpracování ukládáme též identifikátor záznamu, což jsou první čtyři znaky názvu souboru.
 
 Oproti tomu databáze \acs{BUT PPG} používá formát \acl{WFDB} (\acs{WFDB}) a obsahuje \acs{PPG} záznamy v \texttt{.dat} a \texttt{.hea} souborech.
@@ -47,7 +47,7 @@ Výsledné, 63 sekund dlouhé úseky, byly dále považovány za samostatné sig
 % - Na konec signál standardizujeme && normalizujeme od -1 do 1.
 Po načtení a případném rozdělení záznamů následovalo filtrování signálu.
 Na filtraci jsme použili pásmový filtr čtvrtého řádu typu Butterworth, jehož parametry jsme nastavili s ohledem na fyziologické vlastnosti \acs{PPG} signálu.
-Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za minutu).
+Dolní mez frekvence byla nastavena na 0,5~Hz (30 úderů za minutu) a horní mez na 3,35~Hz (201 úderů za~minutu).
 Amplitudová charakteristika filtru je znázorněna na Obr.~\ref{fig:my_AFC}.
 
 Tento rozsah byl zvolen tak, aby odstranil velmi pomalé změny v signálu, například dechovou frekvenci. Zároveň tak, aby potlačil vysokofrekvenční šum, který by mohl negativně ovlivnit detekci vrcholů.
@@ -81,15 +81,15 @@ Po těchto krocích jsme získali očištěný a normalizovaný signál, připra
 %       - pokud je větší než oba AND je větší než nastavené prahy, tak je to vrchol.
 % - na konci jen odstraníme vrcholy, které jsou na stejném vzorku (kvůli překrývání oken), protože chceme v budoucnu pracovat i s tím, kolik jsme našli vrcholů v okně - duplikáty by nám to zkreslily.
 Hledání vrcholů probíhá v pětisekundových oknech, která se překrývají o 50\%.
-Nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
+Nejprve analyzujeme prvních 5 sekund signálu, poté posuneme okno o 2,5 sekundy a~analyzujeme dalších 5 sekund, přičemž prvních 2,5 sekund se překrývají s předchozím oknem.
 Tímto způsobem pokryjeme celý signál a zajistíme, že žádný vrchol nebude vynechán.
 Na jeden minutový signál obvykle připadá 23 oken, ale protože máme 5\% překryv celého minutového záznamu, délka výsledného signálu je 63 sekund, a proto analyzujeme o jedno okno navíc.
 Vizuálně je to znázorněno na Obr.~\ref{fig:my-detection}.
 
 Pro celý signál jsme nastavili dva prahy.
 První prahová hodnota odpovídala minimální výšce vrcholu, který považujeme za platný.
-Tato hodnota byla empiricky nastavena na 0,3 a měla za cíl odlišit skutečné vrcholy od diastolických zářezů a šumu.
-Druhá prahová hodnota odpovídala minimálnímu časovému intervalu mezi dvěma po sobě jdoucími vrcholy.
+Tato hodnota byla empiricky nastavena na 0,3 a měla za cíl odlišit skutečné vrcholy od diastolických zářezů a~šumu.
+Druhá prahová hodnota odpovídala minimálnímu časovému intervalu mezi~dvěma po sobě jdoucími vrcholy.
 Byla nastavena na počet vzorků odpovídající dvěma stům tepům za minutu.
 
 \begin{figure} [h]
@@ -112,7 +112,7 @@ Tento krok je důležitý zejména pro budoucí hodnocení algoritmu, kde pracuj
 Duplicitní detekce by vedly ke zkreslení metrik a nesprávné interpretaci výsledků.
 
 Posledním krokem je zpětná kontrola minimální vzdálenosti mezi detekovanými vrcholy.
-Bez této kontroly by se mohlo stát, že bychom detekovali vrchol na konci prvního okna a u dalšího okna bychom detekovali nový vrchol příliš blízko, protože si nové okno nepamatuje pozici posledního, předchozího vrcholu.
+Bez této kontroly by se mohlo stát, že bychom detekovali vrchol na konci prvního okna a u dalšího okna bychom detekovali nový vrchol příliš blízko, protože si~nové okno nepamatuje pozici posledního, předchozího vrcholu.
 Příklad takové chyby je zobrazen na Obr.~\ref{fig:filter-peaks}, ve druhém okně.
 
 \section{Výpočet tepové frekvence}
@@ -137,7 +137,7 @@ Z těchto intervalů jsme odvodili tepovou frekvenci pomocí vztahu popsaném ro
 
 Po volbě mezi průměrem, mediánem a modem jsme se rozhodli pro medián.
 Na rozdíl od modové a průměrné hodnoty byl medián nejméně citlivý na extrémní hodnoty.
-Na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z našich databází.
+Na Obr.~\ref{fig:HR_hist} vidíme, jak se může lišit průměr, modus a medián u signálů z~našich databází.
 
 \begin{figure}[b]
 	\centering

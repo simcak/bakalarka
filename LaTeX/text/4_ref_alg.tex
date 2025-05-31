@@ -8,7 +8,7 @@ Proto nabízí otevřený zdrojový kód, strukturovanou dokumentaci i podporu k
 Zdrojový kód pro NeuroKit2 je dostupný na \url{https://github.com/neuropsychology/NeuroKit} a dokumentace na \url{https://neurokit2.readthedocs.io/}.
 Knihovnu je možné průběžně modifikovat a vyvíjet.
 
-V~kapitole~\ref{chap:PPG_teorie} byly již podrobně shrnuty principy \acs{PPG}, proto se zde zaměříme na samotnou detekci vrcholů a její realizaci.
+V~kapitole~\ref{chap:PPG_teorie} byly již podrobně shrnuty principy \acs{PPG}, proto se zde zaměříme na~samotnou detekci vrcholů a její realizaci.
 
 \section{Obecná struktura algoritmu}
 \label{sec:alg_structure}
@@ -45,7 +45,7 @@ Filtr je nastaven jako pásmová propust s~dolní a horní mezí 0,5~Hz a 8~Hz, 
 Na Obr.~\ref{fig:filter-example} je ukázka amplitudové charakteristiky filtru a porovnání původního a filtrovaného úseku signálu.
 
 Po filtraci je kladná část signálu umocněna na druhou~(\ref{eq:square}).
-To je provedeno s cílem zdůraznit rozdíly mezi systolickou vlnou a ostatními složkami, jako jsou diastolické zářezy nebo šum~\cite{Elgendi2013}.
+To je provedeno s~cílem zdůraznit rozdíly mezi systolickou vlnou a ostatními složkami, jako jsou diastolické zářezy nebo šum~\cite{Elgendi2013}.
 Výsledná hodnota $y[n]$ po umocnění je dána vztahem:
 \begin{equation}
 	\label{eq:square}
@@ -73,7 +73,7 @@ Pro \(W_1\) byla zvolena hodnota 111 (odpovídající milisekundám) a pro \(W_2
 \label{sec:MA}
 % 
 Elgendi definuje umocěný a vyfiltrovaný \acs{PPG} signál jako \(y[n]\).
-Klouzavý průměr s kratším oknem \acs{MA_P} se pro každý bod \(n\) vypočítá rovnicí:
+Klouzavý průměr s~kratším oknem \acs{MA_P} se pro každý bod \(n\) vypočítá rovnicí:
 
 \begin{equation}
 	MA_{peak}[n] \;=\;
@@ -107,8 +107,8 @@ Tuto průměrnou hodnotu vypočítá z celého umocněného signálu.
 	\label{eq:THR_1}
 \end{equation}
 
-První práh je vykreslen na Obr.~\ref{fig:thresholds_peaks_clean} a Obr.~\ref{fig:thresholds_peaks} společně s klouzavými průměry a umocněným signálem.
-Z těchto obrázků je patrné, že parametry \(\beta\) ani \(\overline{z}\) nemají na práh \acs{THR_1} příliš významný viditelný efekt, tudíž je křivka \acs{THR_1} velmi podobná křivce \acs{MA_B}.
+První práh je vykreslen na Obr.~\ref{fig:thresholds_peaks_clean} a Obr.~\ref{fig:thresholds_peaks} společně s klouzavými průměry a~umocněným signálem.
+Z těchto obrázků je patrné, že parametry \(\beta\) ani \(\overline{z}\) nemají na~práh \acs{THR_1} příliš významný viditelný efekt, tudíž je křivka \acs{THR_1} velmi podobná křivce \acs{MA_B}.
 
 Porovnáním \acs{MA_P}[n] s~\acs{THR_1}[n] získáme časové úseky (tzv. bloky zájmu), které odpovídají částem, kde je signál nad úrovní \acs{MA_B}.
 
@@ -129,13 +129,13 @@ Bloky zájmu jsou zobrazeny jako šedé úseky na Obr.~\ref{fig:thresholds_peaks
 
 Na Obr.~\ref{fig:thresholds_peaks} vidíme tři systolické vrcholy, které nebyly detekovány (kolem 74., 75. a 77. sekundy).
 U prvního z nich je patrné, že umocněný signál překračuje \acs{THR_1}, avšak blok je příliš krátký, a proto je vyřazen.
-Druhý a třetí vrchol mají ve filtrovaném signálu příliš nízkou amplitudu, což způsobuje, že po umocnění nejsou dostatečně výrazné.
+Druhý a třetí vrchol mají ve~filtrovaném signálu příliš nízkou amplitudu, což způsobuje, že po umocnění nejsou dostatečně výrazné.
 
 \subsection*{Nalezení vrcholů}
 \label{sec:peaks}
 
 Samotné systolické vrcholy jsou určeny jako lokální maxima v~oblastech bloků zájmu.
-Funkce \(find\_peaks\) z~knihovny NeuroKit2 zpracovává jednodimenzionální signál a porovnáváním hodnot v~každém bloku zájmu určuje lokální maxima~\cite{NeuroKit2}.
+Funkce \(find\_peaks\) z~knihovny NeuroKit2 zpracovává jednodimenzionální signál a~porovnáváním hodnot v~každém bloku zájmu určuje lokální maxima~\cite{NeuroKit2}.
 
 \begin{figure}[t]
 	\vspace{-9mm}

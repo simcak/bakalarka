@@ -37,7 +37,7 @@ Jak již bylo uvedeno, Hjorthova mobilita (\( H_1 \)) představuje odhad středn
 
 Načtení signálů z databází probíhá stejným způsobem jako u našeho prvního algoritmu, popsaného v podkapitole~\ref{sec:alg_load}.
 Odlišný přístup jsme však zvolili při dělení signálů.
-Zatímco v předchozím algoritmu jsme signály z CapnoBase databáze dělili na minutové úseky, zde si můžeme ve vstupu funkce zvolit libovolný počet úseků, na které signál rozdělíme.
+Zatímco v předchozím algoritmu jsme signály z CapnoBase databáze dělili na minutové úseky, zde si můžeme ve vstupu funkce zvolit libovolný počet úseků, na~které signál rozdělíme.
 Maximální počet těchto úseků odpovídá situaci, kdy jeden úsek trvá 10~s.
 Pokud zbyde po rozdělení signálu část, která je kratší než délka jednoho úseku, tak ji dále nezpracováváme.
 Je proto důležité zvolit takové dělení, které minimalizuje délku zahozených úseků.
@@ -53,7 +53,7 @@ Tím bychom však porovnávali signály různých délek, což by mohlo výsledk
 % KEEP IN MIND: Nepotlačují se frekvence, ale složky o vyšších/nižších frekvencích.
 U analyzovaných signálů jsme provedli standardizaci.
 Nejprve jsme odstranili stejnosměrnou (\acs{DC}) složku signálu, tedy jeho střední hodnotu \(\mu\).
-Tento krok slouží k centrování signálu kolem nuly, čímž omezíme vliv \acs{DC} složky na výpočet rozptylu signálu.
+Tento krok slouží k~centrování signálu kolem nuly, čímž omezíme vliv \acs{DC} složky na výpočet rozptylu signálu.
 Ve druhém kroku standardizace jsme dělili signál zbavený hodnoty \(\mu\) jeho směrodatnou odchylkou \(\sigma\).
 Rovnice pro standardizaci signálu je následující:
 \begin{equation}
@@ -143,7 +143,7 @@ Z hodnoty \( H_1 \) jsme následně odvodili dominantní frekvenci \( f_{dom} \)
 Hodnota dominantní frekvence je graficky znázorněna i písemně zmíněna na Obr.~\ref{fig:hjorth_predzpracovani} společně s odpovídající tepovou frekvencí a referenční hodnotou \acs{TF} z databáze.
 
 \paragraph{}
-Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem s asymptotickou složitostí \( O(N) \), jejich praktická složitost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavováním bloků zájmu (popsané v podkapitole~\ref{sec:blocks}).
+Přestože mají klasické metody detekce vrcholů~\cite{Elgendi2013} lineární průchod signálem s~asymptotickou složitostí \( O(N) \), jejich praktická složitost může být vyšší kvůli víceprůchodovým algoritmům, adaptivním prahům, filtrováním nebo nastavováním bloků zájmu (popsané v podkapitole~\ref{sec:blocks}).
 
 Naopak výpočet Hjorthovy mobility má sice po \( i \) iteracích autokorelace (prováděné pomocí \acs{FFT}) složitost \( O(i \cdot N \log N) \), avšak díky své jednoduchosti a absenci větvení může být v praxi rychlejší.
 
@@ -214,7 +214,7 @@ Jde o metriku založenou na teorii informace, jež vyjadřuje očekávané množ
 \end{equation}
 kde $p_i$ je pravděpodobnost, že hodnota signálu spadá do $i$-tého intervalu histogramu a $N$ je celkový počet binů.
 
-Pro výpočet histogramu byl signál nejprve normalizován do intervalu $< 0, 1 >$ a následně rozdělen do $N = 30$ stejně širokých binů.
+Pro výpočet histogramu byl signál nejprve normalizován do intervalu $< 0, 1 >$ a~následně rozdělen do $N = 30$ stejně širokých binů.
 Tento počet byl zvolen empiricky jako kompromis mezi rozlišením a stabilitou odhadu, při vědomí, že konstantní délka signálu je 10~s a vzorkovací frekvenci 30~Hz.
 
 Shannonova entropie nabývá nízkých hodnot u pravidelných signálů s úzkým rozdělením (např. téměř periodická sinusoida),
@@ -237,12 +237,12 @@ Na rozdíl od lineárních modelů dokáže zachytit i nelineární vztahy mezi 
 % parametry a jejich optimalizace
 Použili jsme implementaci \texttt{RandomForestClassifier} z knihovny \texttt{scikit-learn} s výchozími parametry: \texttt{n\_estimators} = 100 (počet stromů), \texttt{max\_depth} = 5 (maximální hloubka stromu) a \texttt{max\_features} = \texttt{sqrt} (pro každý uzel se testuje náhodně vybraná odmocnina z celkového počtu příznaků).
 Optimalizace těchto parametrů byla provedena pomocí metody \texttt{GridSearchCV} ze~stejné knihovny, která systematicky vybírá nejlepší kombinace z~námi předdefinovaných hodnot parametrů.
-Pro zajištění deterministického chování jsme parametr náhodné inicializace nastavili na hodnotu \texttt{random\_state = 42}.
+Pro~zajištění deterministického chování jsme parametr náhodné inicializace nastavili na~hodnotu \texttt{random\_state = 42}.
 
 % rozdělení dat
 Rozdělení datasetu do trénovací a testovací množiny proběhlo v poměru 60~\% ku 40~\%, přičemž jsme použili stratifikaci, abychom zachovali poměr tříd (kvalitní/nekvalitní signály).
 Jelikož datová sada vykazovala nevyváženost tříd, aktivovali jsme parametr \texttt{class\_weight='balanced'}, který upravuje váhy jednotlivých tříd podle jejich četnosti.
-To zajišťuje, že model nebude preferovat většinovou třídu, ať už kvalitní nebo nekvalitní.
+To zajišťuje, že model nebude preferovat většinovou třídu, ať~už kvalitní nebo nekvalitní.
 
 Jednou z výhod \acs{RF} je možnost kvantifikovat důležitost jednotlivých příznaků na základě jejich vlivu na rozhodování stromů, což přispívá k interpretovatelnosti modelu a transparentnosti výsledků, jak je zobrazeno na Obr.~\ref{fig:hjorth_feature_importance}.
 
